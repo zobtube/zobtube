@@ -1,0 +1,78 @@
+{{ define "adm/home.html" }}
+{{ template "top" .}}
+<style>
+h2 {
+  margin-top: 30px;
+}
+
+.s16 {
+  width: 30px;
+  height: 16px;
+}
+
+.float-right {
+  float: right;
+}
+</style>
+
+<h1>Admin Area</h1>
+
+<hr />
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-body">
+        Zobtube <b>up and running</b>! Version: <b>{{ .Version }}</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-12">
+    <h2>Instance overview</h2>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <span>
+              <div class="d-flex align-items-center">
+                <i class="fas fa-video s16"></i>
+                <h3 class="gl-m-0 gl-ml-3">{{ .VideoCount }}</h3>
+              </div>
+              <div class="gl-mt-3 text-uppercase">Videos</div>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <span>
+              <div class="d-flex align-items-center">
+                <i class="fas fa-user s16"></i>
+                <h3 class="gl-m-0 gl-ml-3">{{ .ActorCount }}</h3>
+              </div>
+              <div class="gl-mt-3 text-uppercase">Actors</div>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <span>
+              <div class="d-flex align-items-center">
+                <i class="fas fa-podcast s16"></i>
+                <h3 class="gl-m-0 gl-ml-3">{{ .ChannelCount }}</h3>
+              </div>
+              <div class="gl-mt-3 text-uppercase">Channels</div>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{{ template "bottom" .}}
+{{ end }}

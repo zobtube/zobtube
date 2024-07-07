@@ -1,0 +1,78 @@
+{{ define "profile/view.html" }}
+{{ template "top" .}}
+<div class="row">
+  <div class="col-md-12">
+    <h1>Your account</h1>
+  </div>
+  <div class="col-md-12">
+    <h3 style="padding-top:50px;">Most viewed videos</h3>
+    <div class="row">
+      {% if not vv %}
+        <div class="col-md-12">
+          <div class="alert alert-warning" role="alert">
+            No trending videos so far!
+          </div>
+        </div>
+      {% else %}
+        {% for video_view in vv %}
+        <div class="col-md-2">
+          <div class="single-video">
+            <div class="video-img">
+              <a href="{% url 'video_view' video_view.video.id %}">
+                <img class="lazy" alt="Video" data-src="{% url 'video_thumb_mini' pk=video_view.video.id %}" style="">
+              </a>
+              <span class="video-duration">{{ .video_view.video.nice_duration }}</span>
+            </div>
+            <div class="video-content">
+                <h4><a href="{% url 'video_view' video_view.video.id %}" class="video-title">{{ .Video }} </a></h4>
+              <div class="video-counter">
+                <div class="video-viewers">
+                  <span class="fa fa-eye view-icon"></span>
+                  <span>{{ .video_view.count }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+  <!-- best actors -->
+  <div class="col-md-12">
+    <h3 style="padding-top:50px;">Most viewed actors</h3>
+    <div class="row">
+      {% if not actors %}
+        <div class="col-md-12">
+          <div class="alert alert-warning" role="alert">
+            No video viewed so far!
+          </div>
+        </div>
+      {% else %}
+        {% for actor, count in actors %}
+        <div class="col-md-2">
+          <div class="">
+            <div class="video-img">
+              <a href="{% url 'actor_view' actor.id %}">
+                <img class="lazy" data-src="{% url 'actor_profile' id=actor.id %}" class="card-img-top lazy">
+              </a>
+            </div>
+            <div class="video-content">
+              <h4><a href="{% url 'actor_view' actor.id %}" class="video-title">{{ .actor.name }}</a></h4>
+              <div class="video-counter">
+                <div class="video-viewers">
+                  <span class="fa fa-eye view-icon"></span>
+                  <span>{{ .count }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+  <!-- end of best actors -->
+</div>
+{{ template "bottom" .}}
+{{ end }}

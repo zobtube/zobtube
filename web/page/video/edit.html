@@ -1,0 +1,605 @@
+{{ define "video/edit.html" }}
+{{ template "top" .}}
+<!-- Stat Page Import Area -->
+<style>
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: inline-flex;
+  padding: 0 25px;
+  height: 50px;
+  font-size: 16px;
+  line-height: 50px;
+  border-radius: 5px;
+  background-color: #f1f1f1;
+  margin-top: 10px;
+  margin-right: 20px;
+}
+
+.chip img {
+  float: left;
+  margin: 0 10px 0 -25px;
+  height: 50px;
+  width: 50px;
+  border-radius: 5px;
+}
+
+.chip button {
+  float: right;
+  margin: 0 -25px 0px 12px;
+  height: 50px;
+  width: 50px;
+  border-radius: 5px;
+}
+</style>
+<h2>Video editing</h2>
+<br />
+
+<div class="row">
+  <div class="col-md-9">
+    <video
+      id="video"
+      style="width: 100%; height: 35vw"
+      src="{{ .Video.URLStream }}"
+      controls
+      ></video>
+  </div>
+  <div class="col-md-3">
+    <h5>Import status</h5>
+    <p>
+      <span id="video-import" class="badge
+      {{ if .Video.Imported }}
+      bg-success
+      {{ else }}
+      bg-warning
+      {{ end }}
+      ">{{ if .Video.Imported }}Imported{{ else }}In triage{{ end }}</span>
+    </p>
+    <h5>Duration</h5>
+    <p>
+      <small class="text-muted" id="video-duration">
+      {{ if .Video.Duration }}
+      {{ .Video.NiceDuration }}
+      {{ else }}
+      Unknown
+      {{ end }}
+      </small>
+    </p>
+    <h5>Thumbnail</h5>
+    <p>
+      <span id="video-thumb" class="badge
+      {{ if .Video.Thumbnail }}
+      bg-success
+      {{ else }}
+      bg-warning
+      {{ end }}
+      ">
+      {{ if .Video.Thumbnail }}
+      Generated
+      {{ else }}
+      Missing
+      {{ end }}
+      </span>
+    </p>
+    <h5>Thumbnail mini</h5>
+    <p>
+      <span id="video-thumb-mini" class="badge
+      {{ if .Video.ThumbnailMini }}
+      bg-success
+      {{ else }}
+      bg-warning
+      {{ end }}
+      ">
+      {{ if .Video.ThumbnailMini }}
+      Generated
+      {{ else }}
+      Missing
+      {{ end }}
+      </span>
+    </p>
+    <hr />
+    <h5>Actions</h5>
+    <p>
+      <button class="btn btn-primary btn-sm" onClick="computeDuration('{{ .Video.ID }}')">Compute duration</button>
+    </p>
+    <p>
+      <button class="btn btn-primary btn-sm" onClick="generateThumbnail('{{ .Video.ID }}')">Generate thumbnail</button>
+    </p>
+    <p>
+      <button class="btn btn-primary btn-sm" onClick="generateThumbnailMini('{{ .Video.ID }}')">Generate mini thumbnail</button>
+    </p>
+    <p>
+      <button class="btn btn-primary btn-sm" onClick="importVideo('{{ .Video.ID }}')">Import</button>
+    </p>
+
+  </div>
+
+  <div class="col-12 mb-3 mt-3">
+    <h4>Video details</h4>
+  </div>
+
+  <!-- form: name -->
+  <div class="col-12 mb-3">
+    <div class="form-floating input-group">
+      <input type="text" class="form-control" readonly id="video-title" value="{{ .Video.Name }}">
+      <label for="name">Name</label>
+      <button class="btn btn-outline-warning" type="button" id="video-title-edit" onClick="video_title_edit()">Edit</button>
+    </div>
+  </div>
+
+  <!-- form: ID -->
+  <div class="col-6 mb-3">
+    <div class="form-floating">
+      <input type="text" readonly class="form-control" id="video-id" value="{{ .Video.ID }}">
+      <label for="originalFilename">ID</label>
+    </div>
+  </div>
+
+  <!-- form: original filename -->
+  <div class="col-6 mb-3">
+    <div class="form-floating">
+      <input type="text" readonly class="form-control" name="filename" value="{{ .Video.Filename }}">
+      <label for="originalFilename">Original filename</label>
+    </div>
+  </div>
+
+  <!-- form: import date -->
+  <div class="col-6 mb-3">
+    <div class="form-floating">
+      <input type="text" readonly class="form-control" name="importDate" value="{{ .Video.CreatedAt.Format "2006-01-02 15:04:05" }}">
+      <label for="originalFilename">Import date</label>
+    </div>
+  </div>
+
+  <!-- form: video type -->
+  <div class="col-6">
+    <div class="mb-3 form-floating">
+      <input type="text" readonly class="form-control" name="type" value="{{ .Video.TypeAsString }}">
+      <label for="originalFilename">Video Type</label>
+    </div>
+  </div>
+
+  <!-- form: actors -->
+  <div class="col-12 mb-3">
+    <div class="form-floating">
+      <div class="form-control chip-selector" id="actor_chip_selector" style="height: unset; display: flex;">
+        <div class="chips">
+          {{ range $actor := .Video.Actors }}
+          <div class="chip">
+            <img src="{{ $actor.URLThumb }}" width="50" height="50">
+            {{ $actor.Name }}
+            <button class="btn btn-danger" onclick="videoRemoveActor('{{ $actor.ID }}');"><i class="fa fa-trash-alt"></i></button>
+          </div>
+          {{ end }}
+          <div class="chip">Add an actor
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addActorModal" onClick="return false;">
+              <i class="fa fa-plus-circle"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <label for="actors">Actors</label>
+    </div>
+  </div>
+
+</div>
+
+<!-- Preview Add Actor Modal -->
+<div class="modal fade" id="addActorModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <form action="" method="">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add actor in video</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-floating" style="margin-bottom: 20px;">
+          <input type="text" class="form-control" id="addActorInput"></input>
+          <label for="addActorInput">Actor name</label>
+        </div>
+
+        <div class="chips">
+          {{ range $actor := .Actors }}
+          <div class="chip add-actor-list" actor-id="{{ $actor.ID }}">
+            <img class="lazy" data-src="{{ $actor.URLThumb }}" width="50" height="50">
+            {{ $actor.Name }}
+            <button class="btn btn-success add-actor-add" onclick="videoAddActor('{{ $actor.ID }}');return false;"><i class="fa fa-plus-circle"></i></button>
+            <button class="btn btn-danger add-actor-remove" onclick="videoRemoveActor('{{ $actor.ID }}');return false;" style="display: none;"><i class="fa fa-trash-alt"></i></button>
+          </div>
+          {{ end }}
+          <div class="chip">Add a new actor
+            <button class="btn btn-success" onclick="window.open('{% url 'actor_new' %}', '_blank');return false;">
+              <i class="fa fa-plus-circle"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- End Add Actor Modal -->
+
+<!-- Preview Model Area -->
+<div class="modal fade" id="newActorModal" tabindex="-2">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="" method="">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add new actor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% actor_form.as_p %}
+      </div>
+      <div class="modal-footer">
+        <input type="button" class="btn btn-primary" onClick="createNewActor()" value="Add actor">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- End Preview Model Area -->
+
+<script>
+
+/* -- start globals set at boot -- */
+
+// store video id
+const video_id = '{{ .Video.ID }}';
+const url_video_actor_edit = '/api/video/{{ .Video.ID }}/actor/00000000-0000-0000-0000-000000000000';
+var csrf_token = '{% csrf_token %}';
+
+/*
+    'aliases': [
+      {% for alias in actor.alias %}
+      '{% alias.name %}',
+      {% endfor %}
+    ],
+*/
+
+// store all actors at start
+var actors_all = {
+  {{ range $actor := .Actors }}
+  '{{ $actor.ID }}': {
+    'name': '{{ $actor.Name }}',
+  },
+  {{ end }}
+};
+
+// store all actors in the video at start
+var actors_in_video = {
+  {{ range $actor := .Video.Actors }}
+  '{{ $actor.ID }}': undefined,
+  {{ end }}
+};
+
+/* -- end globals set at boot -- */
+
+// globals
+var bootstrap = true;
+var actors_complete;
+
+/* videoAddActorInVideo - FilterPresentActors */
+function videoAddActorInVideoFilterPresentActors() {
+  console.log('update actors presents in video');
+  var actors_chips = document.getElementsByClassName('add-actor-list');
+  for (const actor_chip of actors_chips) {
+    actor_id = actor_chip.getAttribute('actor-id');
+    if (actor_id in actors_in_video) {
+      actor_chip.querySelector('.btn-success').style.display = 'none';
+      actor_chip.querySelector('.btn-danger').style.display = '';
+    } else {
+      actor_chip.querySelector('.btn-success').style.display = '';
+      actor_chip.querySelector('.btn-danger').style.display = 'none';
+    }
+  }
+}
+
+/* videoAddActorInVideo - FilterPresentActors */
+function videoAddActorInVideoFilterActorsFromInput(filter = '') {
+  var re = new RegExp(filter, 'i');
+  var actors_chips = document.getElementsByClassName('add-actor-list');
+  for (const actor_chip of actors_chips) {
+    actor_id = actor_chip.getAttribute('actor-id');
+    found = re.test(actors_all[actor_id]['name']);
+    if (!found) {
+      for (const a of actors_all[actor_id]['aliases']) {
+        if (re.test(a)) {
+          found = true;
+          break;
+        }
+      }
+    }
+    if (found) {
+      actor_chip.style.display = 'none';
+      actor_chip.style.display = '';
+    } else {
+      actor_chip.style.display = '';
+      actor_chip.style.display = 'none';
+    }
+  }
+}
+
+/* videoRemoveActor */
+function videoRemoveActor(actor_id) {
+  console.log('remove actor '+actor_id+' from video '+video_id);
+  url = url_video_actor_edit.replace('00000000-0000-0000-0000-000000000000', actor_id);
+  $.ajax(url, {
+    method: 'DELETE',
+    headers: {
+      'X-CSRFToken': '{% csrf_token %}',
+    },
+
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (res) {
+      console.debug('success, got', res);
+      sendToast('Actor removed', '', 'bg-success', actors_all[actor_id]['name']+' removed.');
+      delete actors_in_video[actor_id];
+      videoAddActorInVideoFilterPresentActors();
+    },
+
+    error: function () {
+      console.debug('failed');
+      sendToast('Actor not removed', '', 'bg-danger', actors_all[actor_id]['name']+' not removed, call failed.');
+    },
+
+    complete: function () {
+    },
+  });
+}
+
+/* videoRemoveActor */
+function videoAddActor(actor_id) {
+  console.log('add actor '+actor_id+' in video '+video_id);
+  url = url_video_actor_edit.replace('00000000-0000-0000-0000-000000000000', actor_id);
+  $.ajax(url, {
+    method: 'PUT',
+    headers: {
+      'X-CSRFToken': '{% csrf_token %}',
+    },
+
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (res) {
+      console.debug('success, got', res);
+      sendToast('Actor added', '', 'bg-success', actors_all[actor_id]['name']+' added.');
+      actors_in_video[actor_id] = undefined;
+      videoAddActorInVideoFilterPresentActors();
+    },
+
+    error: function () {
+      console.debug('failed');
+      sendToast('Actor not added', '', 'bg-danger', actors_all[actor_id]['name']+' not added, call failed.');
+    },
+
+    complete: function () {
+    },
+  });
+}
+
+/* filter actor modal */
+function actorInputUpdate(e) {
+  videoAddActorInVideoFilterActorsFromInput(e.target.value);
+}
+
+function updateActorEntries(filter = '') {
+  var content = '';
+  var re = new RegExp(filter, 'i');
+  var alreaySelectedEntries = $('#actors')[0].value.split(',');
+  for (actor in actors_complete['name']) {
+    if (!re.test(actor)) {
+      continue;
+    }
+
+    if (alreaySelectedEntries.includes(actors_complete['name'][actor])) {
+      continue;
+    }
+
+    content += '<div class="cs-entry" onClick="addEntry(\''+actor+'\')">'+actor+'</div>';
+  }
+  $(".cs-dataset").html(content)
+  if (filter == '') {
+    $(".cs-menu").hide();
+  } else {
+    $(".cs-menu").show();
+  }
+}
+
+window.onload = function() {
+  // toggle right button in modal
+  videoAddActorInVideoFilterPresentActors();
+
+  // add event on modal input
+  document.getElementById('addActorInput').addEventListener('input', actorInputUpdate);
+
+  // for thumbnail generation
+  video = document.getElementById("video")
+  video.addEventListener(
+    "timeupdate",
+    function(event){
+      onTrackedVideoFrame(this.currentTime);
+    });
+}
+
+function computeDuration(video_id) {
+  url = "/api/video/00000000-0000-0000-0000-000000000000/compute-duration";
+  url = url.replace('00000000-0000-0000-0000-000000000000', video_id);
+  $.ajax(url, {
+    method: 'POST',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (e) {
+      console.debug('success, redirecting');
+      document.getElementById('video-duration').innerText = e.duration;
+    },
+
+    error: function () {
+      console.debug('failed');
+    },
+  });
+
+  return false;
+}
+
+function generateThumbnail(video_id) {
+  url = "/api/video/00000000-0000-0000-0000-000000000000/generate-thumbnail/00:00:00";
+  url = url.replace('00000000-0000-0000-0000-000000000000', video_id);
+  url = url.replace('00:00:00', video_timing);
+  $.ajax(url, {
+    method: 'POST',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (e) {
+      console.debug('thumbnail successfully generated');
+      ext = document.getElementById('video-thumb');
+      ext.innerText = 'Generated';
+      ext.classList.remove('bg-warning');
+      ext.classList.add('bg-success');
+    },
+
+    error: function () {
+      console.debug('failed');
+    },
+  });
+
+  return false;
+}
+
+function generateThumbnailMini(video_id) {
+  url = "/api/video/00000000-0000-0000-0000-000000000000/generate-thumbnail-xs";
+  url = url.replace('00000000-0000-0000-0000-000000000000', video_id);
+  $.ajax(url, {
+    method: 'POST',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (e) {
+      console.debug('mini thumbnail successfully generated');
+      ext = document.getElementById('video-thumb-mini');
+      ext.innerText = 'Generated';
+      ext.classList.remove('bg-warning');
+      ext.classList.add('bg-success');
+    },
+
+    error: function () {
+      console.debug('failed');
+    },
+  });
+
+  return false;
+}
+
+function importVideo(video_id) {
+  url = "/api/video/"+video_id+"/import";
+  $.ajax(url, {
+    method: 'POST',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (e) {
+      console.debug('import successfull');
+      ext = document.getElementById('video-import');
+      ext.innerText = 'Available';
+      ext.classList.remove('bg-warning');
+      ext.classList.add('bg-success');
+
+    },
+
+    error: function () {
+      console.debug('failed');
+    },
+  });
+
+  return false;
+}
+
+/*
+ * timing tracking
+ */
+var video_timing = '00:00:00';
+function onTrackedVideoFrame(currentTime){
+    date = new Date(null);
+    date.setMilliseconds(currentTime*1000);
+    video_timing = date.toISOString().substr(11,12);
+}
+
+function video_title_edit() {
+  title = document.getElementById('video-title');
+  title.readOnly = false;
+
+  btn = document.getElementById('video-title-edit');
+  btn.classList.remove('btn-outline-warning');
+  btn.classList.add('btn-outline-success');
+  btn.innerText = 'Send';
+  btn.onclick = video_title_send;
+}
+
+function video_title_send() {
+  url = "/api/video/00000000-0000-0000-0000-000000000000/rename";
+  url = url.replace('00000000-0000-0000-0000-000000000000', video_id);
+  $.ajax(url, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{% csrf_token %}',
+    },
+    data: {
+      'name': document.getElementById('video-title').value,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (e) {
+      console.debug('import successfull');
+
+      title = document.getElementById('video-title');
+      title.readOnly = true;
+      title.value = e.name;
+
+      btn = document.getElementById('video-title-edit');
+      btn.classList.add('btn-outline-warning');
+      btn.classList.remove('btn-outline-success');
+      btn.innerText = 'Edit';
+      btn.onClick = video_title_edit;
+    },
+
+    error: function () {
+      console.debug('failed');
+    },
+  });
+
+  return false;
+}
+
+</script>
+{{ template "bottom" .}}
+{{ end }}

@@ -1,0 +1,52 @@
+{{ define "adm/edit.html" }}
+{{ template "top" .}}
+<style>
+h2 {
+  margin-top: 30px;
+}
+
+.s16 {
+  width: 30px;
+  height: 16px;
+}
+
+.float-right {
+  float: right;
+}
+</style>
+
+<h1>Admin Area</h1>
+
+<hr />
+
+<div class="row">
+  <div class="col-md-12">
+    <h2>{{ .ObjectName }} #{{ .Object.ID }}</h2>
+    <div class="row">
+      <div class="col-md-12">
+      </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th colspan=2 scope="col">Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ range $object := .Objects }}
+            <tr>
+              <td>{{ $object.Name }}</td>
+              <td style="text-align: right">
+                <a class="btn btn-primary btn-sm" href="{{ $object.URLView }}">View</a>
+                <a class="btn btn-warning btn-sm" href="{{ $object.URLAdmEdit }}">Edit</a>
+                <!-- TODO: add delete button -->
+              </td>
+            </tr>
+            {{ end }}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{{ template "bottom" .}}
+{{ end }}

@@ -1,0 +1,158 @@
+{{ define "upload/triage.html" }}
+{{ template "top" .}}
+<!-- Stat Page Import Area -->
+<table class="table">
+  <thead>
+    <tr>
+      <th colspan="2" scope="col">Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- TODO: add if empty -->
+    {{ range $folder, $items := .Items }}
+    <tr class="table-active" data-toggle="toggle" onClick="toggleTr(this)">
+      <td><span class="plusminus" style="font-weight: bold">+</span> {{ $folder }} <span class="badge bg-secondary">{{ len $items }}</span></td>
+      <td style="text-align: right">
+      </td>
+    </tr>
+    {{ range $item := $items }}
+    <tr style="display: none">
+      <td>{{ $item.Name }}</td>
+      <td style="text-align: right">
+        <button type="button" class="btn btn-primary btn-sm"  data-bs-toggle="modal" data-bs-target="#previewModal" data-bs-video="{{ $folder }}/{{ $item.Name }}"><i class="bi bi-eye"></i></button>
+      </td>
+    </tr>
+    {{ end }}
+    {{ end }}
+  </tbody>
+</table>
+<!-- End Page Import Area -->
+
+<!-- Preview Model Area -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Triage video preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="ratio ratio-16x9">
+          <video id="previewVideo" class="previewVideo" autoplay controls>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="btn-toolbar justify-content-between mb-2" role="toolbar" style="width:100%">
+          <div class="input-group me-2">
+            <a type="button" class="btn btn-danger previewDelete">Delete</a>
+          </div>
+          <div class="input-group">
+            <div class="input-group-text">Import as</div>
+            <a type="button" class="btn btn-primary previewImportAsVideo">Video</a>
+            <a type="button" class="btn btn-primary previewImportAsClip">Clip</a>
+            <a type="button" class="btn btn-primary previewImportAsMovie">Movie</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End Preview Model Area -->
+
+<!-- Preview specific JS -->
+<script>
+const previewModal = document.getElementById('previewModal')
+previewModal.addEventListener('show.bs.modal', event => {
+  // Button that triggered the modal
+  const button = event.relatedTarget
+  // Extract info from data-bs-* attributes
+  const videoName = button.getAttribute('data-bs-video')
+  // Update the modal's content.
+  const videoItem = previewModal.querySelector('.previewVideo')
+
+  videoItem.src = "/upload/preview/"+encodeURIComponent(videoName)
+
+  const importAsVideoButton = previewModal.querySelector('.previewImportAsVideo')
+  importAsVideoButton.onclick = function() { importAs('v', videoName); }
+
+  const importAsClipButton = previewModal.querySelector('.previewImportAsClip')
+  importAsClipButton.onclick = function() { importAs('c', videoName); }
+
+  const importAsMovieButton = previewModal.querySelector('.previewImportAsMovie')
+  importAsMovieButton.onclick = function() { importAs('m', videoName); }
+
+  const previewDeleteButton = previewModal.querySelector('.previewDelete')
+  previewDeleteButton.href = '/triage/delete/'+videoName
+})
+previewModal.addEventListener('hide.bs.modal', event => {
+  const videoItem = previewModal.querySelector('.previewVideo')
+
+  videoItem.pause()
+})
+
+function importAs(video_type, video_path) {
+  var form = document.createElement("form");
+  var form_el_path = document.createElement("input");
+  var form_el_import_as = document.createElement("input");
+  var form_el_csrf = document.createElement("input");
+
+  form.method = "POST";
+  form.action = "/upload/import";
+
+  form_el_csrf.value = '{% csrf_token %}';
+  form_el_csrf.name = 'csrfmiddlewaretoken';
+  form.appendChild(form_el_csrf);
+
+  form_el_path.value=video_path;
+  form_el_path.name="path";
+  form.appendChild(form_el_path);
+
+  form_el_import_as.value=video_type;
+  form_el_import_as.name="import_as";
+  form.appendChild(form_el_import_as);
+
+  document.body.appendChild(form);
+
+  console.log(form);
+
+  form.submit();
+}
+
+</script>
+
+<!-- Toggle JS -->
+<script>
+function toggleTr(callingTr) {
+  hidden = (callingTr.children[0].children[0].textContent == '+');
+
+  if (hidden) {
+    callingTr.children[0].children[0].textContent = '-';
+    child = callingTr.nextElementSibling;
+    while (!child.hasAttribute("data-toggle")) {
+      $(child).slideDown(600);
+      child = child.nextElementSibling;
+    }
+  } else {
+    callingTr.children[0].children[0].textContent = '+';
+    child = callingTr.nextElementSibling;
+    while (!child.hasAttribute("data-toggle")) {
+      $(child).slideUp(200);
+      child = child.nextElementSibling;
+    }
+  }
+}
+</script>
+<!-- End of toggle JS -->
+
+<!-- Footer Area -->
+<footer>
+    <div class="scroll-top">
+        <div class="scroll-icon">
+            <i class="fa fa-angle-up"></i>
+        </div>
+    </div>
+</footer>
+<!-- End Footer Area -->
+
+{{ template "bottom" .}}
+{{ end }}

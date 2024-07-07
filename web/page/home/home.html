@@ -1,0 +1,73 @@
+{{ define "home/home.html" }}
+{{ template "top" .}}
+<div class="row">
+  <div class="col-md-12">
+    <div class="themeix-section-h">
+      <span class="heading-icon"><i class="fa fa-bolt"></i></span>
+      <h3>Trending Videos</h3>
+      <h3 style="float: right;"><a href="/videos">See all {{ .Counts.videos }} videos</a></h3>
+    </div>
+    <div class="row">
+      {{ if not .Videos }}
+      <div class="col-md-12">
+        <div class="alert alert-warning" role="alert">
+          No trending videos so far!
+        </div>
+      </div>
+      {{ else }}
+      {{ range $video := .Videos }}
+      {{ template "shards/thumb-preview-mini.html" $video }}
+      {{ end }}
+      {{ end }}
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="themeix-section-h">
+      <span class="heading-icon"><i class="fa fa-bolt"></i></span>
+      <h3>Trending Clips</h3>
+      <h3 style="float: right;"><a href="/clips">See all {{ .Counts.clips }} clips</a></h3>
+    </div>
+    <div class="row">
+      {{ if not .Clips }}
+      <div class="col-md-12">
+        <div class="alert alert-warning" role="alert">
+          No trending clips so far!
+        </div>
+      </div>
+      {{ else }}
+      {{ range $clip := .Clips }}
+      {{ template "shards/thumb-preview-mini.html" $clip }}
+      {{ end }}
+      {{ end }}
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="themeix-section-h">
+      <span class="heading-icon"><i class="fa fa-bolt"></i></span>
+      <h3>Trending Films</h3>
+      <h3 style="float: right;"><a href="/movies">See all {{ .Counts.movies }} films</a></h3>
+    </div>
+    <div class="row">
+      {{ if not .Movies }}
+      <div class="col-md-12">
+        <div class="alert alert-warning" role="alert">
+          No trending movies so far!
+        </div>
+      </div>
+      {{ else }}
+      {{ range $movie := .Movies }}
+      {{ template "shards/thumb-preview-mini.html" $movie }}
+      {{ end }}
+      {{ end }}
+    </div>
+  </div>
+</div>
+
+{{ template "bottom" .}}
+{{ end }}

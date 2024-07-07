@@ -1,0 +1,34 @@
+{{ define "actor/list.html" }}
+{{ template "top" .}}
+<h2>Actors{{ if .User.Admin }} <a href="/actor/new"><i class="bi bi-file-plus"></i></a>{{ end }}</h2>
+<br />
+
+<div class="row row-cols-1 row-cols-md-4 g-4">
+
+  {{ range $actor := .Actors }}
+  <div class="col">
+    <div class="card">
+      <img data-src="{{ $actor.URLThumb }}" class="card-img-top lazy">
+      <div class="card-body">
+        <h5 class="card-title">
+          <a class="stretched-link" href="{{ $actor.URLView }}">{{ $actor.Name }}</a>
+              <span style="position: absolute; right: 15px;">
+                {{ if eq $actor.Sex "f" }}
+                <i class="fa fa-venus"></i>
+                {{ else if eq $actor.Sex "m" }}
+                <i class="fa fa-mars"></i>
+                {{ else if eq $actor.Sex "s" }}
+                <i class="fa fa-mars-and-venus"></i>
+                {{ else }}
+                <i class="fa fa-person-circle-question"></i>
+                {{ end }}
+              </span>
+
+        </h5>
+      </div>
+    </div>
+  </div>
+  {{ end }}
+</div>
+{{ template "bottom" .}}
+{{ end }}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>List of previous uploads</h2>
+
+<p class="lead">
+  List of files previously uploaded but not imported yet.
+</p>
+
+<div class="row">
+  {% if not uploads %}
+  <div class="col-md-12">
+    <div class="alert alert-success">
+      No upload found!
+    </div>
+  </div>
+  {% else %}
+  {% for upload in uploads %}
+    <div class="col-md-3">
+      <video
+        width="100%"
+        src="{% url 'upload_stream' pk=upload.id %}"
+        preload="metadata"
+        controls
+        ></video>
+    </div>
+    <div class="col-md-9">
+      <table class="table" style="width: 100%;">
+        <tr>
+          <th>ID</th>
+          <td>{% upload.pk %}</td>
+        </tr>
+        <tr>
+          <th>Filename</th>
+          <td>{% upload.filename %}</td>
+        </tr>
+        <tr>
+          <th>Size</th>
+          <td>{% upload.offset | filesizeformat %}</td>
+        </tr>
+        <tr>
+          <th>Uploaded by</th>
+          <td>{% upload.user %}</td>
+        </tr>
+        <tr>
+          <th>Actions</th>
+          <td>
+
+<div class="row">
+  <div class="col-3 d-grid">
+    <a
+     href="{% url 'upload_import' pk=upload.id import_as='v' %}"
+     class="btn btn-primary btn-sm"
+     >Import as video</a>
+  </div>
+  <div class="col-3 d-grid">
+    <a
+     href="{% url 'upload_import' pk=upload.id import_as='m' %}"
+     class="btn btn-primary btn-sm"
+     >Import as movie</a>
+  </div>
+  <div class="col-3 d-grid">
+    <a
+     href="{% url 'upload_import' pk=upload.id import_as='c' %}"
+     class="btn btn-primary btn-sm"
+     >Import as clip</a>
+  </div>
+  <div class="col-3 d-grid">
+    <a
+     href="{% url 'upload_delete' pk=upload.id %}"
+     class="btn btn-danger btn-sm"
+     >Delete</a>
+  </div>
+
+          </td>
+        </tr>
+      </table>
+    </div>
+  {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

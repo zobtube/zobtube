@@ -1,0 +1,87 @@
+{{ define "video/list.html" }}
+{{ template "top" .}}
+<div class="row">
+    <div class="col-md-12">
+      <div class="themeix-section-h">
+        <span class="heading-icon"><i class="fa fa-bolt"></i></span>
+        <h3>All {{ .Type }}s</h3>
+      </div>
+      <div class="row">
+        {{ if .Videos }}
+        {{ range $video := .Videos }}
+        <div class="col-md-2">
+          <div class="single-video">
+            <div class="video-img">
+              <a href="{{ .URLView }}">
+                <img class="lazy" alt="Video" data-src="{{ .URLThumbXS }}">
+              </a>
+              <span class="video-duration">{{ .NiceDuration }}</span>
+            </div>
+            <div class="video-content">
+              <h4><a href="{{ .URLView }}" class="video-title">{{ .Name }} </a></h4>
+              <div class="video-counter">
+                <div class="video-viewers">
+                  <span class="fa fa-eye view-icon"></span>
+                  <span>241,021</span>
+                </div>
+                <div class="video-feedback">
+                  <div class="video-like-counter">
+                    <span class="far fa-thumbs-up like-icon"></span>
+                    <span>996</span>
+                  </div>
+                  <div class="video-like-counter">
+                    <span class="far fa-thumbs-down dislike-icon"></span>
+                    <span>2140</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{ end }}
+        {{ else }}
+        <div class="col-md-12">
+          <div class="alert alert-warning" role="alert">
+            No {{ .Type }} available so far!
+          </div>
+        </div>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+  <!-- navigation part -->
+  {{ if .Videos }}
+  <nav style="margin-top: 35px;">
+    <ul class="pagination justify-content-center">
+      {{ if .page_obj.has_previous }}
+      <li class="page-item">
+        <a class="page-link" href="?page=1">First</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ .page_obj.previous_page_number }}">{{ .page_obj.previous_page_number }}</a>
+      </li>
+      {{ else }}
+      <li class="page-item disabled">
+        <a class="page-link">First</a>
+      </li>
+      {{ end }}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ .page_obj.number }}">{{ .page_obj.number }}</a>
+      </li>
+      {{ if .page_obj.has_next }}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ .page_obj.next_page_number }}">{{ .page_obj.next_page_number }}</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ .page_obj.paginator.num_pages }}">Last</a>
+      </li>
+      {{ else }}
+      <li class="page-item disabled">
+        <a class="page-link">Last</a>
+      </li>
+      {{ end }}
+    </ul>
+  </nav>
+  {{ end }}
+{{ template "bottom" .}}
+{{ end }}

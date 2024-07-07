@@ -1,0 +1,40 @@
+{{ define "upload/home.html" }}
+{{ template "top" .}}
+<h2>Uploads</h2>
+
+<p class="lead">
+  Choose what you want to do with uploads
+</p>
+
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <div class="h-100 p-5 bg-light rounded-3">
+      <h2>New upload</h2>
+      <p>Upload a new movie from your device.</p>
+      <a class="btn btn-outline-secondary" href="{% url 'upload_new' %}">Upload a new movie</a>
+    </div>
+  </div>
+  <div class="col-md-6 mb-3">
+    <div class="h-100 p-5 bg-light rounded-3">
+      <h2>List uploads</h2>
+      <p>List previous imports and import them.</p>
+      <a class="btn btn-outline-secondary" href="{% url 'upload_list' %}">List previous uploads</a>
+    </div>
+  </div>
+  <div class="col-md-6 mb-3">
+    <div class="h-100 p-5 bg-light rounded-3">
+      <h2>Triage</h2>
+      <p>List and preview files in triage.</p>
+      <a class="btn btn-outline-secondary" href="/upload/triage">View files in triage</a>
+    </div>
+  </div>
+  <div class="col-md-6 mb-3">
+    <div class="h-100 p-5 bg-light rounded-3">
+      <h2>Direct download</h2>
+      <p>Directly download a movie from a provider using <code>yt-dlp</code>.</p>
+      <button class="btn btn-outline-secondary disabled" type="button">Not yet available</button>
+    </div>
+  </div>
+</div>
+{{ template "bottom" .}}
+{{ end }}

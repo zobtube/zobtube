@@ -1,0 +1,186 @@
+{{ define "top" }}
+<!DOCTYPE html>
+<html lang="zxx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>ZobTube</title>
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,700" rel="stylesheet">
+    <!-- LOAD CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/pgwslider.min.css">
+    <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="/static/css/pgwslideshow.min.css">
+    <link rel="stylesheet" href="/static/css/megamenu.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" integrity="sha512-cyzxRvewl+FOKTtpBzYjW6x6IAYUCZy3sGP40hn+DQkqeluGRCax7qztK2ImL64SA+C7kVWdLI6wvdlStawhyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- LOAD CSS -->
+</head>
+<body>
+    <!-- PRE LOADER -->
+      <div class="preloader">
+         <div class='uil-ring-css' style='transform:scale(0.45);'><div></div></div>
+      </div>
+    <!-- Start Header -->
+    <header>
+        <div class="header-top hidden-xs">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="header-top-area">
+                            <div class="site-info left">
+                                <div class="mail-address">
+                                    <i class="fa fa-envelope-o"></i>
+                                    <a href="mailto:nfo@themeix.com">ZobTube, Passion of the Zob, Lube for the Tube!</a>
+                                </div>
+                            </div>
+                            <div class="user-info right">
+                              {{ if .User.Admin }}
+                              <div class="upload-opt">
+                                  <i class="fa fa-upload"></i>
+                                  <a href="/upload">uploads</a>
+                                  <span class="sepator">|</span>
+                              </div>
+                              {{ end }}
+                              {{ if .User.Admin }}
+                              <div class="admin-info">
+                                  <i class="fa fa-hammer"></i>
+                                  <a href="/adm">admin</a>
+                                <span class="sepator">|</span>
+                              </div>
+                              {{ end }}
+                              <div class="user-info">
+                                <i class="fa fa-user"></i>
+                                <a href="{% url 'profile_view' %}">{{ .User.Username }}</a>
+                                <span class="sepator">|</span>
+                              </div>
+                              <div class="user-logout">
+                                <i class="fa fa-sign-out-alt"></i>
+                                <a href="{% url 'logout' %}">logout</a>
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Navigation area starts -->
+        <div class="main-menu">
+            <!-- Start Navigation -->
+            <nav class="header-section pin-style">
+                <div class="container-fluid">
+                       <div class="mod-menu">
+                        <div class="row">
+                            <div class="col-3">
+                              <a href="/" title="logo" class="logo"><img src="/static/images/logo.png" alt="logo" height="55"></a>
+                            </div>
+                            <div class="col-9 nopadding">
+                                <div class="main-nav rightnav">
+                                    <ul class="top-nav">
+                                        <li class="visible-this d-md-none menu-icon">
+                                            <a href="#" class="navbar-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#menu" aria-expanded="false"><i class="fa fa-bars"></i></a>
+                                        </li>
+                                    </ul>
+                                    <div id="menu" class="collapse header-menu">
+                                        <ul class="nav themeix-nav">
+                                            <li><a href="/">Home</a> </li>
+                                            <li><a href="/videos">Videos</a> </li>
+                                            <li><a href="/clips">Clips</a> </li>
+                                            <li><a href="/channels">Channels</a> </li>
+                                            <li><a href="/actors">Actors</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+            </nav>
+            <!-- end navigation -->
+        </div>
+        <!-- Navigation area ends -->
+    </header>
+    <!-- End Header -->
+
+    <div class="container" style="padding-top:50px;">
+{{ end }}
+
+{{ define "bottom" }}
+</div>
+
+    <!-- Toast template -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="zt-toast-container">
+      <div id="toastTemplate" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header text-white">
+          <strong class="me-auto zt-toast-title">Bootstrap</strong>
+          <small class="zt-toast-subtitle">11 mins ago</small>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body zt-toast-body">
+          Hello, world! This is a toast message.
+        </div>
+      </div>
+    </div>
+    <!-- End of toast template -->
+
+    <!-- End Page Import Area -->
+        <div class="scroll-top">
+            <div class="scroll-icon">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div>
+    </footer>
+    <!-- End Footer Area -->
+
+    <!-- Load JS -->
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/jquery.easing.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/pgwslideshow.min.js"></script>
+    <script src="/static/js/pgwslider.min.js"></script>
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/jquery.lazy.min.js"></script>
+    <script src="/static/js/jquery.lazy.plugins.min.js"></script>
+    <script src="/static/js/megamenu.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" integrity="sha512-6lplKUSl86rUVprDIjiW8DuOniNX8UDoRATqZSds/7t6zCQZfaCe3e5zcGaQwxa8Kpn5RTM9Fvl3X2lLV4grPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+      function sendToast(title, subtitle, title_color, message) {
+        // get const
+        toastContainer = document.getElementById('zt-toast-container');
+        toastTemplate = document.getElementById('toastTemplate');
+
+        // create new toast
+        newtoast = toastTemplate.cloneNode(true);
+
+        // set title
+        n_title = newtoast.getElementsByClassName('zt-toast-title');
+        n_title[0].innerText = title;
+
+        // set subtitle
+        n_subtitle = newtoast.getElementsByClassName('zt-toast-subtitle');
+        n_subtitle[0].innerText = subtitle;
+
+        // set color
+        n_header = newtoast.getElementsByClassName('toast-header');
+        n_header[0].className += " "+title_color
+
+        // set content
+        n_content = newtoast.getElementsByClassName('zt-toast-body');
+        n_content[0].innerHTML = message;
+
+        toastContainer.appendChild(newtoast);
+        toast = new bootstrap.Toast(newtoast);
+        toast.show();
+      }
+    </script>
+</body>
+
+</html>
+{{ end }}

@@ -1,0 +1,64 @@
+{{ define "actor/create.html" }}
+{{ template "top" .}}
+<!-- Start Page Actor Create -->
+<h2>Add new actor</h2>
+<hr />
+<br />
+
+<div class="row">
+  <div class="col-3">
+    <div class="card">
+      <div class="card-header">
+        Profile picture
+      </div>
+      <div class="card-body">
+        <img class="rounded-start" src="/static/images/actor-missing-profile-picture.png" style="width: 100%;">
+      </div>
+    </div>
+  </div>
+  <div class="col-9">
+    <h3>Profile details</h3>
+    <br/>
+    <div id="new-profile-info">
+      <form action="/actor/new" method="post">
+        <div class="mb-3">
+          <label for="actor-name" class="form-label">Name:</label>
+          <input type="text" class="form-control" id="actor-name" name="name" onInput="validateMinimalDetails();">
+          <div id="actor-name-help" class="form-text"></div>
+        </div>
+        <div class="mb-3">
+          <label for="actor-sex" class="form-label">Sex:</label>
+          <select class="form-select" id="actor-sex" name="sex" onChange="validateMinimalDetails();">
+            <option value="xx" selected>---------</option>
+            <option value="m">Male</option>
+            <option value="f">Female</option>
+            <option value="s">Shemale</option>
+          </select>
+          <div id="actor-sex-help" class="form-text"></div>
+        </div>
+        <div class="mb-3">
+          <input type="submit" class="btn btn-primary disabled" id="preform-next" value="Next" />
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function validateMinimalDetails() {
+  ActorNameInput = document.getElementById('actor-name');
+  ActorSexSelect = document.getElementById('actor-sex');
+  PreFormNextButton = document.getElementById('preform-next');
+
+  if ((ActorNameInput.value.length > 0) && (ActorSexSelect.value != 'xx')) {
+    PreFormNextButton.classList.remove('disabled');
+  } else {
+    PreFormNextButton.classList.add('disabled');
+  }
+}
+validateMinimalDetails();
+</script>
+<!-- End Page Actor Create -->
+{{ template "bottom" .}}
+{{ end }}

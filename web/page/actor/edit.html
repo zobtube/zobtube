@@ -1,0 +1,471 @@
+{{ define "actor/edit.html" }}
+{{ template "top" .}}
+<style>
+#image_drop_area{
+  width: 100%;
+  height: 400px;
+  border: 1px solid black;
+  background-position: center;
+  background-size: cover;
+  box-sizing: border-box;
+}
+img {
+  display: block;
+
+  /* This rule is very important, please don't ignore this */
+  max-width: 100%;
+}
+</style>
+
+<h2>Edit actor information</h2>
+<hr />
+<br />
+
+<div class="row">
+  <div class="col-3">
+    <div class="card">
+      <div class="card-header">
+        Profile picture
+      </div>
+      <div class="card-body">
+        <img class="rounded-start" src="{{ .Actor.URLThumb }}" style="width: 100%;">
+      </div>
+    </div>
+    <div id="profile-actions">
+      <a class="btn btn-success" style="margin-top: 15px; width: 100%" href="{{ .Actor.URLView }}">View profile</a>
+      <a class="btn btn-danger" style="margin-top: 15px; width: 100%" href="{% url 'actor_remove' actor.id %}">Delete actor profile</a>
+      <a class="btn btn-info" style="margin-top: 15px; width: 100%" onclick="showActorPictures()">View link pictures</a>
+    </div>
+  </div>
+  <div class="col-9">
+    <h3>Profile details</h3>
+    <br/>
+    <div id="profile-info">
+      <div class="mb-3">
+        <label for="actor-name" class="form-label">Name:</label>
+        <input type="text" class="form-control" id="actor-name" name="name" value="{{ .Actor.Name }}" readonly>
+        <div id="actor-name-help" class="form-text"></div>
+      </div>
+      <div class="mb-3">
+        <label for="actor-sex" class="form-label">Sex:</label>
+        <select class="form-select" id="actor-sex" name="sex" disabled>
+          <option value="m" {{ if eq .Actor.Sex "m" }}selected{{ end }}>Male</option>
+          <option value="f" {{ if eq .Actor.Sex "f" }}selected{{ end }}>Female</option>
+          <option value="s" {{ if eq .Actor.Sex "s" }}selected{{ end }}>Shemale</option>
+        </select>
+        <div id="actor-sex-help" class="form-text"></div>
+      </div>
+    </div>
+
+    <h4 style="margin-top: 65px;">Actor links</h4>
+    <table class="table">
+      <thead>
+        <th>Provider</th>
+        <th style="text-align: right"></th>
+      </thead>
+      <tbody>
+        {{ range $provider_slug, $provider := .Providers }}
+        <tr id="provider-{{ $provider_slug }}">
+          <td style="vertical-align: middle">
+            {{ $provider.NiceName }}
+          </td>
+          <td style="text-align: right; vertical-align: middle">
+            <button
+              id="provider-action-{{ $provider_slug }}-search"
+              class="btn btn-primary"
+              onClick="actorLinkAutomaticSearch(
+                '{{ $.Actor.Name }}',
+                '{{ $provider.NiceName }}',
+                '{{ $provider_slug }}',
+                '/api/actor/{{ $.Actor.ID }}/provider/{{ $provider_slug }}'
+              )">
+              <i class="fas fa-search"></i> Automatic search
+            </button>
+            <button class="btn btn-primary" id="provider-action-{{ $provider_slug }}-add">
+              <i class="fas fa-plus"></i> Manual add
+            </button>
+            <a class="btn btn-success" href="" id="provider-action-{{ $provider_slug }}-view" target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-globe"></i> View page
+            </a>
+            <button class="btn btn-warning" id="provider-action-{{ $provider_slug }}-edit">
+              <i class="fas fa-pen"></i> Edit link
+            </button>
+            <button class="btn btn-danger" id="provider-action-{{ $provider_slug }}-delete">
+              <i class="fas fa-trash"></i> Remove link
+            </button>
+            <div id="provider-text-{{ $provider_slug }}-first-time" style="display: none"><i>Automatic reseach will begin shortly...</i></div>
+          </td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row" id="profile-picture-propositions-row" {% if not first_time%}style="display: none"{% endif %}>
+  <div class="col-12">
+    <h4 style="margin-top: 65px;">Actor pictures from external links</h4>
+    <hr/>
+    <div class="row" id="profile-picture-propositions">
+      <div class="col-12">
+        <div class="alert alert-warning" role="alert" id="profile-picture-suggestion-welcome">
+          Picture suggestion loading...
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="alert alert-info" role="alert" id="profile-picture-suggestion-click-info" style="display: none">
+          <i>Click on one picture to set it as profile picture</i>
+        </div>
+      </div>
+      <div class="col-3" id="profile-picture-template" style="display: none">
+        <div class="card">
+          <div class="card-body">
+            <img class="rounded-start" style="width: 100%; cursor: pointer" data-bs-toggle="modal" data-bs-target="#profilePictureModal">
+          </div>
+          <div class="card-footer" style="text-align: center">Provider</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Start Profile Picture Modal -->
+<div class="modal fade" id="profilePictureModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Profile picture preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="profilePictureModalBody">
+        <div id="image_drop_area" test="image_drop_area">
+          <img id="image" src=""></img>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="btn-toolbar justify-content-between mb-2" role="toolbar" style="width:100%">
+          <div class="input-group">
+            <a type="button" class="btn btn-primary profilePictureModalValidate" onclick="send_crop()">Set as new profile picture</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End Profile Picture Modal -->
+
+<script>
+function actorLinkAutomaticSearch(actorName, providerName, providerSlug, url) {
+  sendToast(
+    'Automatic actor search',
+    '',
+    'bg-info',
+    'Searching for '+actorName+' on '+providerName,
+  );
+
+  $.ajax(url, {
+    method: 'GET',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+    success: function (result) {
+      sendToast(
+        'Automatic actor search',
+        '',
+        'bg-success',
+        actorName+' found on '+providerName+'!',
+      );
+      G_links[providerSlug] = {
+        "link_url": result.link_url,
+        "link_id": result.link_id,
+      };
+      updateProviders();
+    },
+    error: function () {
+      sendToast(
+        'Automatic actor search',
+        '',
+        'bg-warning',
+        actorName+' not found on '+providerName,
+      );
+    },
+  });
+
+}
+
+// list all known links
+G_links = {
+{{ range $link := .Actor.Links }}
+  '{{ $link.Provider }}': {
+    'link_url': '{{ $link.URL }}',
+    'link_id': '{{ $link.ID }}',
+  },
+{{ end }}
+};
+
+// list all providers
+G_providers = {
+  {{ range $provider := .Providers }}
+  '{{ $provider.SlugGet }}': '{{ $provider.NiceName }}',
+{{ end }}
+};
+
+G_first_time = {{ if .FirstTime }}true{{ else }}false{{ end }};
+
+G_actor_id = "{{ .Actor.ID }}";
+
+function updateProviders() {
+  for (const provider_slug in G_providers) {
+    if (provider_slug in G_links) {
+      link_url = G_links[provider_slug].link_url;
+      link_id = G_links[provider_slug].link_id;
+      providerLinkPresent(provider_slug, link_url, link_id);
+      continue;
+    }
+
+    /*
+    if (!(provider_slug in providersInit) && G_first_time) {
+      providerFirstTime(provider_slug);
+      continue;
+    }
+    */
+
+    providerLinkAbsent(provider_slug);
+  }
+}
+
+function providerFirstTime(provider_slug) {
+  // hide buttons
+  document.getElementById('provider-action-'+provider_slug+'-view').style.display = 'none';
+  document.getElementById('provider-action-'+provider_slug+'-edit').style.display = 'none';
+  document.getElementById('provider-action-'+provider_slug+'-delete').style.display = 'none';
+  document.getElementById('provider-action-'+provider_slug+'-search').style.display = 'none';
+  document.getElementById('provider-action-'+provider_slug+'-add').style.display = 'none';
+
+  // show first time text
+  document.getElementById('provider-text-'+provider_slug+'-first-time').style.display = '';
+
+}
+
+function providerLinkPresent(provider_slug, link_url, link_id) {
+  // hide search buttons
+  document.getElementById('provider-action-'+provider_slug+'-search').style.display = 'none';
+  document.getElementById('provider-action-'+provider_slug+'-add').style.display = 'none';
+  document.getElementById('provider-text-'+provider_slug+'-first-time').style.display = 'none';
+  // show edit ones
+  btnView = document.getElementById('provider-action-'+provider_slug+'-view');
+  btnView.style.display = '';
+  btnEdit = document.getElementById('provider-action-'+provider_slug+'-edit');
+  btnEdit.style.display = '';
+  btnDelete = document.getElementById('provider-action-'+provider_slug+'-delete');
+  btnDelete.style.display = '';
+
+  // update urls
+  btnView.href = link_url;
+
+  urlEdit   = "{% url 'actor_link_delete' '00000000-0000-0000-0000-000000000000' %}";
+  urlEdit   = urlEdit.replace('00000000-0000-0000-0000-000000000000', link_id);
+
+  btnEdit.href = urlEdit;
+  btnDelete.onclick = function() {
+    linkDelete(provider_slug);
+  }
+}
+
+function linkDelete(provider_slug) {
+  link_id = G_links[provider_slug].link_id;
+  url = "/api/actor/link/"+link_id;
+  $.ajax(url, {
+    method: 'DELETE',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+    success: function (result) {
+      sendToast(
+        'Actor\'s link deleted',
+        '',
+        'bg-success',
+        'Success',
+      );
+      delete G_links[provider_slug];
+      updateProviders();
+    },
+    error: function () {
+      sendToast(
+        'Actor\'s link deletion',
+        '',
+        'bg-warning',
+        'Unable to delete',
+      );
+    },
+  });
+}
+
+function providerLinkAbsent(provider_slug) {
+  // hide buttons
+  document.getElementById('provider-action-'+provider_slug+'-view').style.display = 'none';
+  document.getElementById('provider-action-'+provider_slug+'-edit').style.display = 'none';
+  document.getElementById('provider-action-'+provider_slug+'-delete').style.display = 'none';
+  document.getElementById('provider-text-'+provider_slug+'-first-time').style.display = 'none';
+  // show search ones
+  document.getElementById('provider-action-'+provider_slug+'-search').style.display = '';
+  document.getElementById('provider-action-'+provider_slug+'-add').style.display = '';
+}
+
+function firstTimeSearch() {
+  if (!G_first_time) {
+    return
+  }
+
+  console.debug('First time running, discoverying providers');
+
+  for (const provider_slug in providersAndLinks) {
+    link_url = providersAndLinks[provider_slug].link_url;
+    if (link_url == undefined) {
+      document.getElementById('provider-action-'+provider_slug+'-search').click();
+    }
+  }
+}
+
+updateProviders();
+
+window.onload = function() {
+  firstTimeSearch();
+  suggestProfilePicture();
+}
+
+function showActorPictures() {
+  const profilePictureURL = "/api/actor/link/00000000-0000-0000-0000-000000000000/thumb";
+  template = document.getElementById('profile-picture-template');
+
+  document.getElementById('profile-picture-propositions-row').style.display = '';
+
+  for (const provider_slug in G_links) {
+    link_id = G_links[provider_slug].link_id;
+
+    document.getElementById('profile-picture-suggestion-welcome').style.display = 'none';
+    document.getElementById('profile-picture-suggestion-click-info').style.display = '';
+
+    url = profilePictureURL.replace('00000000-0000-0000-0000-000000000000', link_id);
+
+    newPicture = template.cloneNode(true);
+    newPicture.style.display = '';
+    newPicture.id = 'profile-picture-provider-'+provider_slug;
+    newPicture.querySelector('img').src = url;
+    newPicture.querySelector('.card-footer').innerText = G_providers[provider_slug];
+    newPicture.onclick = function() {
+      const providerSlug = provider_slug;
+      console.log('picture from '+provider_slug);
+      console.log(this);
+    }
+
+    propositionRoot = document.getElementById('profile-picture-propositions');
+    propositionRoot.appendChild(newPicture);
+  }
+}
+
+function suggestProfilePicture() {
+  if ({{ if and (not .FirstTime) .Actor.Thumbnail }}true{{ else }}false{{ end }}) {
+    return;
+  }
+
+  // if first time, wait for init
+  if ({{ if .FirstTime }}true{{ else }}false{{ end }}) {
+    for (provider_slug in providersAndLinks) {
+      if (!(provider_slug in providersInit)) {
+        console.debug('provider '+provider_slug+' not init, waiting');
+        setTimeout(suggestProfilePicture, "1000");
+        return
+      }
+    }
+  }
+
+  showActorPictures();
+}
+
+// set profile picture modal logic
+const previewModal = document.getElementById('profilePictureModal')
+previewModal.addEventListener('show.bs.modal', event => {
+  const caller = event.relatedTarget;
+  console.log(caller);
+  const profilePicturePreview = document.getElementById('image');
+  profilePicturePreview.src = caller.src;
+  gen_new_crop();
+})
+
+var cropper;
+function gen_new_crop() {
+  console.debug('halo');
+    var image = document.querySelector('#image');
+    var minAspectRatio = 1;
+    var maxAspectRatio = 1;
+    cropper = new Cropper(image, {
+        ready: function () {
+            var cropper = this.cropper;
+            var containerData = cropper.getContainerData();
+            var cropBoxData = cropper.getCropBoxData();
+            var aspectRatio = cropBoxData.width / cropBoxData.height;
+            var newCropBoxWidth;
+
+            cropper.setCropBoxData(cropper.getImageData());
+            cropper.moveTo(0);
+          },
+
+        cropmove: function () {
+            var cropper = this.cropper;
+            var cropBoxData = cropper.getCropBoxData();
+            var aspectRatio = cropBoxData.width / cropBoxData.height;
+
+            if (aspectRatio < minAspectRatio) {
+                cropper.setCropBoxData({
+                    width: cropBoxData.height * minAspectRatio
+                  });
+              } else if (aspectRatio > maxAspectRatio) {
+                  cropper.setCropBoxData({
+                      width: cropBoxData.height * maxAspectRatio
+                    });
+                }
+          },
+    });
+}
+
+function send_crop() {
+  cropper.getCroppedCanvas().toBlob(function (blob) {
+    var formData = new FormData();
+
+    formData.append('pp', blob);
+    formData.append('csrfmiddlewaretoken', '{% csrf_token %}');
+    $.ajax("/api/actor/"+G_actor_id+"/thumb", {
+      method: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+
+      xhr: function () {
+        var xhr = new XMLHttpRequest();
+
+        return xhr;
+      },
+
+      success: function () {
+        console.debug('success, redirecting');
+        window.location.href = "/actor/"+G_actor_id+"/edit"; //TODO: add in-page reload
+      },
+
+      error: function () {
+        console.debug('failed');
+      },
+
+      complete: function () {
+      },
+    });
+  });
+}
+
+
+
+</script>
+{{ template "bottom" .}}
+{{ end }}

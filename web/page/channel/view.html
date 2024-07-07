@@ -1,0 +1,15 @@
+{{ define "channel/view.html" }}
+{{ template "top" .}}
+
+<h2>Videos of {{ .Channel.Name }}</h2>
+<hr />
+
+<div class="row row-cols-1 row-cols-md-6 g-4">
+
+  {{ range $video := .Videos }}
+  {{ template "shards/thumb-preview-line.html" $video }}
+  {{ end }}
+
+</div>
+{{ template "bottom" .}}
+{{ end }}
