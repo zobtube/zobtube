@@ -1,6 +1,8 @@
 package http
 
 import (
+	"embed"
+
 	"github.com/gin-gonic/gin"
 
 	"gitlab.com/zobtube/zobtube/internal/controller"
@@ -8,11 +10,13 @@ import (
 
 type Server struct {
 	Server *gin.Engine
+	FS     *embed.FS
 }
 
-func New(c *controller.AbtractController) (*Server, error) {
+func New(c *controller.AbtractController, fs *embed.FS) (*Server, error) {
 	server := &Server{
 		Server: gin.Default(),
+		FS:     fs,
 	}
 
 	server.setupRoutes(*c)

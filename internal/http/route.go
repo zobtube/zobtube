@@ -1,15 +1,21 @@
 package http
 
 import (
+	"io/fs"
+	"net/http"
+
 	"gitlab.com/zobtube/zobtube/internal/controller"
 )
 
 func (s *Server) setupRoutes(c controller.AbtractController) {
 	// load templates
-	s.Server.LoadHTMLGlob("web/page/**/*")
+	s.LoadHTMLFromEmbedFS("web/page/**/*")
+
+	// prepare subfs
+	staticFS, _ := fs.Sub(s.FS, "web/static")
 
 	// load static
-	s.Server.Static("/static", "web/static")
+	s.Server.StaticFS("/static", http.FS(staticFS))
 	s.Server.GET("/ping", livenessProbe)
 
 	// home

@@ -1,12 +1,17 @@
 package main
 
 import (
+	"embed"
+
 	"gitlab.com/zobtube/zobtube/internal/config"
 	"gitlab.com/zobtube/zobtube/internal/controller"
 	"gitlab.com/zobtube/zobtube/internal/http"
 	"gitlab.com/zobtube/zobtube/internal/model"
 	"gitlab.com/zobtube/zobtube/internal/provider"
 )
+
+//go:embed web
+var webFS embed.FS
 
 func main() {
 	cfg, err := config.New()
@@ -25,6 +30,6 @@ func main() {
 	c.ProviderRegister(&provider.Boobpedia{})
 	c.ProviderRegister(&provider.Pornhub{})
 
-	httpServer, _ := http.New(&c)
+	httpServer, _ := http.New(&c, &webFS)
 	httpServer.Start(":8080")
 }
