@@ -755,3 +755,111 @@ func (c *Controller) VideoAjaxUpload(g *gin.Context) {
 
 	g.JSON(200, gin.H{})
 }
+
+func (c *Controller) VideoAjaxDelete(g *gin.Context) {
+	// get id from path
+	id := g.Param("id")
+
+	// get item from ID
+	video := &model.Video{
+		ID: id,
+	}
+	result := c.datastore.First(video)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	// check thumb presence
+	thumbPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID, "thumb.jpg")
+	_, err := os.Stat(thumbPath)
+	if err != nil && !os.IsNotExist(err) {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	if !os.IsNotExist(err) {
+		// exist, deleting it
+		err = os.Remove(thumbPath)
+		if err != nil {
+			g.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	// check thumb-xs presence
+	thumbXsPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID, "thumb-xs.jpg")
+	_, err = os.Stat(thumbXsPath)
+	if err != nil && !os.IsNotExist(err) {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	if !os.IsNotExist(err) {
+		// exist, deleting it
+		err = os.Remove(thumbXsPath)
+		if err != nil {
+			g.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	// check video presence
+	videoPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID, "video.mp4")
+	_, err = os.Stat(videoPath)
+	if err != nil && !os.IsNotExist(err) {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	if !os.IsNotExist(err) {
+		// exist, deleting it
+		err = os.Remove(videoPath)
+		if err != nil {
+			g.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	// delete folder
+	folderPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID)
+	_, err = os.Stat(folderPath)
+	if err != nil && !os.IsNotExist(err) {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	if !os.IsNotExist(err) {
+		// exist, deleting it
+		err = os.Remove(folderPath)
+		if err != nil {
+			g.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	// delete object
+	err = c.datastore.Delete(video).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}

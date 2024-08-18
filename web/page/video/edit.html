@@ -114,6 +114,9 @@
     <p>
       <button class="btn btn-primary btn-sm" onClick="importVideo('{{ .Video.ID }}')">Import</button>
     </p>
+    <p>
+      <button class="btn btn-danger btn-sm" onClick="deleteVideo('{{ .Video.ID }}')">Delete</button>
+    </p>
 
   </div>
 
@@ -512,6 +515,27 @@ function generateThumbnailMini(video_id) {
       ext.innerText = 'Generated';
       ext.classList.remove('bg-warning');
       ext.classList.add('bg-success');
+    },
+
+    error: function () {
+      console.debug('failed');
+    },
+  });
+
+  return false;
+}
+
+function deleteVideo(video_id) {
+  url = "/api/video/"+video_id;
+  $.ajax(url, {
+    method: 'DELETE',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (e) {
+      window.location.replace('/');
     },
 
     error: function () {

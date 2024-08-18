@@ -37,6 +37,7 @@ type AbtractController interface {
 	VideoAjaxUploadThumb(c *gin.Context)
 	VideoAjaxCreate(c *gin.Context)
 	VideoAjaxStreamInfo(c *gin.Context)
+	VideoAjaxDelete(c *gin.Context)
 	VideoEdit(c *gin.Context)
 	VideoStream(c *gin.Context)
 	VideoThumb(c *gin.Context)
