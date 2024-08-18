@@ -26,51 +26,33 @@ type AbtractController interface {
 	ActorView(c *gin.Context)
 	ActorThumb(c *gin.Context)
 
-	// Generic Video, used for Clips, Movies and Videos
-	GenericVideoAjaxActors(c *gin.Context)
-	GenericVideoAjaxComputeDuration(c *gin.Context)
-	GenericVideoAjaxGenerateThumbnail(c *gin.Context)
-	GenericVideoAjaxGenerateThumbnailXS(c *gin.Context)
-	GenericVideoAjaxImport(c *gin.Context)
-	GenericVideoAjaxRename(c *gin.Context)
-	GenericVideoAjaxUpload(c *gin.Context)
-	GenericVideoAjaxUploadThumb(c *gin.Context)
-	GenericVideoAjaxCreate(c *gin.Context)
-	GenericVideoAjaxStreamInfo(c *gin.Context)
-	GenericVideoEdit(c *gin.Context)
+	// Video, used for Clips, Movies and Videos
+	VideoAjaxActors(c *gin.Context)
+	VideoAjaxComputeDuration(c *gin.Context)
+	VideoAjaxGenerateThumbnail(c *gin.Context)
+	VideoAjaxGenerateThumbnailXS(c *gin.Context)
+	VideoAjaxImport(c *gin.Context)
+	VideoAjaxRename(c *gin.Context)
+	VideoAjaxUpload(c *gin.Context)
+	VideoAjaxUploadThumb(c *gin.Context)
+	VideoAjaxCreate(c *gin.Context)
+	VideoAjaxStreamInfo(c *gin.Context)
+	VideoEdit(c *gin.Context)
+	VideoStream(c *gin.Context)
+	VideoThumb(c *gin.Context)
+	VideoThumbXS(c *gin.Context)
+	VideoView(c *gin.Context)
+
+	ClipList(c *gin.Context)
+	MovieList(c *gin.Context)
+	VideoList(c *gin.Context)
 	GenericVideoList(vt string, c *gin.Context)
-	GenericVideoStream(vt string, c *gin.Context)
-	GenericVideoThumb(vt string, c *gin.Context)
-	GenericVideoThumbXS(vt string, c *gin.Context)
-	GenericVideoView(vt string, c *gin.Context)
 
 	// Channels
 	ChannelCreate(c *gin.Context)
 	ChannelList(c *gin.Context)
 	ChannelView(c *gin.Context)
 	ChannelThumb(c *gin.Context)
-
-	// Clips
-	ClipList(c *gin.Context)
-	ClipView(c *gin.Context)
-	ClipStream(c *gin.Context)
-	ClipThumb(c *gin.Context)
-	ClipThumbXS(c *gin.Context)
-
-	// Movies
-	MovieList(c *gin.Context)
-	MovieView(c *gin.Context)
-	MovieStream(c *gin.Context)
-	MovieThumb(c *gin.Context)
-	MovieThumbXS(c *gin.Context)
-
-	// Videos
-	VideoList(c *gin.Context)
-	VideoView(c *gin.Context)
-	VideoStream(c *gin.Context)
-	VideoEdit(c *gin.Context)
-	VideoThumb(c *gin.Context)
-	VideoThumbXS(c *gin.Context)
 
 	// Uploads
 	UploadHome(c *gin.Context)

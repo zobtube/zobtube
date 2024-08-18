@@ -49,19 +49,19 @@ func (v *Video) TypeAsString() string {
 }
 
 func (v *Video) URLView() string {
-	return fmt.Sprintf("/%s/%s", v.TypeAsString(), v.ID)
+	return fmt.Sprintf("/video/%s", v.ID)
 }
 
 func (v *Video) URLThumb() string {
-	return fmt.Sprintf("/%s/%s/thumb", v.TypeAsString(), v.ID)
+	return fmt.Sprintf("/video/%s/thumb", v.ID)
 }
 
 func (v *Video) URLThumbXS() string {
-	return fmt.Sprintf("/%s/%s/thumb_xs", v.TypeAsString(), v.ID)
+	return fmt.Sprintf("/video/%s/thumb_xs", v.ID)
 }
 
 func (v *Video) URLStream() string {
-	return fmt.Sprintf("/%s/%s/stream", v.TypeAsString(), v.ID)
+	return fmt.Sprintf("/video/%s/stream", v.ID)
 }
 
 func (v *Video) URLAdmEdit() string {
