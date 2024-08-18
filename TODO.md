@@ -14,3 +14,4 @@
 [] Add categories
 [] Add view count per user
 [] Add compilation into a single binary
+[] Add a welcome page when no configuration is specified to bootstrap the app
