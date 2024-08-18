@@ -21,7 +21,7 @@ func (c *Controller) UploadHome(g *gin.Context) {
 func (c *Controller) UploadTriage(g *gin.Context) {
 	// list folders in triage path
 	folders, err := os.ReadDir(
-		filepath.Join(c.config.MediaFolder, TRIAGE_FILEPATH),
+		filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH),
 	)
 	if err != nil {
 		g.JSON(500, gin.H{
@@ -34,7 +34,7 @@ func (c *Controller) UploadTriage(g *gin.Context) {
 
 	for _, folder := range folders {
 		dir, err := os.Open(filepath.Join(
-			c.config.MediaFolder,
+			c.config.Media.Path,
 			TRIAGE_FILEPATH,
 			folder.Name(),
 		))
@@ -73,7 +73,7 @@ func (c *Controller) UploadPreview(g *gin.Context) {
 	}
 
 	// construct file path
-	targetPath := filepath.Join(c.config.MediaFolder, TRIAGE_FILEPATH, filePath)
+	targetPath := filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, filePath)
 
 	// give file path
 	g.File(targetPath)

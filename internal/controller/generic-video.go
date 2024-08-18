@@ -82,7 +82,7 @@ func (c *Controller) GenericVideoAjaxComputeDuration(g *gin.Context) {
 		return
 	}
 
-	filePath := filepath.Join(c.config.MediaFolder, fileTypeToPath[video.TypeAsString()], id, "video.mp4")
+	filePath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "video.mp4")
 	out, err := exec.Command(
 		"ffprobe",
 		"-v",
@@ -139,7 +139,7 @@ func (c *Controller) GenericVideoAjaxGenerateThumbnail(g *gin.Context) {
 	}
 
 	// construct paths
-	videoPath := filepath.Join(c.config.MediaFolder, fileTypeToPath[video.TypeAsString()], id, "video.mp4")
+	videoPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "video.mp4")
 	videoPath, err := filepath.Abs(videoPath)
 	if err != nil {
 		g.JSON(500, gin.H{
@@ -148,7 +148,7 @@ func (c *Controller) GenericVideoAjaxGenerateThumbnail(g *gin.Context) {
 		return
 	}
 
-	thumbPath := filepath.Join(c.config.MediaFolder, fileTypeToPath[video.TypeAsString()], id, "thumb.jpg")
+	thumbPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "thumb.jpg")
 	thumbPath, err = filepath.Abs(thumbPath)
 	if err != nil {
 		g.JSON(500, gin.H{
@@ -201,7 +201,7 @@ func (c *Controller) GenericVideoAjaxGenerateThumbnailXS(g *gin.Context) {
 	}
 
 	// construct paths
-	thumbPath := filepath.Join(c.config.MediaFolder, fileTypeToPath[video.TypeAsString()], id, "thumb.jpg")
+	thumbPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "thumb.jpg")
 	thumbPath, err := filepath.Abs(thumbPath)
 	if err != nil {
 		g.JSON(500, gin.H{
@@ -210,7 +210,7 @@ func (c *Controller) GenericVideoAjaxGenerateThumbnailXS(g *gin.Context) {
 		return
 	}
 
-	thumbXSPath := filepath.Join(c.config.MediaFolder, fileTypeToPath[video.TypeAsString()], id, "thumb-xs.jpg")
+	thumbXSPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "thumb-xs.jpg")
 	thumbXSPath, err = filepath.Abs(thumbXSPath)
 	if err != nil {
 		g.JSON(500, gin.H{
@@ -343,9 +343,9 @@ func (c *Controller) GenericVideoStream(videoType string, g *gin.Context) {
 	// construct file path
 	var targetPath string
 	if video.Imported {
-		targetPath = filepath.Join(c.config.MediaFolder, fileTypeToPath[videoType], id, "video.mp4")
+		targetPath = filepath.Join(c.config.Media.Path, fileTypeToPath[videoType], id, "video.mp4")
 	} else {
-		targetPath = filepath.Join(c.config.MediaFolder, TRIAGE_FILEPATH, video.Filename)
+		targetPath = filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, video.Filename)
 	}
 
 	// give file path
@@ -373,7 +373,7 @@ func (c *Controller) GenericVideoAjaxStreamInfo(g *gin.Context) {
 		return
 	}
 
-	path := filepath.Join(c.config.MediaFolder, fileTypeToPath[video.TypeAsString()], video.ID, "video.mp4")
+	path := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID, "video.mp4")
 	_, err := os.Stat(path)
 	if err == nil {
 		g.JSON(200, gin.H{})
@@ -412,7 +412,7 @@ func (c *Controller) GenericVideoThumb(videoType string, g *gin.Context) {
 	}
 
 	// construct file path
-	targetPath := filepath.Join(c.config.MediaFolder, fileTypeToPath[videoType], id, "thumb.jpg")
+	targetPath := filepath.Join(c.config.Media.Path, fileTypeToPath[videoType], id, "thumb.jpg")
 
 	// give file path
 	g.File(targetPath)
@@ -441,7 +441,7 @@ func (c *Controller) GenericVideoThumbXS(videoType string, g *gin.Context) {
 	}
 
 	// construct file path
-	targetPath := filepath.Join(c.config.MediaFolder, fileTypeToPath[videoType], id, "thumb-xs.jpg")
+	targetPath := filepath.Join(c.config.Media.Path, fileTypeToPath[videoType], id, "thumb-xs.jpg")
 
 	// give file path
 	g.File(targetPath)
@@ -505,8 +505,8 @@ func (c *Controller) GenericVideoAjaxImport(g *gin.Context) {
 	}
 
 	// prepare paths
-	previousPath := filepath.Join(c.config.MediaFolder, TRIAGE_FILEPATH, video.Filename)
-	newFolderPath := filepath.Join(c.config.MediaFolder, fileTypeToPath[video.TypeAsString()], id)
+	previousPath := filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, video.Filename)
+	newFolderPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id)
 	newPath := filepath.Join(newFolderPath, "video.mp4")
 
 	// ensure folder exists
@@ -631,7 +631,7 @@ func (c *Controller) GenericVideoAjaxUploadThumb(g *gin.Context) {
 	}
 
 	// ensure folder exists
-	videoFolder := filepath.Join(c.config.MediaFolder, fileTypeToPath[video.TypeAsString()], video.ID)
+	videoFolder := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID)
 	_, err := os.Stat(videoFolder)
 	if os.IsNotExist(err) {
 		// do not exists, create it
@@ -697,7 +697,7 @@ func (c *Controller) GenericVideoAjaxUpload(g *gin.Context) {
 	}
 
 	// ensure folder exists
-	videoFolder := filepath.Join(c.config.MediaFolder, fileTypeToPath[video.TypeAsString()], video.ID)
+	videoFolder := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID)
 	_, err := os.Stat(videoFolder)
 	if os.IsNotExist(err) {
 		// do not exists, create it

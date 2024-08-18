@@ -2,3 +2,4 @@ test_data
 zt.db
 tmp/*
 dist/
+config.yml

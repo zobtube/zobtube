@@ -150,7 +150,7 @@ func (c *Controller) ActorThumb(g *gin.Context) {
 	}
 
 	// construct file path
-	targetPath := filepath.Join(c.config.MediaFolder, ACTOR_FILEPATH, id, "thumb.jpg")
+	targetPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id, "thumb.jpg")
 
 	// give file path
 	g.File(targetPath)
@@ -304,7 +304,7 @@ func (c *Controller) ActorAjaxThumb(g *gin.Context) {
 	}
 
 	// construct file path
-	targetPath := filepath.Join(c.config.MediaFolder, ACTOR_FILEPATH, id, "thumb.jpg")
+	targetPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id, "thumb.jpg")
 
 	//save thumb on disk
 	err = g.SaveUploadedFile(file, targetPath)

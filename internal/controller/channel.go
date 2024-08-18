@@ -92,7 +92,7 @@ func (c *Controller) ChannelThumb(g *gin.Context) {
 	}
 
 	// construct file path
-	targetPath := filepath.Join(c.config.MediaFolder, ACTOR_FILEPATH, id, "thumb.jpg")
+	targetPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id, "thumb.jpg")
 
 	// give file path
 	g.File(targetPath)

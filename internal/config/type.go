@@ -3,30 +3,54 @@ package config
 import (
 	"errors"
 	"os"
+
+	"github.com/kelseyhightower/envconfig"
+	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	DbDriver     string
-	DbConnstring string
-	MediaFolder  string
+	DB struct {
+		Driver     string `yaml:"driver", envconfig:"ZT_DB_DRIVER"`
+		Connstring string `yaml:"connstring", envconfig:"ZT_DB_CONNSTRING"`
+	} `yaml:"db"`
+	Media struct {
+		Path string `yaml:"path", envconfig:"ZT_MEDIA_PATH"`
+	} `yaml:"media"`
 }
 
 func New() (*Config, error) {
 	cfg := &Config{}
 
-	cfg.DbDriver = os.Getenv("ZT_DB_DRIVER")
-	if cfg.DbDriver == "" {
+	if _, err := os.Stat("./config.yml"); err == nil {
+		f, err := os.Open("config.yml")
+		if err != nil {
+			return cfg, err
+		}
+		defer f.Close()
+
+		decoder := yaml.NewDecoder(f)
+		err = decoder.Decode(cfg)
+		if err != nil {
+			return cfg, err
+		}
+	}
+
+	err := envconfig.Process("", cfg)
+	if err != nil {
+		return cfg, err
+	}
+
+	// pre flight checks
+	if cfg.DB.Driver == "" {
 		return cfg, errors.New("ZT_DB_DRIVER is not set")
 	}
 
-	cfg.DbConnstring = os.Getenv("ZT_DB_CONNSTRING")
-	if cfg.DbConnstring == "" {
+	if cfg.DB.Connstring == "" {
 		return cfg, errors.New("ZT_DB_CONNSTRING is not set")
 	}
 
-	cfg.MediaFolder = os.Getenv("ZT_MEDIA")
-	if cfg.MediaFolder == "" {
-		return cfg, errors.New("ZT_MEDIA is not set")
+	if cfg.Media.Path == "" {
+		return cfg, errors.New("ZT_MEDIA_PATH is not set")
 	}
 
 	return cfg, nil
