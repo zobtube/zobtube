@@ -563,13 +563,9 @@ function video_title_edit() {
 }
 
 function video_title_send() {
-  url = "/api/video/00000000-0000-0000-0000-000000000000/rename";
-  url = url.replace('00000000-0000-0000-0000-000000000000', video_id);
+  url = "/api/video/"+video_id+"/rename";
   $.ajax(url, {
     method: 'POST',
-    headers: {
-      'X-CSRFToken': '{% csrf_token %}',
-    },
     data: {
       'name': document.getElementById('video-title').value,
     },
@@ -583,7 +579,6 @@ function video_title_send() {
 
       title = document.getElementById('video-title');
       title.readOnly = true;
-      title.value = e.name;
 
       btn = document.getElementById('video-title-edit');
       btn.classList.add('btn-outline-warning');

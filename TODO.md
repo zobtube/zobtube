@@ -2,7 +2,7 @@
 
 ## Bugs
 
-[] Video renaming works but the title field is set to `undefined`
+_None known so far!_
 
 ## Enhancement
 
