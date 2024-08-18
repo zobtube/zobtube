@@ -9,6 +9,9 @@ import (
 )
 
 type Config struct {
+	Server struct {
+		Bind string `yaml:"bind", envconfig:"ZT_SERVER_BIND"`
+	}
 	DB struct {
 		Driver     string `yaml:"driver", envconfig:"ZT_DB_DRIVER"`
 		Connstring string `yaml:"connstring", envconfig:"ZT_DB_CONNSTRING"`
@@ -51,6 +54,10 @@ func New() (*Config, error) {
 
 	if cfg.Media.Path == "" {
 		return cfg, errors.New("ZT_MEDIA_PATH is not set")
+	}
+
+	if cfg.Server.Bind == "" {
+		cfg.Server.Bind = "127.0.0.1:8080"
 	}
 
 	return cfg, nil
