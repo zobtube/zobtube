@@ -20,7 +20,7 @@ func (c *Controller) AdmHome(g *gin.Context) {
 
 	g.HTML(http.StatusOK, "adm/home.html", gin.H{
 		"User":         user,
-		"Version":      "0.0.1",
+		"Version":      ZT_VERSION,
 		"VideoCount":   videoCount,
 		"ActorCount":   actorCount,
 		"ChannelCount": channelCount,
