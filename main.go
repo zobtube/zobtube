@@ -31,5 +31,5 @@ func main() {
 	c.ProviderRegister(&provider.Pornhub{})
 
 	httpServer, _ := http.New(&c, &webFS)
-	httpServer.Start(":8080")
+	httpServer.Start(cfg.Server.Bind)
 }
