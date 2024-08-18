@@ -1,0 +1,18 @@
+---
+
+stages:
+  - release
+
+release:
+  stage: release
+  image:
+    name: goreleaser/goreleaser
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_TAG
+  variables:
+    # Disable shallow cloning so that goreleaser can diff between tags to
+    # generate a changelog.
+    GIT_DEPTH: 0
+  script:
+    - goreleaser release --clean
