@@ -285,20 +285,19 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 }
 
 func (c *Controller) ClipList(g *gin.Context) {
-	c.GenericVideoList("c", g)
+	c.GenericVideoList("clip", g)
 }
 
 func (c *Controller) MovieList(g *gin.Context) {
-	c.GenericVideoList("m", g)
+	c.GenericVideoList("movie", g)
 }
 
 func (c *Controller) VideoList(g *gin.Context) {
-	c.GenericVideoList("v", g)
+	c.GenericVideoList("video", g)
 }
 
 func (c *Controller) GenericVideoList(videoType string, g *gin.Context) {
 	var videos []model.Video
-	fmt.Println(videoType[0:1])
 	c.datastore.Where("type = ?", videoType[0:1]).Order("created_at desc").Find(&videos)
 	g.HTML(http.StatusOK, "video/list.html", gin.H{
 		"Type":   videoType,

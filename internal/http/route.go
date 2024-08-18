@@ -55,8 +55,8 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 
 	// videos
 	s.Server.GET("/clips", c.ClipList)
-	s.Server.GET("/movies", c.VideoList)
-	s.Server.GET("/videos", c.MovieList)
+	s.Server.GET("/movies", c.MovieList)
+	s.Server.GET("/videos", c.VideoList)
 	videos := s.Server.Group("/video")
 	videos.GET("/:id", c.VideoView)
 	videos.GET("/:id/edit", c.VideoEdit)
