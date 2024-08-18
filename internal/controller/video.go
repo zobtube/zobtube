@@ -299,7 +299,7 @@ func (c *Controller) VideoList(g *gin.Context) {
 func (c *Controller) GenericVideoList(videoType string, g *gin.Context) {
 	var videos []model.Video
 	fmt.Println(videoType[0:1])
-	c.datastore.Debug().Where("type = ?", videoType[0:1]).Find(&videos).Limit(30).Offset(0).Order("created_at")
+	c.datastore.Where("type = ?", videoType[0:1]).Limit(30).Offset(0).Order("created_at").Find(&videos)
 	g.HTML(http.StatusOK, "video/list.html", gin.H{
 		"Type":   videoType,
 		"User":   user,
@@ -326,7 +326,7 @@ func (c *Controller) VideoView(g *gin.Context) {
 
 	// get random videos
 	var randomVideos []model.Video
-	c.datastore.Find(&randomVideos).Limit(6) //TODO: order by rand
+	c.datastore.Limit(12).Find(&randomVideos) //TODO: order by rand
 
 	g.HTML(http.StatusOK, "video/view.html", gin.H{
 		"Type":         video.Type,
