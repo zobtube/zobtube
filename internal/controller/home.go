@@ -11,15 +11,15 @@ import (
 func (c *Controller) Home(g *gin.Context) {
 	// get clips
 	var clips []model.Video
-	c.datastore.Where("type = ?", "c").Find(&clips).Limit(12).Offset(0).Order("created_at")
+	c.datastore.Where("type = ?", "c").Limit(12).Offset(0).Order("created_at").Find(&clips)
 
 	// get videos
 	var videos []model.Video
-	c.datastore.Where("type = ?", "v").Find(&videos).Limit(12).Offset(0).Order("created_at")
+	c.datastore.Where("type = ?", "v").Limit(12).Offset(0).Order("created_at").Find(&videos)
 
 	// get movies
 	var movies []model.Video
-	c.datastore.Where("type = ?", "m").Find(&movies).Limit(12).Offset(0).Order("created_at")
+	c.datastore.Where("type = ?", "m").Limit(12).Offset(0).Order("created_at").Find(&movies)
 
 	//TODO: get comics
 
