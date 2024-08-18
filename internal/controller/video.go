@@ -299,7 +299,7 @@ func (c *Controller) VideoList(g *gin.Context) {
 func (c *Controller) GenericVideoList(videoType string, g *gin.Context) {
 	var videos []model.Video
 	fmt.Println(videoType[0:1])
-	c.datastore.Where("type = ?", videoType[0:1]).Limit(30).Offset(0).Order("created_at desc").Find(&videos)
+	c.datastore.Where("type = ?", videoType[0:1]).Order("created_at desc").Find(&videos)
 	g.HTML(http.StatusOK, "video/list.html", gin.H{
 		"Type":   videoType,
 		"User":   user,
