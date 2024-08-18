@@ -205,7 +205,7 @@
 
         <div class="chips">
           {{ range $actor := .Actors }}
-          <div class="chip add-actor-list" actor-id="{{ $actor.ID }}">
+          <div class="chip add-actor-list" actor-id="{{ $actor.ID }}" style="display:none">
             <img class="lazy" data-src="{{ $actor.URLThumb }}" width="50" height="50">
             {{ $actor.Name }}
             <button class="btn btn-success add-actor-add" onclick="videoAddActor('{{ $actor.ID }}');return false;"><i class="fa fa-plus-circle"></i></button>
@@ -273,6 +273,7 @@ var actors_all = {
   {{ range $actor := .Actors }}
   '{{ $actor.ID }}': {
     'name': '{{ $actor.Name }}',
+    'aliases': [],
   },
   {{ end }}
 };
@@ -310,18 +311,23 @@ function videoAddActorInVideoFilterPresentActors() {
 function videoAddActorInVideoFilterActorsFromInput(filter = '') {
   var re = new RegExp(filter, 'i');
   var actors_chips = document.getElementsByClassName('add-actor-list');
+  found_count = 0;
+  found_count_max = 15;
   for (const actor_chip of actors_chips) {
     actor_id = actor_chip.getAttribute('actor-id');
     found = re.test(actors_all[actor_id]['name']);
-    if (!found) {
+    if (found) {
+      found_count++;
+    } else {
       for (const a of actors_all[actor_id]['aliases']) {
         if (re.test(a)) {
           found = true;
+          found_count++;
           break;
         }
       }
     }
-    if (found) {
+    if (found && found_count < found_count_max) {
       actor_chip.style.display = 'none';
       actor_chip.style.display = '';
     } else {
@@ -429,6 +435,7 @@ window.onload = function() {
 
   // add event on modal input
   document.getElementById('addActorInput').addEventListener('input', actorInputUpdate);
+  videoAddActorInVideoFilterActorsFromInput('');
 
   // for thumbnail generation
   video = document.getElementById("video")
