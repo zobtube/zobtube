@@ -3,7 +3,9 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"gitlab.com/zobtube/zobtube/internal/config"
+	"gitlab.com/zobtube/zobtube/internal/model"
 	"gitlab.com/zobtube/zobtube/internal/provider"
+
 	"gorm.io/gorm"
 )
 
@@ -13,6 +15,13 @@ type AbtractController interface {
 
 	// Home
 	Home(c *gin.Context)
+
+	// Auth
+	AuthPage(*gin.Context)
+	AuthLogin(*gin.Context)
+	AuthLogout(*gin.Context)
+	GetSession(*model.UserSession) *gorm.DB
+	GetUser(*model.User) *gorm.DB
 
 	// Actors
 	ActorAjaxLinkThumbGet(c *gin.Context)
@@ -64,6 +73,9 @@ type AbtractController interface {
 	// Providers
 	ProviderRegister(provider.Provider)
 	ProviderGet(string) (provider.Provider, error)
+
+	// Cleanup
+	CleanupRoutine()
 }
 
 type Controller struct {

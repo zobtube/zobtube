@@ -34,7 +34,7 @@ func (c *Controller) Home(g *gin.Context) {
 	c.datastore.Table("videos").Where("type = ?", "v").Count(&videoCount)
 
 	g.HTML(http.StatusOK, "home/home.html", gin.H{
-		"User":   user,
+		"User":   g.MustGet("user").(*model.User),
 		"Clips":  clips,
 		"Movies": movies,
 		"Videos": videos,

@@ -13,9 +13,12 @@ type User struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Username  string
-	Admin     bool `gorm:"default:false"`
+	Password  string
+	Admin     bool
+	Session   UserSession
 }
 
+// UUID pre-hook
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	if u.ID == "00000000-0000-0000-0000-000000000000" {
 		u.ID = uuid.NewString()
@@ -26,5 +29,6 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.ID = uuid.NewString()
 		return nil
 	}
+
 	return nil
 }

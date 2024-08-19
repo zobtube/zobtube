@@ -15,7 +15,7 @@ func (c *Controller) ChannelList(g *gin.Context) {
 	c.datastore.Find(&channels)
 	g.HTML(http.StatusOK, "channel/list.html", gin.H{
 		"Channels": channels,
-		"User":     user,
+		"User":     g.MustGet("user").(*model.User),
 	})
 }
 
@@ -41,7 +41,7 @@ func (c *Controller) ChannelCreate(g *gin.Context) {
 		}
 	}
 	g.HTML(http.StatusOK, "channel/create.html", gin.H{
-		"User":  user,
+		"User":  g.MustGet("user").(*model.User),
 		"Error": err,
 	})
 }
@@ -64,7 +64,7 @@ func (c *Controller) ChannelView(g *gin.Context) {
 	}
 
 	g.HTML(http.StatusOK, "channel/view.html", gin.H{
-		"User":    user,
+		"User":    g.MustGet("user").(*model.User),
 		"Channel": channel,
 	})
 }

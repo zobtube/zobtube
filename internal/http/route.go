@@ -18,19 +18,29 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	s.Server.StaticFS("/static", http.FS(staticFS))
 	s.Server.GET("/ping", livenessProbe)
 
+	// authentication
+	auth := s.Server.Group("/auth")
+	auth.GET("", c.AuthPage)
+	auth.POST("/login", c.AuthLogin)
+	auth.GET("/logout", c.AuthLogout)
+
+	authGroup := s.Server.Group("")
+	authGroup.Use(UserIsAuthenticated(c))
+
 	// home
-	s.Server.GET("", c.Home)
+	authGroup.GET("", c.Home)
 
 	// actors
-	s.Server.GET("/actors", c.ActorList)
-	actors := s.Server.Group("/actor")
+	authGroup.GET("/actors", c.ActorList)
+	actors := authGroup.Group("/actor")
+	actors.Use(UserIsAuthenticated(c))
 	actors.GET("/new", c.ActorNew)
 	actors.POST("/new", c.ActorNew)
 	actors.GET("/:id", c.ActorView)
 	actors.GET("/:id/edit", c.ActorEdit)
 	actors.GET("/:id/thumb", c.ActorThumb)
 
-	actorAPI := s.Server.Group("/api/actor")
+	actorAPI := authGroup.Group("/api/actor")
 	{
 		actorAPI.POST("/", c.ActorAjaxNew)
 
@@ -46,25 +56,25 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	}
 
 	// channels
-	s.Server.GET("/channels", c.ChannelList)
-	channels := s.Server.Group("/channel")
+	authGroup.GET("/channels", c.ChannelList)
+	channels := authGroup.Group("/channel")
 	channels.GET("/new", c.ChannelCreate)
 	channels.POST("/new", c.ChannelCreate)
 	channels.GET("/:id", c.ChannelView)
 	channels.GET("/:id/thumb", c.ChannelThumb)
 
 	// videos
-	s.Server.GET("/clips", c.ClipList)
-	s.Server.GET("/movies", c.MovieList)
-	s.Server.GET("/videos", c.VideoList)
-	videos := s.Server.Group("/video")
+	authGroup.GET("/clips", c.ClipList)
+	authGroup.GET("/movies", c.MovieList)
+	authGroup.GET("/videos", c.VideoList)
+	videos := authGroup.Group("/video")
 	videos.GET("/:id", c.VideoView)
 	videos.GET("/:id/edit", c.VideoEdit)
 	videos.GET("/:id/stream", c.VideoStream)
 	videos.GET("/:id/thumb", c.VideoThumb)
 	videos.GET("/:id/thumb_xs", c.VideoThumbXS)
 
-	videoAPI := s.Server.Group("/api/video")
+	videoAPI := authGroup.Group("/api/video")
 	videoAPI.POST("/", c.VideoAjaxCreate)
 	videoAPI.HEAD("/:id", c.VideoAjaxStreamInfo)
 	videoAPI.DELETE("/:id", c.VideoAjaxDelete)
@@ -79,14 +89,14 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	videoAPI.POST("/:id/rename", c.VideoAjaxRename)
 
 	// uploads
-	uploads := s.Server.Group("/upload")
+	uploads := authGroup.Group("/upload")
 	uploads.GET("/", c.UploadHome)
 	uploads.GET("/triage", c.UploadTriage)
 	uploads.GET("/preview/:filepath", c.UploadPreview)
 	uploads.POST("/import", c.UploadImport)
 
 	// adm
-	s.Server.GET("/adm", c.AdmHome)
+	authGroup.GET("/adm", c.AdmHome)
 
 	// remainings routes to implement
 	/*

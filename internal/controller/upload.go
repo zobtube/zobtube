@@ -14,7 +14,7 @@ import (
 
 func (c *Controller) UploadHome(g *gin.Context) {
 	g.HTML(http.StatusOK, "upload/home.html", gin.H{
-		"User": user,
+		"User": g.MustGet("user").(*model.User),
 	})
 }
 
@@ -57,7 +57,7 @@ func (c *Controller) UploadTriage(g *gin.Context) {
 	}
 
 	g.HTML(http.StatusOK, "upload/triage.html", gin.H{
-		"User":  user,
+		"User":  g.MustGet("user").(*model.User),
 		"Items": items,
 	})
 }

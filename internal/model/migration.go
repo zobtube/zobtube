@@ -16,6 +16,8 @@ var modelToMigrate = []interface{}{
 	ActorLink{},
 	Channel{},
 	Video{},
+	User{},
+	UserSession{},
 }
 
 func New(cfg *config.Config) (db *gorm.DB, err error) {

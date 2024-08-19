@@ -18,11 +18,6 @@ import (
 	"gitlab.com/zobtube/zobtube/internal/model"
 )
 
-var user = &model.User{
-	Username: "test-user-admin",
-	Admin:    true,
-}
-
 func (c *Controller) VideoAjaxActors(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -279,7 +274,7 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 
 	g.HTML(http.StatusOK, "video/edit.html", gin.H{
 		"Actors": actors,
-		"User":   user,
+		"User":   g.MustGet("user").(*model.User),
 		"Video":  video,
 	})
 }
@@ -301,7 +296,7 @@ func (c *Controller) GenericVideoList(videoType string, g *gin.Context) {
 	c.datastore.Where("type = ?", videoType[0:1]).Order("created_at desc").Find(&videos)
 	g.HTML(http.StatusOK, "video/list.html", gin.H{
 		"Type":   videoType,
-		"User":   user,
+		"User":   g.MustGet("user").(*model.User),
 		"Videos": videos,
 	})
 }
@@ -329,7 +324,7 @@ func (c *Controller) VideoView(g *gin.Context) {
 
 	g.HTML(http.StatusOK, "video/view.html", gin.H{
 		"Type":         video.Type,
-		"User":         user,
+		"User":         g.MustGet("user").(*model.User),
 		"Video":        video,
 		"RandomVideos": randomVideos,
 	})

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.com/zobtube/zobtube/internal/model"
 )
 
 func (c *Controller) AdmHome(g *gin.Context) {
@@ -19,7 +20,7 @@ func (c *Controller) AdmHome(g *gin.Context) {
 	c.datastore.Table("channels").Count(&channelCount)
 
 	g.HTML(http.StatusOK, "adm/home.html", gin.H{
-		"User":         user,
+		"User":         g.MustGet("user").(*model.User),
 		"Version":      ZT_VERSION,
 		"VideoCount":   videoCount,
 		"ActorCount":   actorCount,

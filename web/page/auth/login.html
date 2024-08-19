@@ -1,0 +1,80 @@
+{{ define "auth/login.html" }}
+{{ template "top" .}}
+<div class="page-content-area themeix-ptb">
+  <div class="container">
+    <h3 class="mb-4">Access is restricted, please authenticate</h3>
+
+    <form method="post" id="id_form" action="javascript:;" onsubmit="login(this)">
+      <!-- Email input -->
+      <div class="form-outline mb-4">
+        <input type="text" id="id_username" name="username" class="form-control" placeholder="Username" />
+      </div>
+
+      <!-- Password input -->
+      <div class="form-outline mb-4">
+        <input type="password" id="id_password" name="password" class="form-control" placeholder="Password" />
+      </div>
+
+      <!-- Submit button -->
+      <input type="submit" class="btn btn-primary btn-block mb-4" id="id_submit" value="Sign in"/>
+    </form>
+  </div>
+</div>
+
+<script>
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+async function digestMessage(message) {
+    const msgUint8 = new TextEncoder().encode(message); // encode as (utf-8) Uint8Array
+    const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8); // hash the message
+    const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join(""); // convert bytes to hex string
+    return hashHex;
+}
+
+function login() {
+  username = document.getElementById('id_username').value;
+  password = document.getElementById('id_password').value;
+
+  digestMessage(password).then((passwordSha) => {
+    digestMessage(getCookie('zt_auth')+passwordSha).then((challenge) => {
+      console.log('send challenge');
+      $.ajax('/auth/login', {
+        method: 'POST',
+        data: {
+          'username': username,
+          'password': challenge,
+        },
+        xhr: function () {
+          var xhr = new XMLHttpRequest();
+          return xhr;
+        },
+
+        success: function (e) {
+          // auth successful
+          window.location.href = '/';
+        },
+
+        error: function (data) {
+          sendToast(
+            'Unable to login',
+            '',
+            'bg-warning',
+            data.responseJSON.error,
+          );
+        },
+      });
+    });
+  });
+}
+</script>
+
+
+{{ template "bottom" .}}
+{{ end }}

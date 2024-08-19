@@ -30,6 +30,8 @@ func main() {
 	c.ProviderRegister(&provider.Boobpedia{})
 	c.ProviderRegister(&provider.Pornhub{})
 
+	go c.CleanupRoutine()
+
 	httpServer, _ := http.New(&c, &webFS)
 	httpServer.Start(cfg.Server.Bind)
 }
