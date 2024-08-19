@@ -91,15 +91,20 @@ func (p *Pornhub) ActorGetThumb(actor_name, url string) (thumb []byte, err error
 	thumbURLMatches := rLegacy.FindStringSubmatch(string(pageData))
 
 	if len(thumbURLMatches) != 2 || thumbURLMatches[1] == "" {
-		return thumb, errors.New("provider did not return a thumbnail")
+		// second attempt on new page format
+
+		rNew := regexp.MustCompile("<div class=\"thumbImage\">\\n\\s*<img src=\"([^\"]*)")
+		thumbURLMatches = rNew.FindStringSubmatch(string(pageData))
+
+		// check result
+		if len(thumbURLMatches) != 2 || thumbURLMatches[1] == "" {
+			// definitely not found
+			return thumb, errors.New("provider did not return a thumbnail")
+		}
 	}
 
 	// set found url
 	url = thumbURLMatches[1]
-
-	//TODO: add secondary search with new profiles
-	// for reference, regex is: <div class="thumbImage">\n\s*<img src="([^"]*)
-	// note: regex is most likely multilined
 
 	// retrieve thumb
 	req, err = http.NewRequest("GET", url, nil)
