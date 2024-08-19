@@ -13,14 +13,6 @@
 <div style="display: flex">
   <div style="width: 250px; margin-right: 25px">
     <img class="img-rounded" src="{{ .Actor.URLThumb }}" style="height: 250px; width: 250px">
-      <div style="margin-top: 20px">
-      {% for link in actor.actorlink_set.all %}
-      <a href="{% link.link %}" target="_blank" rel="noopener noreferrer">
-      <img class="img-rounded" src="{% url 'provider_thumb' link.provider.slug %}" style="height: 80px; width: 80px; margin-top: 5px">
-      </a>
-      {% endfor %}
-      </div>
-
   </div>
   <div id="bio" style="flex-grow:1; margin:0;">
     <h2 class="card-title actor_name">{{ .Actor.Name }}</h2>
@@ -30,28 +22,18 @@
     {{ if .User.Admin }}
     <a href="/actor/{{ .Actor.ID }}/edit"><i>Edit profile</i></a>
     {{ end }}
+  </div>
 
-    <ul id="bio-details" style="margin-top: 15px">
-      {% if actor.boob_improvements %}
-      <li>
-        <span class="bio_detail_label">Boobs:</span>
-        {% actor.get_boob_improvements_display %}
-      </li>
-      {% endif %}
-      {% if actor.tits_size %}
-      <li>
-        <span class="bio_detail_label">Boobs size:</span>
-        {% actor.tits_size %}
-      </li>
-      {% endif %}
-      {% if actor.hair_color %}
-      <li>
-        <span class="bio_detail_label">Hair:</span>
-        {% actor.hair_color %}
-      </li>
-      {% endif %}
-    </ul>
-
+  <div style="display: flex;">
+    <div style="width: 170px;">
+      <div style="margin-top: 20px; float: right;">
+        {{ range $link := .Actor.Links }}
+        <a href="{{ $link.URL }}" target="_blank" rel="noopener noreferrer">
+        <img class="img-rounded" src="/static/images/provider-{{ $link.Provider }}.png" style="height: 80px; width: 80px; margin-top: 5px">
+        </a>
+        {{ end }}
+      </div>
+    </div>
   </div>
 </div>
 <!-- End of Actor banner -->
