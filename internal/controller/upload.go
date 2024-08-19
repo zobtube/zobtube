@@ -42,6 +42,7 @@ func (c *Controller) UploadTriage(g *gin.Context) {
 			g.JSON(500, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
 		defer dir.Close()
 
@@ -51,6 +52,7 @@ func (c *Controller) UploadTriage(g *gin.Context) {
 			g.JSON(500, gin.H{
 				"error": err.Error(),
 			})
+			return
 		}
 
 		items[folder.Name()] = files

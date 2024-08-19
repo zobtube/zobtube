@@ -2,7 +2,7 @@
 
 ## Bugs
 
-_None known so far!_
+[] Fix crash when file is not in a folder in `/triage`
 
 ## Enhancement
 
