@@ -1,6 +1,30 @@
 {{ define "upload/triage.html" }}
 {{ template "top" .}}
-<!-- Stat Page Import Area -->
+
+<style>
+.br-link {
+  color: #0d6efd;
+  text-decoration: underline;
+  cursor: pointer;
+}
+</style>
+
+<nav id="path" style="font-size:large">
+</nav>
+
+<h4>Folders</h4>
+<hr />
+
+<div class="row row-cols=1 row-cols-md-6 g-4" id="folders">
+</div>
+
+<h4 style="margin-top: 45px">Files</h4>
+<div class="row row-cols=1 row-cols-md-6 g-4" id="files">
+</div>
+<hr />
+
+
+<!--
 <table class="table">
   <thead>
     <tr>
@@ -8,7 +32,6 @@
     </tr>
   </thead>
   <tbody>
-    <!-- TODO: add if empty -->
     {{ range $folder, $items := .Items }}
     <tr class="table-active" data-toggle="toggle" onClick="toggleTr(this)">
       <td><span class="plusminus" style="font-weight: bold">+</span> {{ $folder }} <span class="badge bg-secondary">{{ len $items }}</span></td>
@@ -140,6 +163,186 @@ function toggleTr(callingTr) {
       child = child.nextElementSibling;
     }
   }
+}
+
+var CURRENT_PATH='/';
+function setFolder(folderName) {
+  CURRENT_PATH=folderName;
+  updatePath();
+}
+
+function enterFolder(folderName) {
+  if (CURRENT_PATH == '/') {
+    CURRENT_PATH += folderName;
+  } else {
+    CURRENT_PATH += '/';
+    CURRENT_PATH += folderName;
+  }
+  updatePath();
+}
+
+function updatePath() {
+  console.log('switching to: '+CURRENT_PATH);
+
+  generateBreadcrumb();
+  loadFolders();
+  loadFiles();
+}
+
+function generateBreadcrumb() {
+  var path = CURRENT_PATH;
+  pathAsArray = path.split('/');
+  max = pathAsArray.length;
+  progressivePath = '';
+
+  newBr  = '<ol class="breadcrumb">';
+  newBr += '<li class="breadcrumb-item';
+  if (path == '/') {
+    newBr += ' active">';
+  } else {
+    newBr += ' br-link" onclick="setFolder(\'/\')">';
+  }
+  newBr += 'Home</li>';
+  for (var i=0; i < max; i++) {
+    folder = pathAsArray[i];
+    if (folder == "") {
+      continue;
+    } else {
+      progressivePath += '/'+folder;
+    }
+
+    newBr += '<li class="breadcrumb-item';
+    if (i+1 == max) {
+      newBr += ' active">';
+    } else {
+      newBr += ' br-link" onClick="setFolder(\''+progressivePath+'\')">';
+    }
+    newBr += folder+'</li>';
+  }
+
+  newBr += '</ol>';
+
+  document.getElementById('path').innerHTML = newBr;
+}
+
+function loadFolders() {
+  $.ajax('/api/upload/triage/folder', {
+    method: 'POST',
+    data: {
+      'path': CURRENT_PATH,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (data) {
+      console.log(data);
+      showFolders(data.folders);
+    },
+
+    error: function (data) {
+      sendToast(
+        'Unable to show folders',
+        '',
+        'bg-warning',
+        data.responseJSON.error,
+      );
+    },
+  });
+}
+
+function loadFiles() {
+  $.ajax('/api/upload/triage/file', {
+    method: 'POST',
+    data: {
+      'path': CURRENT_PATH,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (data) {
+      console.log(data);
+      showFiles(data.files);
+    },
+
+    error: function (data) {
+      sendToast(
+        'Unable to show files',
+        '',
+        'bg-warning',
+        data.responseJSON.error,
+      );
+    },
+  });
+}
+
+function showFolders(folders) {
+  folderHTML = '';
+  Object.keys(folders).forEach(function(folder) {
+    elements = folders[folder];
+    folderHTML += '<div class="col">';
+    folderHTML += '<div class="card border-dark col" style="cursor: pointer" ';
+    folderHTML += 'onclick="enterFolder(\''+folder+'\');">';
+    folderHTML += '<div class="card-body">';
+    folderHTML += '<i class="fas fa-folder"></i>&nbsp;&nbsp;';
+    folderHTML += folder;
+    folderHTML += '<span class="badge bg-secondary">'+elements+'</span></div>';
+    folderHTML += '</div>';
+    folderHTML += '</div>';
+  });
+
+  document.getElementById('folders').innerHTML = folderHTML;
+}
+
+function showFiles(files) {
+  folderHTML = '';
+  Object.keys(files).forEach(function(file) {
+    // store file infos
+    fileInfo = files[file];
+
+    // guess filetype based on the extension
+    fileType = 'unknown';
+    if (file.match(/.*\.mp4/)) {
+      fileType = 'video';
+    } else if (file.match(/.*\.(png|jpg|jpeg)/)) {
+      fileType = 'image';
+    }
+
+    // render files
+    folderHTML += '<div class="col">';
+    folderHTML += '  <div class="card border-dark col" style="cursor: pointer" ';
+    folderHTML += '  onclick="">';
+    if (fileType == 'video') {
+      folderHTML += '    <video style="height:130px" controls src="/upload/preview/'+encodeURIComponent(CURRENT_PATH+'/'+file)+'" class="card-img-top"></video>';
+    } else if (fileType == 'image') {
+      folderHTML += '    <img style="height:130px" src="/upload/preview/'+encodeURIComponent(CURRENT_PATH+'/'+file)+'" class="card-img-top">';
+    } else {
+      folderHTML += '<svg class="bd-placeholder-img card-img-top" width="100%" height="130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6" dy=".3em">File</text></svg>';
+    }
+    folderHTML += '    <div class="card-body">';
+    folderHTML += '      <i class="fas ';
+    if (fileType == 'video') {
+    folderHTML += '        fa-file-video';
+    } else if (fileType == 'image') {
+    folderHTML += '        fa-file-image';
+    } else {
+    folderHTML += '        fa-file';
+    }
+    folderHTML += '        "></i>&nbsp;&nbsp;';
+    folderHTML +=        file;
+    folderHTML += '    </div>';
+    folderHTML += '  </div>';
+    folderHTML += '</div>';
+  });
+
+  document.getElementById('files').innerHTML = folderHTML;
+}
+window.onload = function() {
+  generateBreadcrumb();
+  setFolder(CURRENT_PATH);
 }
 </script>
 <!-- End of toggle JS -->
