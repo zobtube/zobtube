@@ -7,7 +7,6 @@ _None known so far!_
 ## Enhancement
 
 [] Retrieve triage dynamically to avoid listing all videos on page arrival
-[] Ensure all directories exist on start
 [] Add pagination
 [] Add categories
 [] Add view count per user

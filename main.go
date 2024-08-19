@@ -19,6 +19,11 @@ func main() {
 		panic(err)
 	}
 
+	err = cfg.EnsureTreePresent()
+	if err != nil {
+		panic(err)
+	}
+
 	db, err := model.New(cfg)
 	if err != nil {
 		panic(err)
