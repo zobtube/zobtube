@@ -90,8 +90,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 
 	// uploads
 	uploads := authGroup.Group("/upload")
-	uploads.GET("/", c.UploadHome)
-	uploads.GET("/triage", c.UploadTriage)
+	uploads.GET("/", c.UploadTriage)
 	uploads.GET("/preview/:filepath", c.UploadPreview)
 	uploads.POST("/import", c.UploadImport)
 	uploadAPI := authGroup.Group("/api/upload")

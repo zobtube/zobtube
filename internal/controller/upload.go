@@ -12,14 +12,8 @@ import (
 	"gitlab.com/zobtube/zobtube/internal/model"
 )
 
-func (c *Controller) UploadHome(g *gin.Context) {
-	g.HTML(http.StatusOK, "upload/home.html", gin.H{
-		"User": g.MustGet("user").(*model.User),
-	})
-}
-
 func (c *Controller) UploadTriage(g *gin.Context) {
-	g.HTML(http.StatusOK, "upload/triage.html", gin.H{
+	g.HTML(http.StatusOK, "upload/home.html", gin.H{
 		"User": g.MustGet("user").(*model.User),
 	})
 }

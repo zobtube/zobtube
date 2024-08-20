@@ -65,7 +65,6 @@ type AbtractController interface {
 	ChannelThumb(c *gin.Context)
 
 	// Uploads
-	UploadHome(c *gin.Context)
 	UploadTriage(c *gin.Context)
 	UploadPreview(c *gin.Context)
 	UploadImport(c *gin.Context)
