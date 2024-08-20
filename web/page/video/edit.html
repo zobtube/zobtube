@@ -103,19 +103,19 @@
     <hr />
     <h5>Actions</h5>
     <p>
-      <button class="btn btn-primary btn-sm" onClick="computeDuration('{{ .Video.ID }}')">Compute duration</button>
+      <button class="btn btn-primary btn-sm w-100" onClick="computeDuration('{{ .Video.ID }}')">Compute duration</button>
     </p>
     <p>
-      <button class="btn btn-primary btn-sm" onClick="generateThumbnail('{{ .Video.ID }}')">Generate thumbnail</button>
+      <button class="btn btn-primary btn-sm w-100" onClick="generateThumbnail('{{ .Video.ID }}')">Generate thumbnail</button>
     </p>
     <p>
-      <button class="btn btn-primary btn-sm" onClick="generateThumbnailMini('{{ .Video.ID }}')">Generate mini thumbnail</button>
+      <button class="btn btn-primary btn-sm w-100" onClick="generateThumbnailMini('{{ .Video.ID }}')">Generate mini thumbnail</button>
     </p>
     <p>
-      <button class="btn btn-primary btn-sm" onClick="importVideo('{{ .Video.ID }}')">Import</button>
+      <button class="btn btn-primary btn-sm w-100" {{ if .Video.Imported }}disabled{{ end }} onClick="importVideo('{{ .Video.ID }}')">Import</button>
     </p>
     <p>
-      <button class="btn btn-danger btn-sm" onClick="deleteVideo('{{ .Video.ID }}')">Delete</button>
+      <button class="btn btn-danger btn-sm w-100" onClick="deleteVideo('{{ .Video.ID }}')">Delete</button>
     </p>
 
   </div>
