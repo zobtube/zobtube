@@ -115,6 +115,15 @@
       <button class="btn btn-primary btn-sm w-100" {{ if .Video.Imported }}disabled{{ end }} onClick="importVideo('{{ .Video.ID }}')">Import</button>
     </p>
     <p>
+      <button class="btn btn-primary btn-sm w-100" {{ if eq .Video.Type "c" }}disabled{{ end }} onClick="changeTo('c', '{{ .Video.ID }}')">Change to Clip</button>
+    </p>
+    <p>
+      <button class="btn btn-primary btn-sm w-100" {{ if eq .Video.Type "m" }}disabled{{ end }} onClick="changeTo('m', '{{ .Video.ID }}')">Change to Movie</button>
+    </p>
+    <p>
+      <button class="btn btn-primary btn-sm w-100" {{ if eq .Video.Type "v" }}disabled{{ end }} onClick="changeTo('v', '{{ .Video.ID }}')">Change to Video</button>
+    </p>
+    <p>
       <button class="btn btn-danger btn-sm w-100" onClick="deleteVideo('{{ .Video.ID }}')">Delete</button>
     </p>
 
@@ -571,6 +580,33 @@ function importVideo(video_id) {
 
   return false;
 }
+
+function changeTo(new_type, video_id) {
+  url = "/api/video/"+video_id+"/migrate";
+  $.ajax(url, {
+    method: 'POST',
+    data: {
+      'new_type': new_type,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (e) {
+      sendToast('Change video type', '', 'bg-success', 'Successfull');
+      console.debug('success');
+    },
+
+    error: function (data) {
+      sendToast('Change video type', 'failed', 'bg-danger', data.responseJSON.error);
+    },
+  });
+
+  return false;
+}
+
+
 
 /*
  * timing tracking

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"image"
 	"image/jpeg"
 	"net/http"
@@ -534,7 +533,6 @@ func (c *Controller) VideoAjaxImport(g *gin.Context) {
 	}
 
 	// move
-	fmt.Println(previousPath, " -> ", newPath)
 	err = os.Rename(previousPath, newPath)
 	if err != nil {
 		g.JSON(500, gin.H{
@@ -849,6 +847,54 @@ func (c *Controller) VideoAjaxDelete(g *gin.Context) {
 
 	// delete object
 	err = c.datastore.Delete(video).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}
+
+func (c *Controller) VideoAjaxMigrate(g *gin.Context) {
+	// get id from path
+	id := g.Param("id")
+
+	// get item from ID
+	video := &model.Video{
+		ID: id,
+	}
+	result := c.datastore.First(video)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	newType := g.PostForm("new_type")
+	newVid := &model.Video{
+		Type: newType,
+	}
+
+	previousPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID)
+	newPath := filepath.Join(c.config.Media.Path, fileTypeToPath[newVid.TypeAsString()], video.ID)
+
+	// move
+	err := os.Rename(previousPath, newPath)
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// change object in db
+	video.Type = newType
+
+	// commit
+	err = c.datastore.Save(video).Error
 	if err != nil {
 		g.JSON(500, gin.H{
 			"error": err.Error(),
