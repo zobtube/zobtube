@@ -18,11 +18,11 @@
 <h4>Folders</h4>
 <hr />
 
-<div class="row row-cols=1 row-cols-md-6 g-4" id="folders">
+<div class="row row-cols=1 row-cols-md-4 g-4" id="folders">
 </div>
 
 <h4 style="margin-top: 45px">Files</h4>
-<div class="row row-cols=1 row-cols-md-6 g-4" id="files">
+<div class="row row-cols=1 row-cols-md-4 g-4" id="files">
 </div>
 
 <hr />
@@ -301,7 +301,7 @@ function showFolders(folders) {
     folderHTML += '<div class="col">';
     folderHTML += '<div class="card border-dark col" style="cursor: pointer" ';
     folderHTML += 'onclick="enterFolder(\''+folder+'\');">';
-    folderHTML += '<div class="card-body">';
+    folderHTML += '<div class="card-body" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">';
     folderHTML += '<i class="fas fa-folder"></i>&nbsp;&nbsp;';
     folderHTML += folder;
     folderHTML += '<span class="badge bg-secondary">'+elements+'</span></div>';
@@ -337,7 +337,7 @@ function showFiles(files) {
     } else {
       folderHTML += '<svg class="bd-placeholder-img card-img-top" width="100%" height="130" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6" dy=".3em">File</text></svg>';
     }
-    folderHTML += '    <div class="card-body">';
+    folderHTML += '    <div class="card-body" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">';
     folderHTML += '      <i class="fas ';
     if (fileType == 'video') {
     folderHTML += '        fa-file-video';
@@ -356,6 +356,9 @@ function showFiles(files) {
   folderHTML += '<div class="col">';
   folderHTML += '<div class="card border-light col" style="cursor: pointer" onclick="clickInputButton()">';
   folderHTML += '<svg style="text-anchor: middle;" class="bd-placeholder-img card-img-top" width="100%" height="130" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="130" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6" dy=".3em">Upload your file here</text></svg>';
+  folderHTML += '<div class="card-body" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; text-align: center">';
+  folderHTML += 'Click to upload a file';
+  folderHTML += '</div>';
   folderHTML += '</div>';
   folderHTML += '<form>';
   folderHTML += '<input type="hidden" name="path" value="'+CURRENT_PATH+'" />';
