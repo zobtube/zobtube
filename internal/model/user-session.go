@@ -11,7 +11,7 @@ type UserSession struct {
 	ID         string `gorm:"type:uuid;primary_key"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
-	UserID     string
+	UserID     *string
 	ValidUntil time.Time
 }
 

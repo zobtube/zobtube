@@ -40,14 +40,14 @@ func UserIsAuthenticated(c controller.AbtractController) gin.HandlerFunc {
 		}
 
 		// check if user is authenticated
-		if session.UserID == "" {
+		if *session.UserID == "" {
 			g.Redirect(http.StatusFound, "/auth")
 			return
 		}
 
 		// get user
 		user := &model.User{
-			ID: session.UserID,
+			ID: *session.UserID,
 		}
 		result = c.GetUser(user)
 		if result.RowsAffected < 1 {

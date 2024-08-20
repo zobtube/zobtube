@@ -96,7 +96,7 @@ func (c *Controller) AuthLogin(g *gin.Context) {
 
 	// extend expiration
 	session.ValidUntil = time.Now().Add(sessionTimeValidated)
-	session.UserID = user.ID
+	session.UserID = &user.ID
 	c.datastore.Save(session)
 
 	// set auth cookie
