@@ -182,3 +182,29 @@ func (c *Controller) UploadAjaxTriageFile(g *gin.Context) {
 	})
 
 }
+
+func (c *Controller) UploadAjaxUploadFile(g *gin.Context) {
+	// get file
+	file, err := g.FormFile("file")
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// get path
+	_path := g.PostForm("path")
+	path := filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, _path, file.Filename)
+
+	// save file
+	err = g.SaveUploadedFile(file, path)
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}

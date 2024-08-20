@@ -71,6 +71,7 @@ type AbtractController interface {
 	UploadImport(c *gin.Context)
 	UploadAjaxTriageFolder(*gin.Context)
 	UploadAjaxTriageFile(*gin.Context)
+	UploadAjaxUploadFile(*gin.Context)
 
 	// Providers
 	ProviderRegister(provider.Provider)
