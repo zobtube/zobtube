@@ -136,7 +136,7 @@
   <!-- form: name -->
   <div class="col-12 mb-3">
     <div class="form-floating input-group">
-      <input type="text" class="form-control" readonly id="video-title" value="{{ .Video.Name }}">
+      <input type="text" class="form-control" disabled id="video-title" value="{{ .Video.Name }}">
       <label for="name">Name</label>
       <button class="btn btn-outline-warning" type="button" id="video-title-edit" onClick="video_title_edit()">Edit</button>
     </div>
@@ -145,7 +145,7 @@
   <!-- form: ID -->
   <div class="col-6 mb-3">
     <div class="form-floating">
-      <input type="text" readonly class="form-control" id="video-id" value="{{ .Video.ID }}">
+      <input type="text" disabled class="form-control" id="video-id" value="{{ .Video.ID }}">
       <label for="originalFilename">ID</label>
     </div>
   </div>
@@ -153,7 +153,7 @@
   <!-- form: original filename -->
   <div class="col-6 mb-3">
     <div class="form-floating">
-      <input type="text" readonly class="form-control" name="filename" value="{{ .Video.Filename }}">
+      <input type="text" disabled class="form-control" name="filename" value="{{ .Video.Filename }}">
       <label for="originalFilename">Original filename</label>
     </div>
   </div>
@@ -161,7 +161,7 @@
   <!-- form: import date -->
   <div class="col-6 mb-3">
     <div class="form-floating">
-      <input type="text" readonly class="form-control" name="importDate" value="{{ .Video.CreatedAt.Format "2006-01-02 15:04:05" }}">
+      <input type="text" disabled class="form-control" name="importDate" value="{{ .Video.CreatedAt.Format "2006-01-02 15:04:05" }}">
       <label for="originalFilename">Import date</label>
     </div>
   </div>
@@ -169,7 +169,7 @@
   <!-- form: video type -->
   <div class="col-6">
     <div class="mb-3 form-floating">
-      <input type="text" readonly class="form-control" name="type" value="{{ .Video.TypeAsString }}">
+      <input type="text" disabled class="form-control" name="type" value="{{ .Video.TypeAsString }}">
       <label for="originalFilename">Video Type</label>
     </div>
   </div>
@@ -620,7 +620,7 @@ function onTrackedVideoFrame(currentTime){
 
 function video_title_edit() {
   title = document.getElementById('video-title');
-  title.readOnly = false;
+  title.disabled = false;
 
   btn = document.getElementById('video-title-edit');
   btn.classList.remove('btn-outline-warning');
@@ -645,7 +645,7 @@ function video_title_send() {
       console.debug('import successfull');
 
       title = document.getElementById('video-title');
-      title.readOnly = true;
+      title.disabled = true;
 
       btn = document.getElementById('video-title-edit');
       btn.classList.add('btn-outline-warning');
