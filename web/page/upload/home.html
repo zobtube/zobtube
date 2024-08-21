@@ -331,9 +331,9 @@ function showFiles(files) {
     folderHTML += '  <div class="card border-dark col" style="cursor: pointer" ';
     folderHTML += '  onclick="">';
     if (fileType == 'video') {
-      folderHTML += '    <video style="height:130px" controls src="/upload/preview/'+encodeURIComponent(CURRENT_PATH+'/'+file)+'" class="card-img-top"></video>';
+      folderHTML += '    <video style="height:130px" controls class="lazy" data-src="/upload/preview/'+encodeURIComponent(CURRENT_PATH+'/'+file)+'" class="card-img-top"></video>';
     } else if (fileType == 'image') {
-      folderHTML += '    <img style="height:130px" src="/upload/preview/'+encodeURIComponent(CURRENT_PATH+'/'+file)+'" class="card-img-top">';
+      folderHTML += '    <img style="height:130px" class="lazy" data-src="/upload/preview/'+encodeURIComponent(CURRENT_PATH+'/'+file)+'" class="card-img-top">';
     } else {
       folderHTML += '<svg class="bd-placeholder-img card-img-top" width="100%" height="130" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6" dy=".3em">File</text></svg>';
     }
@@ -366,8 +366,9 @@ function showFiles(files) {
   folderHTML += '</form>';
   folderHTML += '</div>';
 
-
   document.getElementById('files').innerHTML = folderHTML;
+
+  window.lazyLoadInstance.update();
 }
 
 function clickInputButton() {

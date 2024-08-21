@@ -99,16 +99,6 @@
    }
    scrolltop();
 
-
-
-
-   $('.lazy').Lazy({
-      placeholder: "data:image/gif;base64,R0lGODlhEALAPQAPzl5uLr9Nrl8e7..."
-   });
-
-  /*  Footer full year */
-  $('#spanYear').html(new Date().getFullYear());
-
-
+   window.lazyLoadInstance = new LazyLoad({});
 
 })(jQuery);
