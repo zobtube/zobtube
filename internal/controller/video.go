@@ -543,8 +543,14 @@ func (c *Controller) VideoAjaxImport(g *gin.Context) {
 
 	// commit the update on database
 	video.Imported = true
-	c.datastore.Save(video)
-	//TODO: check result
+	err = c.datastore.Save(video).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	g.JSON(200, gin.H{})
 }
 
@@ -552,12 +558,10 @@ func (c *Controller) VideoAjaxCreate(g *gin.Context) {
 	var err error
 
 	form := struct {
-		ID           string   `form:"id"`
-		Name         string   `form:"name"`
-		Filename     string   `form:"filename"`
-		Actors       []string `form:"actors"`
-		TypeEnum     string   `form:"type"`
-		CreationDate string   `form:"date"`
+		Name     string   `form:"name"`
+		Filename string   `form:"filename"`
+		Actors   []string `form:"actors"`
+		TypeEnum string   `form:"type"`
 	}{}
 	err = g.ShouldBind(&form)
 	if err != nil {
@@ -567,21 +571,17 @@ func (c *Controller) VideoAjaxCreate(g *gin.Context) {
 		return
 	}
 
-	// validate date
-	date, err := time.Parse(time.RFC3339, form.CreationDate)
-	if err != nil {
+	if form.Name == "" || form.Filename == "" || (form.TypeEnum != "c" && form.TypeEnum != "m" && form.TypeEnum != "v") {
 		g.JSON(500, gin.H{
-			"error": err.Error(),
+			"error": "invalid input",
 		})
 		return
 	}
 
 	video := &model.Video{
-		ID:        form.ID,
 		Name:      form.Name,
 		Filename:  form.Filename,
 		Type:      form.TypeEnum,
-		CreatedAt: date,
 		Imported:  false,
 		Thumbnail: false,
 	}
@@ -615,7 +615,9 @@ func (c *Controller) VideoAjaxCreate(g *gin.Context) {
 		}
 	}
 
-	g.JSON(200, gin.H{})
+	g.JSON(200, gin.H{
+		"video_id": video.ID,
+	})
 }
 
 func (c *Controller) VideoAjaxUploadThumb(g *gin.Context) {

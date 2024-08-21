@@ -75,7 +75,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	videos.GET("/:id/thumb_xs", c.VideoThumbXS)
 
 	videoAPI := authGroup.Group("/api/video")
-	videoAPI.POST("/", c.VideoAjaxCreate)
+	videoAPI.POST("", c.VideoAjaxCreate)
 	videoAPI.HEAD("/:id", c.VideoAjaxStreamInfo)
 	videoAPI.DELETE("/:id", c.VideoAjaxDelete)
 	videoAPI.POST("/:id/upload", c.VideoAjaxUpload)

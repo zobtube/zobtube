@@ -27,37 +27,51 @@
 
 <hr />
 
-<!-- Preview Model Area -->
-<div class="modal fade" id="previewModal" tabindex="-1">
-  <div class="modal-dialog modal-xl">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Triage video preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Import as video modal -->
+<div class="offcanvas offcanvas-bottom h-auto" tabindex="-1" id="importAsVideoOffCanvas" style="height: 50vh">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Import a video</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="row">
+      <div class="col-1">
       </div>
-      <div class="modal-body">
-        <div class="ratio ratio-16x9">
-          <video id="previewVideo" class="previewVideo" autoplay controls>
+      <div class="col-4">
+        <p><b>Video preview</b></p>
+        <video controls class="previewVideo" style="height: 35vh" />
+      </div>
+      <div class="col-6">
+        <p><b>Video details</b></p>
+        <div class="mb-4">
+          Enter a title, select a type and import the video!
         </div>
-      </div>
-      <div class="modal-footer">
-        <div class="btn-toolbar justify-content-between mb-2" role="toolbar" style="width:100%">
-          <div class="input-group me-2">
-            <a type="button" class="btn btn-danger previewDelete">Delete</a>
-          </div>
-          <div class="input-group">
-            <div class="input-group-text">Import as</div>
-            <a type="button" class="btn btn-primary previewImportAsVideo">Video</a>
-            <a type="button" class="btn btn-primary previewImportAsClip">Clip</a>
-            <a type="button" class="btn btn-primary previewImportAsMovie">Movie</a>
-          </div>
+        <div class="form-floating mb-4">
+          <input type="hidden" class="video-filepath">
+          <input type="text" disabled class="form-control video-filename">
+          <label for="originalFilename">Original filename</label>
+        </div>
+         <div class="form-floating mb-4">
+          <input type="text" class="form-control video-title">
+          <label for="originalFilename">Video title</label>
+        </div>
+        <div class="input-group">
+          <span class="input-group-text">Choose video type</span>
+          <select class="form-select" onchange="importAsVideoButtonUpdate(this)" id="importAsVideoTypeSelect">
+            <option value="x" selected>Choose...</option>
+            <option value="v">Video</option>
+            <option value="c">Clip</option>
+            <option value="m">Movie</option>
+          </select>
+          <button class="btn btn-success" type="button" id="importAsVideoButton" disabled onclick="importVideoAjax()">Import</button>
         </div>
       </div>
     </div>
   </div>
 </div>
-<!-- End Preview Model Area -->
+<!-- End import as video modal -->
 
+<!-- Toast template -->
 <div style="display: none">
   <div id="toastFileUploadTemplate" class="toast" role="alert" data-bs-autohide="false" style="opacity: 1; transition: opacity 1s;">
     <div class="toast-header text-white bg-primary">
@@ -70,90 +84,10 @@
     </div>
   </div>
 </div>
+<!-- End of toast template -->
 
 <!-- Preview specific JS -->
 <script>
-const previewModal = document.getElementById('previewModal')
-previewModal.addEventListener('show.bs.modal', event => {
-  // Button that triggered the modal
-  const button = event.relatedTarget
-  // Extract info from data-bs-* attributes
-  const videoName = button.getAttribute('data-bs-video')
-  // Update the modal's content.
-  const videoItem = previewModal.querySelector('.previewVideo')
-
-  videoItem.src = "/upload/preview/"+encodeURIComponent(videoName)
-
-  const importAsVideoButton = previewModal.querySelector('.previewImportAsVideo')
-  importAsVideoButton.onclick = function() { importAs('v', videoName); }
-
-  const importAsClipButton = previewModal.querySelector('.previewImportAsClip')
-  importAsClipButton.onclick = function() { importAs('c', videoName); }
-
-  const importAsMovieButton = previewModal.querySelector('.previewImportAsMovie')
-  importAsMovieButton.onclick = function() { importAs('m', videoName); }
-
-  const previewDeleteButton = previewModal.querySelector('.previewDelete')
-  previewDeleteButton.href = '/triage/delete/'+videoName
-})
-previewModal.addEventListener('hide.bs.modal', event => {
-  const videoItem = previewModal.querySelector('.previewVideo')
-
-  videoItem.pause()
-})
-
-function importAs(video_type, video_path) {
-  var form = document.createElement("form");
-  var form_el_path = document.createElement("input");
-  var form_el_import_as = document.createElement("input");
-  var form_el_csrf = document.createElement("input");
-
-  form.method = "POST";
-  form.action = "/upload/import";
-
-  form_el_csrf.value = '{% csrf_token %}';
-  form_el_csrf.name = 'csrfmiddlewaretoken';
-  form.appendChild(form_el_csrf);
-
-  form_el_path.value=video_path;
-  form_el_path.name="path";
-  form.appendChild(form_el_path);
-
-  form_el_import_as.value=video_type;
-  form_el_import_as.name="import_as";
-  form.appendChild(form_el_import_as);
-
-  document.body.appendChild(form);
-
-  console.log(form);
-
-  form.submit();
-}
-
-</script>
-
-<!-- Toggle JS -->
-<script>
-function toggleTr(callingTr) {
-  hidden = (callingTr.children[0].children[0].textContent == '+');
-
-  if (hidden) {
-    callingTr.children[0].children[0].textContent = '-';
-    child = callingTr.nextElementSibling;
-    while (!child.hasAttribute("data-toggle")) {
-      $(child).slideDown(600);
-      child = child.nextElementSibling;
-    }
-  } else {
-    callingTr.children[0].children[0].textContent = '+';
-    child = callingTr.nextElementSibling;
-    while (!child.hasAttribute("data-toggle")) {
-      $(child).slideUp(200);
-      child = child.nextElementSibling;
-    }
-  }
-}
-
 var CURRENT_PATH='/';
 function setFolder(folderName) {
   CURRENT_PATH=folderName;
@@ -298,14 +232,21 @@ function showFiles(files) {
       fileType = 'image';
     }
 
+    filePath = '';
+    if (CURRENT_PATH == '/') {
+      filePath = '/'+file;
+    } else {
+      filePath = CURRENT_PATH+'/'+file;
+    }
+
     // render files
     folderHTML += '<div class="col">';
     folderHTML += '  <div class="card border-dark col" style="cursor: pointer" ';
     folderHTML += '  onclick="">';
     if (fileType == 'video') {
-      folderHTML += '    <video style="height:130px" controls class="lazy" data-src="/upload/preview/'+encodeURIComponent(CURRENT_PATH+'/'+file)+'" class="card-img-top"></video>';
+      folderHTML += '    <video style="height:130px" class="lazy" data-src="/upload/preview/'+encodeURIComponent(filePath)+'" class="card-img-top" onclick="importVideo(this, \''+file+'\', \''+filePath+'\')"></video>';
     } else if (fileType == 'image') {
-      folderHTML += '    <img style="height:130px" class="lazy" data-src="/upload/preview/'+encodeURIComponent(CURRENT_PATH+'/'+file)+'" class="card-img-top">';
+      folderHTML += '    <img style="height:130px" class="lazy" data-src="/upload/preview/'+encodeURIComponent(filePath)+'" class="card-img-top">';
     } else {
       folderHTML += '<svg class="bd-placeholder-img card-img-top" width="100%" height="130" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6" dy=".3em">File</text></svg>';
     }
@@ -445,9 +386,147 @@ function fileUpload(e) {
   });
 }
 
+function importVideo(caller, filename, filepath) {
+  // prepare offcanvas
+  oc = document.getElementById('importAsVideoOffCanvas');
+
+  const filenameInput = oc.querySelector('.video-filename');
+  filenameInput.value = filename;
+
+  const filepathInput = oc.querySelector('.video-filepath');
+  filepathInput.value = filepath;
+
+  const title = oc.querySelector('.video-title');
+  title.value = filename.replace(/\.[^/.]+$/, "");
+
+  const video = oc.querySelector('.previewVideo');
+  video.src = '/upload/preview/'+encodeURIComponent(filepath.substring(1));
+
+  // show
+  window.OffcanvasVideo.show();
+}
+
 window.onload = function() {
   generateBreadcrumb();
   setFolder(CURRENT_PATH);
+
+  // initialize offcanvas import as video
+  oc = document.getElementById('importAsVideoOffCanvas');
+  window.OffcanvasVideo = new bootstrap.Offcanvas(oc);
+
+  // pause video when hidden
+  oc.addEventListener('hide.bs.offcanvas', event => {
+    const video = oc.querySelector('.previewVideo');
+    video.pause();
+  });
+
+  // reset video type selection
+  sel = document.getElementById('importAsVideoTypeSelect');
+  sel.value = 'x';
+  importAsVideoButtonUpdate(sel);
+}
+
+function importAsVideoButtonUpdate(sel) {
+  const btn = document.getElementById('importAsVideoButton');
+  btn.disabled = (sel.value == 'x');
+}
+
+function importVideoAjax() {
+  oc = document.getElementById('importAsVideoOffCanvas');
+  const filename = oc.querySelector('.video-filepath').value;
+  const title = oc.querySelector('.video-title').value;
+  const filetype = document.getElementById('importAsVideoTypeSelect').value;
+
+  $.ajax('/api/video', {
+    method: 'POST',
+    data: {
+      'name': title,
+      'filename': filename,
+      'type': filetype,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (data) {
+      // get video id from response
+      video_id = data.video_id;
+
+      // send notification
+      sendToast(
+        'Import a video',
+        '',
+        'bg-success',
+        'You can edit the video more <a href="/video/'+video_id+'/edit" target="_blank">here</a>',
+      );
+
+      // close canvas
+
+      // remove video from view
+
+      // move file
+      $.ajax('/api/video/'+video_id+'/import', {
+        method: 'POST',
+        xhr: function () {
+          var xhr = new XMLHttpRequest();
+          return xhr;
+        },
+
+        success: function (data) {
+          generateThumnail(video_id);
+          computeDuration(video_id);
+          sendToast(
+            'Import a video',
+            '',
+            'bg-success',
+            'Video ready',
+          );
+        },
+
+        error: function (data) {
+          sendToast(
+            'Unable to move video',
+            '',
+            'bg-warning',
+            data.responseJSON.error,
+          );
+        },
+      });
+
+
+    },
+
+    error: function (data) {
+      sendToast(
+        'Unable to import video',
+        '',
+        'bg-warning',
+        data.responseJSON.error,
+      );
+    },
+  });
+
+}
+
+function generateThumnail(video_id) {
+  $.ajax('/api/video/'+video_id+'/generate-thumbnail/0', {
+    method: 'POST',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+  });
+}
+
+function computeDuration(video_id) {
+  $.ajax('/api/video/'+video_id+'/compute-duration', {
+    method: 'POST',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+  });
 }
 </script>
 
