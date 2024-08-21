@@ -27,34 +27,6 @@
 
 <hr />
 
-
-<!--
-<table class="table">
-  <thead>
-    <tr>
-      <th colspan="2" scope="col">Name</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{ range $folder, $items := .Items }}
-    <tr class="table-active" data-toggle="toggle" onClick="toggleTr(this)">
-      <td><span class="plusminus" style="font-weight: bold">+</span> {{ $folder }} <span class="badge bg-secondary">{{ len $items }}</span></td>
-      <td style="text-align: right">
-      </td>
-    </tr>
-    {{ range $item := $items }}
-    <tr style="display: none">
-      <td>{{ $item.Name }}</td>
-      <td style="text-align: right">
-        <button type="button" class="btn btn-primary btn-sm"  data-bs-toggle="modal" data-bs-target="#previewModal" data-bs-video="{{ $folder }}/{{ $item.Name }}"><i class="bi bi-eye"></i></button>
-      </td>
-    </tr>
-    {{ end }}
-    {{ end }}
-  </tbody>
-</table>
-<!-- End Page Import Area -->
-
 <!-- Preview Model Area -->
 <div class="modal fade" id="previewModal" tabindex="-1">
   <div class="modal-dialog modal-xl">
