@@ -403,6 +403,8 @@ function updateToastProgress(path, file, current, max) {
     n_title = toast.getElementsByClassName('zt-toast-title');
     n_title[0].innerText = 'Upload finished';
 
+    loadFiles();
+
     // close a little bit later
     setTimeout(function() {
       $(toast).hide();
