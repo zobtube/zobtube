@@ -1778,12 +1778,6 @@ Demo options Panels
 }
  
  
-button.jscolor {
-	background-color:#f44336;
-	border:medium none;
-	color:#fff;
-}
-
 .demo-wrapper.collapse-left .demo-optiond-bar {
 	margin-left:0;
 
