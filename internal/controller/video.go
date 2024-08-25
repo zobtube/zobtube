@@ -106,7 +106,12 @@ func (c *Controller) VideoAjaxComputeDuration(g *gin.Context) {
 	}
 
 	video.Duration = d
-	c.datastore.Save(&video)
+	err = c.datastore.Save(&video).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+	}
 
 	g.JSON(200, gin.H{
 		"duration": d.String(),
