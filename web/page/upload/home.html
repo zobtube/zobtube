@@ -227,7 +227,7 @@ function showFiles(files) {
     // guess filetype based on the extension
     fileType = 'unknown';
     fileIcon = 'fas fa-file';
-    if (file.match(/.*\.(mp4|mkv)/)) {
+    if (file.match(/.*\.(mp4|mkv|webm)/)) {
       fileType = 'video';
       fileIcon = 'fas fa-file-video';
     } else if (file.match(/.*\.(png|jpg|jpeg)/)) {
