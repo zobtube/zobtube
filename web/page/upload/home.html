@@ -473,7 +473,6 @@ function importVideoAjax() {
 
         success: function (data) {
           generateThumnail(video_id);
-          computeDuration(video_id);
           sendToast(
             'Import a video',
             '',
@@ -513,6 +512,9 @@ function generateThumnail(video_id) {
     xhr: function () {
       var xhr = new XMLHttpRequest();
       return xhr;
+    },
+    success: function(data) {
+      computeDuration(video_id);
     },
   });
 }
