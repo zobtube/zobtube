@@ -40,7 +40,7 @@ func UserIsAuthenticated(c controller.AbtractController) gin.HandlerFunc {
 		}
 
 		// check if user is authenticated
-		if *session.UserID == "" {
+		if session == nil || *session.UserID == "" {
 			g.Redirect(http.StatusFound, "/auth")
 			return
 		}
