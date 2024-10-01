@@ -98,9 +98,7 @@
       <h3>More Random Videos</h3>
     </div>
     <div class="row">
-      {{ range $video := .RandomVideos }}
-      {{ template "shards/thumb-preview-mini.html" $video }}
-      {{ end }}
+      {{ template "shards/video-mini-tile.html" .RandomVideos }}
     </div>
   </div>
   <!-- End Recent Videos -->

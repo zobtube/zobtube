@@ -324,13 +324,16 @@ func (c *Controller) VideoView(g *gin.Context) {
 
 	// get random videos
 	var randomVideos []model.Video
-	c.datastore.Limit(12).Find(&randomVideos) //TODO: order by rand
+	c.datastore.Limit(12).Order("RANDOM()").Find(&randomVideos)
 
 	g.HTML(http.StatusOK, "video/view.html", gin.H{
-		"Type":         video.Type,
-		"User":         g.MustGet("user").(*model.User),
-		"Video":        video,
-		"RandomVideos": randomVideos,
+		"Type":  video.Type,
+		"User":  g.MustGet("user").(*model.User),
+		"Video": video,
+		"RandomVideos": gin.H{
+			"Videos":    randomVideos,
+			"VideoType": video.Type,
+		},
 	})
 }
 
