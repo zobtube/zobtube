@@ -18,6 +18,7 @@ func UserIsAuthenticated(c controller.AbtractController) gin.HandlerFunc {
 		if err != nil {
 			// cookie not set
 			g.Redirect(http.StatusFound, "/auth")
+			g.Abort()
 			return
 		}
 
@@ -30,18 +31,21 @@ func UserIsAuthenticated(c controller.AbtractController) gin.HandlerFunc {
 		// check result
 		if result.RowsAffected < 1 {
 			g.Redirect(http.StatusFound, "/auth")
+			g.Abort()
 			return
 		}
 
 		// check validity
 		if session.ValidUntil.Before(time.Now()) {
 			g.Redirect(http.StatusFound, "/auth")
+			g.Abort()
 			return
 		}
 
 		// check if user is authenticated
 		if session == nil || *session.UserID == "" {
 			g.Redirect(http.StatusFound, "/auth")
+			g.Abort()
 			return
 		}
 
@@ -52,6 +56,7 @@ func UserIsAuthenticated(c controller.AbtractController) gin.HandlerFunc {
 		result = c.GetUser(user)
 		if result.RowsAffected < 1 {
 			g.Redirect(http.StatusFound, "/auth")
+			g.Abort()
 			return
 		}
 
