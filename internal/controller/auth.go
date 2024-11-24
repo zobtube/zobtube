@@ -56,7 +56,7 @@ func (c *Controller) AuthLogin(g *gin.Context) {
 	if result.RowsAffected < 1 {
 		c.createSession(g)
 
-		g.JSON(500, gin.H{
+		g.JSON(401, gin.H{
 			"error": "invalid session",
 		})
 		return
@@ -67,7 +67,7 @@ func (c *Controller) AuthLogin(g *gin.Context) {
 		// session expired, creating a new one
 		c.createSession(g)
 
-		g.JSON(500, gin.H{
+		g.JSON(401, gin.H{
 			"error": "session expired",
 		})
 		return
@@ -78,7 +78,7 @@ func (c *Controller) AuthLogin(g *gin.Context) {
 	user := &model.User{}
 	result = c.datastore.First(&user, "username = ?", username)
 	if result.RowsAffected < 1 {
-		g.JSON(500, gin.H{
+		g.JSON(401, gin.H{
 			"error": "auth failed - user not found",
 		})
 		return
@@ -88,7 +88,7 @@ func (c *Controller) AuthLogin(g *gin.Context) {
 	challengeHex := sha256.Sum256([]byte(session.ID + user.Password))
 	challenge := hex.EncodeToString(challengeHex[:])
 	if g.PostForm("password") != challenge {
-		g.JSON(500, gin.H{
+		g.JSON(401, gin.H{
 			"error": "auth failed - password",
 		})
 		return
