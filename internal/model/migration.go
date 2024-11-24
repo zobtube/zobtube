@@ -6,7 +6,7 @@ import (
 	"github.com/glebarez/sqlite"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/logger"
+	"gorm.io/gorm/logger"
 
 	"gitlab.com/zobtube/zobtube/internal/config"
 )
