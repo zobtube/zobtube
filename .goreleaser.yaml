@@ -25,5 +25,16 @@ archives:
       - goos: windows
         format: zip
 
+dockers:
+  - image_templates:
+      - "zobtube/zobtube"
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+    use: buildx
+
 changelog:
   sort: asc
