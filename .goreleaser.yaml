@@ -27,7 +27,6 @@ archives:
 
 dockers:
   - image_templates:
-      - "zobtube/zobtube"
       - "registry.gitlab.com/zobtube/zobtube:{{ .Version }}"
     build_flag_templates:
       - "--pull"
