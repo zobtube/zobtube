@@ -21,9 +21,9 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    formats_overrides:
+    format_overrides:
       - goos: windows
-        format: zip
+        formats: zip
 
 dockers:
   - image_templates:
