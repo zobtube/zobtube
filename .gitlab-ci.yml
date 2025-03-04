@@ -26,4 +26,4 @@ release:
       -e DOCKER_PASSWORD \
       -e DOCKER_REGISTRY \
       -e GITLAB_TOKEN \
-      goreleaser/goreleaser release --clean --snapshot
+      goreleaser/goreleaser release --clean
