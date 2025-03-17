@@ -1,29 +1,17 @@
 {{ define "shards/video-mini-tile.html" }}
-<div class="video-mini-flex">
-  <div class="video-mini-grid">
-    {{ if not .Videos }}
-    <div class="col-md-12">
-      <div class="alert alert-warning" role="alert">
-        No trending {{ .VideoType }} so far!
-      </div>
-    </div>
-    {{ else }}
-    {{ range $video := .Videos }}
-    <div class="video-mini-single-video">
-      <div class="video-mini-video-img">
+  <div class="col-md-3">
+    <div class="single-video">
+      <div class="video-img">
         <a href="{{ .URLView }}">
           <img class="lazy" data-src="{{ .URLThumbXS }}">
         </a>
         {{ if .Duration }}
-        <span class="video-mini-video-duration">{{.NiceDuration }}</span>
+        <span class="video-duration">{{.NiceDuration }}</span>
         {{ end }}
       </div>
       <div class="video-mini-title">
         <h4><a href="{{ .URLView }}" class="video-title">{{ .Name }} </a></h4>
       </div>
     </div>
-    {{ end }}
-    {{ end }}
   </div>
-</div>
 {{ end }}

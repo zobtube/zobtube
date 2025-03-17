@@ -446,6 +446,7 @@ ul.pgwSlider > li span, .pgwSlider > .ps-list > li span {
     transition: all .4s linear 0s;
     line-height:1.2;
     font-weight:600;
+    margin: 6px 0px 0px 0px;
 }
 .video-title:hover {
 	color:#f44336;
@@ -487,6 +488,7 @@ ul.pgwSlider > li span, .pgwSlider > .ps-list > li span {
 .video-img >a >img {
   max-width: 100%;
   width:100%;
+  height: 160px;
   object-fit: cover;
   border-radius: 12px;
 }
@@ -586,6 +588,7 @@ ul.pgwSlider > li span, .pgwSlider > .ps-list > li span {
   opacity:0.0001;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
   visibility: hidden;
+  border-radius: 12px;
 }
 .single-video .video-img a:after,
 .single-review .review-img a:after {
@@ -612,6 +615,7 @@ ul.pgwSlider > li span, .pgwSlider > .ps-list > li span {
 	opacity:1;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
 	visibility: visible;
+  border-radius: 12px;
 }
 .owl-carousel .owl-item img {
   -webkit-transform-style:initial;
@@ -639,6 +643,7 @@ ul.pgwSlider > li span, .pgwSlider > .ps-list > li span {
   opacity:1;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
   visibility: visible;
+  border-radius: 12px;
 }
 
 /*****************************************
