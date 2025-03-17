@@ -24,7 +24,7 @@
          var bodyTop = $("html, body");
          bodyTop.animate({
             scrollTop: 0
-         }, 800, "easeOutCubic");
+         }, 800, "swing");
       });
 
    }
