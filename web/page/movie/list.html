@@ -1,0 +1,26 @@
+{{ define "movie/list.html" }}
+{{ template "top" .}}
+<div class="row">
+    <div class="col-md-12">
+      <div class="themeix-section-h">
+        <span class="heading-icon"><i class="fa fa-bolt"></i></span>
+        <h3>All {{ .Type }}s</h3>
+      </div>
+      <div class="row">
+        {{ if .Videos }}
+        {{ range $video := .Videos }}
+        {{ template "shards/thumb-preview-line.html" $video }}
+        {{ end }}
+        {{ else }}
+        <div class="col-md-12">
+          <div class="alert alert-warning" role="alert">
+            No {{ .Type }} available so far!
+          </div>
+        </div>
+        {{ end }}
+      </div>
+    </div>
+  </div>
+</div>
+{{ template "bottom" .}}
+{{ end }}

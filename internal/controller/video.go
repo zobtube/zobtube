@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/image/draw"
+	"gorm.io/gorm/clause"
 
 	"gitlab.com/zobtube/zobtube/internal/model"
 )
@@ -288,7 +289,13 @@ func (c *Controller) ClipList(g *gin.Context) {
 }
 
 func (c *Controller) MovieList(g *gin.Context) {
-	c.GenericVideoList("movie", g)
+	var videos []model.Video
+	c.datastore.Where("type = ?", "m").Order("created_at desc").Preload(clause.Associations).Find(&videos)
+	g.HTML(http.StatusOK, "movie/list.html", gin.H{
+		"Type":   "movie",
+		"User":   g.MustGet("user").(*model.User),
+		"Videos": videos,
+	})
 }
 
 func (c *Controller) VideoList(g *gin.Context) {

@@ -1,29 +1,23 @@
 {{ define "shards/thumb-preview-line.html" }}
- <div class="single-review">
-   <div class="review-img">
-     <a href="{{ .URLView }}">
-       <img src="{{ .URLThumbXS }}" class="lazy">
-     </a>
-     {{ if .Duration }}
-     <span class="video-duration">{{ .NiceDuration }}</span>
-     {{ end }}
-   </div>
-   <div class="review-content">
-     <h4><a href="{{ .URLView }}" class="video-title">{{ .Name }}</a></h4>
-     {{ range $actor := .Actors }}
-     <span class="video-posts-author">
-       {{ if eq $actor.Sex "f" }}
-       <i class="fa fa-venus"></i>
-       {{ else if eq $actor.Sex "m" }}
-       <i class="fa fa-mars"></i>
-       {{ else if eq $actor.Sex "s" }}
-       <i class="fa fa-mars-and-venus"></i>
-       {{ else }}
-       <i class="fa fa-person-circle-question"></i>
-       {{ end }}
-       <a href="{{ $actor.URLView }}">{{ $actor.Name }}</a>
-     </span>
-     {{ end }}
-   </div>
- </div>
+<div class="single-review">
+  <div class="review-img">
+    <a href="{{ .URLView }}">
+      <img src="{{ .URLThumbXS }}" class="lazy">
+    </a>
+    {{ if .Duration }}
+    <span class="video-duration">{{ .NiceDuration }}</span>
+    {{ end }}
+  </div>
+  <div class="review-content">
+    <h4><a href="{{ .URLView }}" class="video-title">{{ .Name }}</a></h4>
+    {{ if .Actors }}
+    <span class="video-posts-author"><i>Featuring: </i></span>
+    {{ end }}
+    {{ range $actor := .Actors }}
+    <span class="video-posts-author">
+      <a href="{{ $actor.URLView }}">{{ $actor.Name }}</a>
+    </span>
+    {{ end }}
+  </div>
+</div>
 {{ end }}
