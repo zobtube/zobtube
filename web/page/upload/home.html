@@ -434,6 +434,11 @@ function fileUpload(e) {
     done: function() {
       updateToastProgress(CURRENT_PATH, file.name, e.loaded, e.total);
     },
+    fail: function( jqXHR, textStatus, errorThrown ) {
+      console.error('upload failed');
+      console.error(textStatus);
+      console.error(errorThrown);
+    },
   });
 }
 
