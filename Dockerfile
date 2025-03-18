@@ -2,6 +2,5 @@ FROM scratch
 
 ENTRYPOINT ["/zobtube"]
 
-RUN mkdir /tmp
-
+COPY docker/tmp /tmp
 COPY zobtube /
