@@ -236,11 +236,33 @@ func (c *Controller) VideoAjaxGenerateThumbnailXS(g *gin.Context) {
 		return
 	}
 
-	// set new size
-	dst := image.NewRGBA(image.Rect(0, 0, 320, 180))
+	targetH := 320
+	targetV := 180
 
-	// resize
-	draw.NearestNeighbor.Scale(dst, dst.Rect, src, src.Bounds(), draw.Over, nil)
+	h := src.Bounds().Dx()
+	v := src.Bounds().Dy()
+
+	originalImageRGBA := image.NewRGBA(image.Rect(0, 0, h, v))
+	draw.Draw(originalImageRGBA, originalImageRGBA.Bounds(), src, src.Bounds().Min, draw.Src)
+
+	ratioH := float32(h) / float32(targetH)
+	ratioV := float32(v) / float32(targetV)
+	ratio := max(ratioH, ratioV)
+
+	h = int(float32(h) / ratio)
+	v = int(float32(v) / ratio)
+
+	// set new size
+	dst := image.NewRGBA(image.Rect(0, 0, targetH, targetV))
+
+	// draw outer
+	outerImg := gaussianBlur(originalImageRGBA, 15)
+	draw.NearestNeighbor.Scale(dst, dst.Bounds(), outerImg, outerImg.Bounds(), draw.Over, nil)
+
+	// draw inner
+	innerH := (targetH - h) / 2
+	innerV := (targetV - v) / 2
+	draw.NearestNeighbor.Scale(dst, image.Rect(innerH, innerV, innerH+h, innerV+v), src, src.Bounds(), draw.Over, nil)
 
 	// encode to jpeg
 	err = jpeg.Encode(output, dst, &jpeg.Options{Quality: 90})
