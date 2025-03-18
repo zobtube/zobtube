@@ -1,6 +1,6 @@
 FROM busybox AS build-env
 
-RUN mkdir /build/tmp
+RUN mkdir -p /build/tmp
 
 FROM scratch
 
