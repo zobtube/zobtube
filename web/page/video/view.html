@@ -12,6 +12,7 @@
             preload="metadata"
             poster="{{ .Video.URLThumb }}"
             controls
+            onplay="countView()"
             ></video>
         </div>
         <h3 id="page_view_video_title" class="post-title mt-3">{{ .Video }}
@@ -56,11 +57,15 @@
           </div>
         </div>
         <div class="video-post-counter">
-          <div class="video-post-viewers">
+          <div class="video-post-viewers" id="video-view-count">
             {{ if .ViewCount }}
+            {{ if gt .ViewCount 1 }}
             <h3>{{ .ViewCount }} views</h3>
             {{ else }}
-            <h3>999,999 views</h3>
+            <h3>{{ .ViewCount }} view</h3>
+            {{ end }}
+            {{ else }}
+            <h3>Not viewed yet!</h3>
             {{ end }}
           </div>
           <div class="video-like">
@@ -104,5 +109,31 @@
   <!-- End Recent Videos -->
   </div>
 </div>
+
+<script>
+viewCounted = false;
+function countView() {
+  if (viewCounted) {
+    return
+  }
+  $.ajax('/api/video/{{ .Video.ID }}/count-view', {
+    method: 'POST',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+    success: function(data) {
+      $('#video-view-count').animate({'opacity': 0}, 400, function(){
+        viewCount = data['view-count'];
+        newViewCount = '<h3>'+viewCount+' view';
+        newViewCount += viewCount > 1 ? 's' : '';
+        newViewCount += '</h3>';
+        $(this).html(newViewCount).animate({'opacity': 1}, 400);
+      });
+      viewCounted = true;
+    },
+  });
+}
+</script>
 {{ template "bottom" .}}
 {{ end }}

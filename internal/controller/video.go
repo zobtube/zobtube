@@ -333,10 +333,20 @@ func (c *Controller) VideoView(g *gin.Context) {
 	var randomVideos []model.Video
 	c.datastore.Limit(12).Order("RANDOM()").Find(&randomVideos)
 
+	// get video count
+	user := g.MustGet("user").(*model.User)
+	viewCount := 0
+	count := &model.VideoView{}
+	result = c.datastore.Debug().First(&count, "video_id = ? AND user_id = ?", video.ID, user.ID)
+	if result.RowsAffected > 0 {
+		viewCount = count.Count
+	}
+
 	g.HTML(http.StatusOK, "video/view.html", gin.H{
-		"Type":  video.Type,
-		"User":  g.MustGet("user").(*model.User),
-		"Video": video,
+		"Type":      video.Type,
+		"User":      user,
+		"Video":     video,
+		"ViewCount": viewCount,
 		"RandomVideos": gin.H{
 			"Videos":    randomVideos,
 			"VideoType": video.Type,

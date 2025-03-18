@@ -17,6 +17,7 @@ var modelToMigrate = []interface{}{
 	ActorLink{},
 	Channel{},
 	Video{},
+	VideoView{},
 	User{},
 	UserSession{},
 }

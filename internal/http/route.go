@@ -88,6 +88,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	videoAPI.POST("/:id/generate-thumbnail-xs", c.VideoAjaxGenerateThumbnailXS)
 	videoAPI.POST("/:id/import", c.VideoAjaxImport)
 	videoAPI.POST("/:id/rename", c.VideoAjaxRename)
+	videoAPI.POST("/:id/count-view", c.VideoViewAjaxIncrement)
 
 	// uploads
 	uploads := authGroup.Group("/upload")

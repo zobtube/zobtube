@@ -54,6 +54,9 @@ type AbtractController interface {
 	VideoThumbXS(c *gin.Context)
 	VideoView(c *gin.Context)
 
+	// Video Views
+	VideoViewAjaxIncrement(g *gin.Context)
+
 	ClipList(c *gin.Context)
 	MovieList(c *gin.Context)
 	VideoList(c *gin.Context)
