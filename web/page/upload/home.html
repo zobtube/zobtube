@@ -7,25 +7,105 @@
   text-decoration: underline;
   cursor: pointer;
 }
-.fade {
-  opacity: 0;
+.triage-listing-table {
+  width: 100%;
+  table-layout: fixed;
+  font-size:medium;
+}
+.triage-listing-table tr {
+  user-select: none;
+}
+.triage-listing-table tr:hover td {
+  background-color: #efefef;
+}
+#item-details button,a {
+  width: 100%;
+  margin: 5px 0 5px 0;
+}
+code {
+  color: #684900;
+  background-color: #fffbda;
 }
 </style>
 
-<nav id="path" style="font-size:large">
+<!-- header -->
+<div style="display: flex; justify-content: space-between;">
+  <h4>Upload and triage folder</h4>
+  <button class="btn btn-outline-success" onclick="clickInputButton()">Upload file</button>
+</div>
+<hr />
+
+<!-- breadcumb -->
+<nav id="path" style="font-size:large; margin: 30px 0px 30px 0px; --bs-breadcrumb-divider: '>';">
 </nav>
 
-<h4>Folders</h4>
-<hr />
-
-<div class="row row-cols=1 row-cols-md-4 g-4" id="folders">
+<!-- listing -->
+<div class="row">
+  <div class="col-md-12">
+    <table class="table triage-listing-table">
+      <colgroup>
+        <col style="width:2%;">
+        <col style="width:73%;">
+        <col style="width:15%;">
+        <col style="width:10%;">
+      </colgroup>
+      <thead>
+        <th colspan="2">Name</th>
+        <th>Last modified</th>
+        <th>Size</th>
+      </thead>
+      <tbody id="triage-listing"></tbody>
+    </table>
+  </div>
 </div>
 
-<h4 style="margin-top: 45px">Files</h4>
-<div class="row row-cols=1 row-cols-md-4 g-4" id="files">
+<!-- upload form -->
+<div class="row">
+  <div class="col-md-12">
+    <form>
+      <input type="hidden" id="upload-input-path" name="path" value="" />
+      <input type="file" id="upload-input-file" name="file" style="visibility:hidden" onchange="fileUpload(this)"/>
+    </form>
+  </div>
 </div>
 
-<hr />
+<!-- detail offcanvas -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="item-details">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Details</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body" id="item-details-content">
+    ...
+  </div>
+</div>
+
+<!-- import video modal -->
+<div class="modal fade modal-lg" id="video-import-modal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalToggleLabel">Import video confirmation</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Details of the video to be imported</p>
+        <p>Filename: <code id="videoImportFileName">sdfsdfs</code></p>
+        <p>Located in: <code id="videoImportFilePath">sdfsdfs</code></p>
+      </div>
+      <div class="modal-footer">
+        <div class="input-group" style="justify-content: flex-end;">
+          <span class="input-group-text">Import as: </span>
+          <button type="button" class="btn btn-primary" onclick="importVideoAjax('v')">Video</button>
+          <button type="button" class="btn btn-primary" onclick="importVideoAjax('m')">Movie</button>
+          <button type="button" class="btn btn-primary" onclick="importVideoAjax('c')">Clip</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="btn btn-primary" data-bs-target="#exampleModalToggle" data-bs-toggle="modal">Open first modal</button>
 
 <!-- Import as video modal -->
 <div class="offcanvas offcanvas-bottom h-auto" tabindex="-1" id="importAsVideoOffCanvas" style="height: 50vh">
@@ -108,6 +188,10 @@ function updatePath() {
   console.log('switching to: '+CURRENT_PATH);
 
   generateBreadcrumb();
+
+  // reset table listing
+  document.getElementById('triage-listing').innerHTML = '';
+
   loadFolders();
   loadFiles();
 }
@@ -201,88 +285,59 @@ function loadFiles() {
 }
 
 function showFolders(folders) {
-  folderHTML = '';
+  folderEntries = '';
   Object.keys(folders).forEach(function(folder) {
-    elements = folders[folder];
-    folderHTML += '<div class="col">';
-    folderHTML += '<div class="card border-dark col" style="cursor: pointer" ';
-    folderHTML += 'onclick="enterFolder(\''+folder+'\');">';
-    folderHTML += '<div class="card-body" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">';
-    folderHTML += '<i class="fas fa-folder"></i>&nbsp;&nbsp;';
-    folderHTML += folder;
-    folderHTML += '<span class="badge bg-secondary">'+elements+'</span></div>';
-    folderHTML += '</div>';
-    folderHTML += '</div>';
+    folderEntries += '<tr ondblclick="enterFolder(\''+folder+'\');">';
+    folderEntries += '<td><i class="far fa-folder"></i></td>';
+    folderEntries += '<td>'+folder+'</td>';
+    folderEntries += '<td>—</td>';
+    folderEntries += '<td>'+folders[folder]+' items</td>';
+    folderEntries += '</tr>';
   });
 
-  document.getElementById('folders').innerHTML = folderHTML;
+  document.getElementById('triage-listing').innerHTML += folderEntries;
 }
 
 function showFiles(files) {
-  folderHTML = '';
+  fileEntries = '';
   Object.keys(files).forEach(function(file) {
     // store file infos
     fileInfo = files[file];
+    fileSize = fileInfo['Size'] == 0 ? 'Empty' : humanFileSize(fileInfo['Size'], true);
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    fileDate = new Date(fileInfo['LastModification']).toLocaleDateString(undefined, options);
 
     // guess filetype based on the extension
     fileType = 'unknown';
     fileIcon = 'fas fa-file';
     if (file.match(/.*\.(mp4|mkv|webm)/)) {
       fileType = 'video';
-      fileIcon = 'fas fa-file-video';
+      fileIcon = 'far fa-play-circle';
     } else if (file.match(/.*\.(png|jpg|jpeg)/)) {
       fileType = 'image';
-      fileIcon = 'fas fa-file-image';
+      fileIcon = 'far fa-image';
     } else if (file.match(/.*\.(zip|tar)/)) {
       fileType = 'archive';
       fileIcon = 'far fa-file-archive';
     }
 
-    filePath = '';
-    if (CURRENT_PATH == '/') {
-      filePath = '/'+file;
-    } else {
-      filePath = CURRENT_PATH+'/'+file;
-    }
+    // build file path
+    filePath = CURRENT_PATH == '/' ? filePath = '/'+file : CURRENT_PATH+'/'+file;
 
     // render files
-    folderHTML += '<div class="col">';
-    folderHTML += '  <div class="card border-dark col" style="cursor: pointer" ';
-    folderHTML += '  onclick="">';
-    if (fileType == 'video') {
-      folderHTML += '    <video style="height:130px" class="lazy" data-src="/upload/preview/'+encodeURIComponent(filePath)+'" class="card-img-top" onclick="importVideo(this, \''+file+'\', \''+filePath+'\')"></video>';
-    } else if (fileType == 'image') {
-      folderHTML += '    <img style="height:130px" class="lazy" data-src="/upload/preview/'+encodeURIComponent(filePath)+'" class="card-img-top">';
-    } else {
-      folderHTML += '<svg class="bd-placeholder-img card-img-top" width="100%" height="130" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6" dy=".3em">File</text></svg>';
-    }
-    folderHTML += '    <div class="card-body" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">';
-    folderHTML += '      <i class="'+fileIcon+'"></i>&nbsp;&nbsp;';
-    folderHTML +=        file;
-    folderHTML += '    </div>';
-    folderHTML += '  </div>';
-    folderHTML += '</div>';
+    fileEntries += '<tr onclick="showFileDetails(\''+file+'\', \''+filePath+'\', \''+fileType+'\', \''+fileSize+'\', \''+fileDate+'\')">';
+    fileEntries += '<td><i class="'+fileIcon+'"></i></td>';
+    fileEntries += '<td>'+file+'</td>';
+    fileEntries += '<td>'+fileDate+'</td>';
+    fileEntries += '<td>'+fileSize+'</td>';
+    fileEntries += '</tr>';
   });
 
-  folderHTML += '<div class="col">';
-  folderHTML += '<div class="card border-light col" style="cursor: pointer" onclick="clickInputButton()">';
-  folderHTML += '<svg style="text-anchor: middle;" class="bd-placeholder-img card-img-top" width="100%" height="130" xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="130" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6" dy=".3em">Upload your file here</text></svg>';
-  folderHTML += '<div class="card-body" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; text-align: center">';
-  folderHTML += 'Click to upload a file';
-  folderHTML += '</div>';
-  folderHTML += '</div>';
-  folderHTML += '<form>';
-  folderHTML += '<input type="hidden" name="path" value="'+CURRENT_PATH+'" />';
-  folderHTML += '<input type="file" id="upload-input-file" name="file" style="visibility:hidden" onchange="fileUpload(this)"/>';
-  folderHTML += '</form>';
-  folderHTML += '</div>';
-
-  document.getElementById('files').innerHTML = folderHTML;
-
-  window.lazyLoadInstance.update();
+  document.getElementById('triage-listing').innerHTML += fileEntries;
 }
 
 function clickInputButton() {
+  document.getElementById('upload-input-path').value = CURRENT_PATH;
   document.getElementById('upload-input-file').click();
 }
 
@@ -384,44 +439,94 @@ function fileUpload(e) {
   });
 }
 
-function importVideo(caller, filename, filepath) {
-  // prepare offcanvas
-  oc = document.getElementById('importAsVideoOffCanvas');
+function importVideo(filename, filepath) {
+  const filenameInput = window.VideoImport.querySelector('#videoImportFileName');
+  filenameInput.innerText = filename;
 
-  const filenameInput = oc.querySelector('.video-filename');
-  filenameInput.value = filename;
+  const filepathInput = window.VideoImport.querySelector('#videoImportFilePath');
+  filepathInput.innerText = filepath;
 
-  const filepathInput = oc.querySelector('.video-filepath');
-  filepathInput.value = filepath;
-
-  const title = oc.querySelector('.video-title');
-  title.value = filename.replace(/\.[^/.]+$/, "");
-
-  const video = oc.querySelector('.previewVideo');
-  video.src = '/upload/preview/'+encodeURIComponent(filepath.substring(1));
-
-  // show
-  window.OffcanvasVideo.show();
+  // display modal
+  window.VideoImportModal.show();
 }
 
+function showFileDetails(fileName, filePath, fileType, fileSize, fileDate) {
+  // Nice file types
+  const niceFileTypes = {
+    'unknown': 'Unrecognized type',
+    'video': 'Video',
+    'image': 'Picture',
+    'archive': 'Compressed archive',
+  };
+
+  // generate canvas content - common atrributes
+  canvasHTML = '<h3>File details</h3><hr />';
+  canvasHTML += '<b>Name</b><p>'+fileName+'</p>';
+  canvasHTML += '<b>Type</b><p>'+niceFileTypes[fileType]+'</p>';
+  canvasHTML += '<b>Size</b><p>'+fileSize+'</p>';
+  canvasHTML += '<b>Last modification</b><p>'+fileDate+'</p>';
+
+  // generate canvas content - video specifics
+  if (fileType == 'video') {
+    canvasHTML += '<h5 style="padding-top: 50px;">Video preview</h5><hr />';
+    canvasHTML += '<video controls class="previewVideo" style="width: 100%"';
+    canvasHTML += 'src="/upload/preview/'+encodeURIComponent(filePath.substring(1))+'" >';
+    canvasHTML += '</video>';
+  }
+  // generate canvas content - picture specifics
+  else if (fileType == 'image') {
+    canvasHTML += '<h5 style="padding-top: 50px;">Picture preview</h5><hr />';
+    canvasHTML += '<img style="width: 100%"';
+    canvasHTML += 'src="/upload/preview/'+encodeURIComponent(filePath.substring(1))+'" ';
+    canvasHTML += '/>';
+  }
+
+  // generate canvas content - actions
+  canvasHTML += '<h5 style="padding: 50px 0px 15px 0px;">Actions</h5>';
+
+  // generate canvas content - video specific actions
+  if (fileType == 'video') {
+    canvasHTML += '<button class="btn btn-outline-primary" onclick="importVideo(\''+fileName+'\', \''+filePath+'\')">';
+    canvasHTML += '<i class="fas fa-file-import"></i> Import</button>';
+  }
+
+  // generate canvas content - common actions
+  canvasHTML += '<a class="btn btn-outline-primary" target="_blank" rel="noopener noreferrer" ';
+  canvasHTML += 'href="/upload/preview/'+encodeURIComponent(filePath.substring(1))+'">';
+  canvasHTML += '<i class="fas fa-download"></i> Download</a>';
+  /*
+   * TODO: implement deletion
+   * canvasHTML += '<button class="btn btn-outline-danger"><i class="far fa-trash-alt"></i> Delete</button>';
+   */
+
+  // set content
+  window.DetailPanelContent.innerHTML = canvasHTML;
+
+  // display canvas
+  window.DetailPanelOffCanvas.show();
+}
+
+/* startup */
 window.onload = function() {
   generateBreadcrumb();
   setFolder(CURRENT_PATH);
 
-  // initialize offcanvas import as video
-  oc = document.getElementById('importAsVideoOffCanvas');
-  window.OffcanvasVideo = new bootstrap.Offcanvas(oc);
+  // initialize detail panel
+  window.DetailPanel = document.getElementById('item-details');
+  window.DetailPanelOffCanvas = new bootstrap.Offcanvas(window.DetailPanel);
+  window.DetailPanelContent = document.getElementById('item-details-content');
 
   // pause video when hidden
-  oc.addEventListener('hide.bs.offcanvas', event => {
-    const video = oc.querySelector('.previewVideo');
-    video.pause();
+  window.DetailPanel.addEventListener('hide.bs.offcanvas', event => {
+    const video = DetailPanelContent.querySelector('.previewVideo');
+    if (video != null) {
+      video.pause();
+    }
   });
 
-  // reset video type selection
-  sel = document.getElementById('importAsVideoTypeSelect');
-  sel.value = 'x';
-  importAsVideoButtonUpdate(sel);
+  // initialize video import modal
+  window.VideoImport = document.getElementById('video-import-modal');
+  window.VideoImportModal = new bootstrap.Modal(window.VideoImport);
 }
 
 function importAsVideoButtonUpdate(sel) {
@@ -429,11 +534,10 @@ function importAsVideoButtonUpdate(sel) {
   btn.disabled = (sel.value == 'x');
 }
 
-function importVideoAjax() {
+function importVideoAjax(filetype) {
   oc = document.getElementById('importAsVideoOffCanvas');
-  const filename = oc.querySelector('.video-filepath').value;
-  const title = oc.querySelector('.video-title').value;
-  const filetype = document.getElementById('importAsVideoTypeSelect').value;
+  const filename = window.VideoImport.querySelector('#videoImportFilePath').innerText;
+  const title = window.VideoImport.querySelector('#videoImportFileName').innerText;
 
   $.ajax('/api/video', {
     method: 'POST',
@@ -456,7 +560,7 @@ function importVideoAjax() {
         'Import a video',
         '',
         'bg-success',
-        'You can edit the video more <a href="/video/'+video_id+'/edit" target="_blank">here</a>',
+        '<a href="/video/'+video_id+'/edit" target="_blank">You can edit the video more here</a>',
       );
 
       // close canvas
@@ -479,6 +583,16 @@ function importVideoAjax() {
             'bg-success',
             'Video ready',
           );
+
+          // close modal
+          window.VideoImportModal.hide();
+
+          // close off canvas
+          window.DetailPanelOffCanvas.hide();
+
+          // refresh view
+          updatePath();
+
         },
 
         error: function (data) {
@@ -528,6 +642,41 @@ function computeDuration(video_id) {
     },
   });
 }
+
+// From: https://stackoverflow.com/a/14919494
+
+/**
+ * Format bytes as human-readable text.
+ *
+ * @param bytes Number of bytes.
+ * @param si True to use metric (SI) units, aka powers of 1000. False to use
+ *           binary (IEC), aka powers of 1024.
+ * @param dp Number of decimal places to display.
+ *
+ * @return Formatted string.
+ */
+ function humanFileSize(bytes, si=false, dp=1) {
+  const thresh = si ? 1000 : 1024;
+
+  if (Math.abs(bytes) < thresh) {
+    return bytes + ' B';
+  }
+
+  const units = si
+    ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+    : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+  let u = -1;
+  const r = 10**dp;
+
+  do {
+    bytes /= thresh;
+    ++u;
+  } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+
+  return bytes.toFixed(dp) + ' ' + units[u];
+}
+
 </script>
 
 <!-- Footer Area -->
