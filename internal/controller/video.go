@@ -112,6 +112,7 @@ func (c *Controller) VideoAjaxComputeDuration(g *gin.Context) {
 		g.JSON(500, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	g.JSON(200, gin.H{
