@@ -338,7 +338,7 @@ func (c *Controller) VideoView(g *gin.Context) {
 	user := g.MustGet("user").(*model.User)
 	viewCount := 0
 	count := &model.VideoView{}
-	result = c.datastore.Debug().First(&count, "video_id = ? AND user_id = ?", video.ID, user.ID)
+	result = c.datastore.First(&count, "video_id = ? AND user_id = ?", video.ID, user.ID)
 	if result.RowsAffected > 0 {
 		viewCount = count.Count
 	}

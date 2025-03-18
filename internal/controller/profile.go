@@ -26,7 +26,7 @@ func (c *Controller) ProfileView(g *gin.Context) {
 	}
 	for _, videoView := range videoViewsAll {
 		var actors []ActorResult
-		c.datastore.Debug().Table("video_actors").Select("actor_id").Where("video_id = ?", videoView.VideoID).Scan(&actors)
+		c.datastore.Table("video_actors").Select("actor_id").Where("video_id = ?", videoView.VideoID).Scan(&actors)
 
 		for _, actor := range actors {
 			_, ok := countPerActor[actor.ActorID]

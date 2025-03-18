@@ -25,7 +25,7 @@ func (c *Controller) VideoViewAjaxIncrement(g *gin.Context) {
 	user := g.MustGet("user").(*model.User)
 
 	count := &model.VideoView{}
-	result = c.datastore.Debug().First(&count, "video_id = ? AND user_id = ?", video.ID, user.ID)
+	result = c.datastore.First(&count, "video_id = ? AND user_id = ?", video.ID, user.ID)
 
 	// check result
 	if result.RowsAffected > 0 {
@@ -49,7 +49,7 @@ func (c *Controller) VideoViewAjaxIncrement(g *gin.Context) {
 		Count: 1,
 	}
 
-	err := c.datastore.Debug().Create(count).Error
+	err := c.datastore.Create(count).Error
 	if err != nil {
 		g.JSON(500, gin.H{
 			"error": err.Error(),
