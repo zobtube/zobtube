@@ -37,7 +37,13 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 }
 
 func (c *Controller) ClipList(g *gin.Context) {
-	c.GenericVideoList("clip", g)
+	var videos []model.Video
+	c.datastore.Where("type = ?", "c").Order("created_at desc").Preload(clause.Associations).Find(&videos)
+	g.HTML(http.StatusOK, "clip/list.html", gin.H{
+		"Type":   "clip",
+		"User":   g.MustGet("user").(*model.User),
+		"Videos": videos,
+	})
 }
 
 func (c *Controller) MovieList(g *gin.Context) {
