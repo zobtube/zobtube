@@ -1,0 +1,23 @@
+{{ define "shards/video-mini-view-count-tile.html" }}
+  <div class="col-md-3">
+    <div class="single-video">
+      <div class="video-img">
+        <a href="{{ .Video.URLView }}">
+          <img class="lazy" data-src="{{ .Video.URLThumbXS }}">
+        </a>
+        {{ if .Video.Duration }}
+        <span class="video-duration">{{.Video.NiceDuration }}</span>
+        {{ end }}
+      </div>
+      <div class="video-mini-title">
+        <h4><a href="{{ .Video.URLView }}" class="video-title">{{ .Video.Name }} </a></h4>
+        <div class="video-counter">
+          <div class="video-viewers">
+            <span class="fa fa-eye view-icon"></span>
+            <span>{{ .Count }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{{ end }}

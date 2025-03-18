@@ -103,6 +103,9 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	// adm
 	authGroup.GET("/adm", c.AdmHome)
 
+	// profile
+	authGroup.GET("/profile", c.ProfileView)
+
 	// remainings routes to implement
 	/*
 	   path('actor/<uuid:id>/edit/first-time', views.actor_edit, name='actor_edit_first_time', kwargs={'first_time': True}),

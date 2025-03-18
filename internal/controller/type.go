@@ -82,6 +82,9 @@ type AbtractController interface {
 
 	// Cleanup
 	CleanupRoutine()
+
+	// Profile
+	ProfileView(c *gin.Context)
 }
 
 type Controller struct {
