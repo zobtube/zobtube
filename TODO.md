@@ -18,14 +18,15 @@
 - [ ] Add 'set as image' in triage towards videos / actors / channels
 - [ ] Clips view
 
-## Bugs
+### Bugs
 
 - [ ] Fix bug with large uploaded files in triage
 - [ ] Ensure that only admin can use admin routes
 
-## Enhancement
+### Enhancement
 
 - [ ] Add a welcome page when no configuration is specified to bootstrap the app
+- [ ] Write onboarding readme
 
 ## Enhancements not expected before 1.1.0
 
