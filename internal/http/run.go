@@ -1,7 +1,10 @@
 package http
 
-import ()
+import "log"
 
 func (s *Server) Start(bindAddress string) {
-	s.Server.Run(bindAddress)
+	err := s.Server.Run(bindAddress)
+	if err != nil {
+		log.Panic(err.Error())
+	}
 }

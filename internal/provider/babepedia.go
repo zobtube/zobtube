@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Babepedia struct{}
@@ -25,7 +28,10 @@ func (p *Babepedia) ActorSearch(actorName string) (url string, err error) {
 			return http.ErrUseLastResponse
 		},
 	}
-	url = "https://www.babepedia.com/babe/" + strings.ReplaceAll(strings.Title(actorName), " ", "_")
+
+	caser := cases.Title(language.English)
+
+	url = "https://www.babepedia.com/babe/" + strings.ReplaceAll(caser.String(actorName), " ", "_")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return url, err
@@ -51,7 +57,8 @@ func (p *Babepedia) ActorGetThumb(actorName, url string) (thumb []byte, err erro
 			return http.ErrUseLastResponse
 		},
 	}
-	_url := "https://www.babepedia.com/pics/" + strings.Title(actorName) + ".jpg"
+	caser := cases.Title(language.English)
+	_url := "https://www.babepedia.com/pics/" + caser.String(actorName) + ".jpg"
 	req, err := http.NewRequest("GET", _url, nil)
 	if err != nil {
 		return thumb, err

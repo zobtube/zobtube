@@ -7,6 +7,9 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Boobpedia struct{}
@@ -26,7 +29,8 @@ func (p *Boobpedia) ActorSearch(actorName string) (url string, err error) {
 			return http.ErrUseLastResponse
 		},
 	}
-	url = "https://www.boobpedia.com/boobs/" + strings.ReplaceAll(strings.Title(actorName), " ", "_")
+	caser := cases.Title(language.English)
+	url = "https://www.boobpedia.com/boobs/" + strings.ReplaceAll(caser.String(actorName), " ", "_")
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return url, err

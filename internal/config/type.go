@@ -10,14 +10,14 @@ import (
 
 type Config struct {
 	Server struct {
-		Bind string `yaml:"bind",envconfig:"ZT_SERVER_BIND"`
+		Bind string `yaml:"bind" envconfig:"ZT_SERVER_BIND"`
 	}
 	DB struct {
-		Driver     string `yaml:"driver",envconfig:"ZT_DB_DRIVER"`
-		Connstring string `yaml:"connstring",envconfig:"ZT_DB_CONNSTRING"`
+		Driver     string `yaml:"driver" envconfig:"ZT_DB_DRIVER"`
+		Connstring string `yaml:"connstring" envconfig:"ZT_DB_CONNSTRING"`
 	} `yaml:"db"`
 	Media struct {
-		Path string `yaml:"path",envconfig:"ZT_MEDIA_PATH"`
+		Path string `yaml:"path" envconfig:"ZT_MEDIA_PATH"`
 	} `yaml:"media"`
 }
 
