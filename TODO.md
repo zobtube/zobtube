@@ -36,6 +36,7 @@
 - [ ] Merge actors
 - [ ] Add actors on video page after selections
 - [ ] Fix mini thumb down-sizing scale issue
+- [ ] Fix suggestion videos
 
 ### Enhancement
 
