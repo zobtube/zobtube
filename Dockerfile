@@ -1,10 +1,7 @@
-FROM busybox AS build-env
+FROM alpine:3.21.3
 
-RUN mkdir -p /build/tmp
-
-FROM scratch
+RUN apk add ffmpeg
 
 ENTRYPOINT ["/zobtube"]
 
-COPY --from=build-env --chmod=777 /build/tmp /tmp
 COPY zobtube /
