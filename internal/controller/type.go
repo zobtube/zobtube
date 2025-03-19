@@ -2,9 +2,9 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"gitlab.com/zobtube/zobtube/internal/config"
-	"gitlab.com/zobtube/zobtube/internal/model"
-	"gitlab.com/zobtube/zobtube/internal/provider"
+	"github.com/zobtube/zobtube/internal/config"
+	"github.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/provider"
 
 	"gorm.io/gorm"
 )

@@ -3,11 +3,11 @@ package main
 import (
 	"embed"
 
-	"gitlab.com/zobtube/zobtube/internal/config"
-	"gitlab.com/zobtube/zobtube/internal/controller"
-	"gitlab.com/zobtube/zobtube/internal/http"
-	"gitlab.com/zobtube/zobtube/internal/model"
-	"gitlab.com/zobtube/zobtube/internal/provider"
+	"github.com/zobtube/zobtube/internal/config"
+	"github.com/zobtube/zobtube/internal/controller"
+	"github.com/zobtube/zobtube/internal/http"
+	"github.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/provider"
 )
 
 //go:embed web

@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm/clause"
 
-	"gitlab.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/model"
 )
 
 func (c *Controller) ChannelList(g *gin.Context) {

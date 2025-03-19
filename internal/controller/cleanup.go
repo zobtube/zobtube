@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"gitlab.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/model"
 )
 
 func (c *Controller) CleanupRoutine() {

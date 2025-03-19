@@ -15,7 +15,7 @@ import (
 	"golang.org/x/image/draw"
 	"gorm.io/gorm/clause"
 
-	"gitlab.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/model"
 )
 
 func (c *Controller) VideoAjaxActors(g *gin.Context) {

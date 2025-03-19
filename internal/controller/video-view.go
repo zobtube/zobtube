@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 
-	"gitlab.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/model"
 )
 
 func (c *Controller) VideoViewAjaxIncrement(g *gin.Context) {

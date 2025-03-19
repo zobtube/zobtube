@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/model"
 )
 
 func (c *Controller) AdmHome(g *gin.Context) {

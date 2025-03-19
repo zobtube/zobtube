@@ -3,7 +3,7 @@ package controller
 import (
 	"errors"
 
-	"gitlab.com/zobtube/zobtube/internal/provider"
+	"github.com/zobtube/zobtube/internal/provider"
 )
 
 func (c *Controller) ProviderRegister(p provider.Provider) {

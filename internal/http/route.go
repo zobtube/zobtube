@@ -4,7 +4,7 @@ import (
 	"io/fs"
 	"net/http"
 
-	"gitlab.com/zobtube/zobtube/internal/controller"
+	"github.com/zobtube/zobtube/internal/controller"
 )
 
 func (s *Server) setupRoutes(c controller.AbtractController) {

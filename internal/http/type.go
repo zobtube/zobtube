@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"gitlab.com/zobtube/zobtube/internal/controller"
+	"github.com/zobtube/zobtube/internal/controller"
 )
 
 type Server struct {

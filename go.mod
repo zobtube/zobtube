@@ -1,4 +1,4 @@
-module gitlab.com/zobtube/zobtube
+module github.com/zobtube/zobtube
 
 go 1.22.2
 

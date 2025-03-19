@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"gitlab.com/zobtube/zobtube/internal/config"
+	"github.com/zobtube/zobtube/internal/config"
 )
 
 var modelToMigrate = []interface{}{

@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"gitlab.com/zobtube/zobtube/internal/controller"
-	"gitlab.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/controller"
+	"github.com/zobtube/zobtube/internal/model"
 )
 
 const cookieName = "zt_auth"
