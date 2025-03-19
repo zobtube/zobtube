@@ -24,7 +24,7 @@
 - [x] Fix bug with large uploaded files in triage
 - [ ] Ensure that only admin can use admin routes
 - [ ] Create own favicon
-- [ ] Add linting validation
+- [x] Add linting validation
 - [ ] Add tests
   - [ ] Validate routes requiring authentication
   - [ ] Validate routes requiring admin rights
