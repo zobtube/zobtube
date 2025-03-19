@@ -17,16 +17,31 @@
 - [ ] Add folder creation in triage
 - [ ] Add 'set as image' in triage towards videos / actors / channels
 - [ ] Clips view
+- [ ] Edit actor aliases
 
 ### Bugs
 
-- [ ] Fix bug with large uploaded files in triage
+- [x] Fix bug with large uploaded files in triage
 - [ ] Ensure that only admin can use admin routes
+- [ ] Create own favicon
+- [ ] Add linting validation
+- [ ] Add tests
+  - [ ] Validate routes requiring authentication
+  - [ ] Validate routes requiring admin rights
+  - [ ] Validate upload
+  - [ ] Validate video viewing
+- [ ] Manually add links of actors
+- [ ] Delete actors
+- [ ] Rename actors
+- [ ] Merge actors
+- [ ] Add actors on video page after selections
+- [ ] Fix mini thumb down-sizing scale issue
 
 ### Enhancement
 
 - [ ] Add a welcome page when no configuration is specified to bootstrap the app
 - [ ] Write onboarding readme
+- [ ] Add actor description
 
 ## Enhancements not expected before 1.1.0
 
