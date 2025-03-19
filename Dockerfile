@@ -6,5 +6,5 @@ FROM scratch
 
 ENTRYPOINT ["/zobtube"]
 
-COPY --from=build-env --chmod 777 /build/tmp /tmp
+COPY --from=build-env --chmod=777 /build/tmp /tmp
 COPY zobtube /
