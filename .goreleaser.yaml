@@ -27,7 +27,7 @@ archives:
 
 dockers:
   - image_templates:
-      - "gcr.github.io/zobtube/zobtube:{{ .Version }}"
+      - "ghcr.github.io/zobtube/zobtube:{{ .Version }}"
     build_flag_templates:
       - "--pull"
       - "--label=org.opencontainers.image.created={{.Date}}"
