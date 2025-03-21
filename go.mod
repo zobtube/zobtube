@@ -5,7 +5,7 @@ go 1.22.2
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/glebarez/sqlite v1.11.0
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	golang.org/x/image v0.18.0
 	golang.org/x/text v0.16.0
