@@ -100,7 +100,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [ ] Merge actors
 - [ ] Add actors on video page after selections
 - [ ] Fix mini thumb down-sizing scale issue
-- [ ] Fix suggestion videos
+- [x] Fix suggestion videos
 
 **Enhancement**
 
