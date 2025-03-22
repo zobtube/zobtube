@@ -85,6 +85,9 @@ type AbtractController interface {
 
 	// Profile
 	ProfileView(c *gin.Context)
+
+	// Failsafe
+	FailsafeConfiguration(c *gin.Context)
 }
 
 type Controller struct {

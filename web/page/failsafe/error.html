@@ -1,0 +1,17 @@
+{{ define "failsafe/error.html" }}
+{{ template "top-failsafe" .}}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="alert alert-danger">
+      A fatal error occured during initialization!<br />
+      ZobTube is not able to recover from it.<br />
+      Please fix the configuration file and restart ZobTube.<br />
+      Last error was:<br />
+      <code>{{ .Error }}</code>
+    </div>
+  </div>
+</div>
+
+{{ template "bottom-failsafe" . }}
+{{ end }}

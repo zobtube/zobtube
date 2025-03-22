@@ -8,6 +8,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var ErrNoDbDriverSet = errors.New("ZT_DB_DRIVER is not set")
+var ErrNoDbConnStringSet = errors.New("ZT_DB_CONNSTRING is not set")
+var ErrNoMediaPathSet = errors.New("ZT_MEDIA_PATH is not set")
+
 type Config struct {
 	Server struct {
 		Bind string `yaml:"bind" envconfig:"ZT_SERVER_BIND"`
@@ -45,15 +49,15 @@ func New() (*Config, error) {
 
 	// pre flight checks
 	if cfg.DB.Driver == "" {
-		return cfg, errors.New("ZT_DB_DRIVER is not set")
+		return cfg, ErrNoDbDriverSet
 	}
 
 	if cfg.DB.Connstring == "" {
-		return cfg, errors.New("ZT_DB_CONNSTRING is not set")
+		return cfg, ErrNoDbConnStringSet
 	}
 
 	if cfg.Media.Path == "" {
-		return cfg, errors.New("ZT_MEDIA_PATH is not set")
+		return cfg, ErrNoMediaPathSet
 	}
 
 	if cfg.Server.Bind == "" {

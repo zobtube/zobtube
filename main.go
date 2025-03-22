@@ -13,20 +13,38 @@ import (
 //go:embed web
 var webFS embed.FS
 
+func startFailsafeWebServer(err error) {
+	var httpServer *http.Server
+
+	if err == config.ErrNoDbDriverSet || err == config.ErrNoDbConnStringSet || err == config.ErrNoMediaPathSet {
+		c := controller.New(nil, nil)
+		httpServer, _ = http.NewFailsafeConfig(c, &webFS)
+	} else {
+		c := controller.New(nil, nil)
+		httpServer, _ = http.NewUnexpectedError(c, &webFS, err)
+		//httpServer.registerError(err)
+	}
+
+	httpServer.Start("0.0.0.0:8080")
+}
+
 func main() {
 	cfg, err := config.New()
 	if err != nil {
-		panic(err)
+		startFailsafeWebServer(err)
+		return
 	}
 
 	err = cfg.EnsureTreePresent()
 	if err != nil {
-		panic(err)
+		startFailsafeWebServer(err)
+		return
 	}
 
 	db, err := model.New(cfg)
 	if err != nil {
-		panic(err)
+		startFailsafeWebServer(err)
+		return
 	}
 
 	c := controller.New(cfg, db)
