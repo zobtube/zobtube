@@ -80,6 +80,10 @@ type AbtractController interface {
 	ProviderRegister(provider.Provider)
 	ProviderGet(string) (provider.Provider, error)
 
+	// Init
+	ConfigurationRegister(*config.Config)
+	DatabaseRegister(*gorm.DB)
+
 	// Cleanup
 	CleanupRoutine()
 
@@ -92,15 +96,23 @@ type AbtractController interface {
 }
 
 type Controller struct {
-	config    *config.Config
-	datastore *gorm.DB
-	providers map[string]provider.Provider
+	config          *config.Config
+	datastore       *gorm.DB
+	providers       map[string]provider.Provider
+	shutdownChannel chan<- int
 }
 
-func New(cfg *config.Config, db *gorm.DB) AbtractController {
+func New(shutdownChannel chan int) AbtractController {
 	return &Controller{
-		config:    cfg,
-		datastore: db,
-		providers: make(map[string]provider.Provider),
+		providers:       make(map[string]provider.Provider),
+		shutdownChannel: shutdownChannel,
 	}
+}
+
+func (c *Controller) ConfigurationRegister(cfg *config.Config) {
+	c.config = cfg
+}
+
+func (c *Controller) DatabaseRegister(db *gorm.DB) {
+	c.datastore = db
 }

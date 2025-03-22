@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -44,9 +43,9 @@ func (c *Controller) FailsafeConfiguration(g *gin.Context) {
 				err = encoder.Encode(newConfig)
 
 				if err == nil {
-					//TODO: improve with http server kill and self execve
-					fmt.Println("configuration set, exiting to allow a restart")
-					os.Exit(0)
+					c.Restart()
+					g.Redirect(http.StatusFound, "/")
+					return
 				}
 			}
 		}
@@ -85,9 +84,9 @@ func (c *Controller) FailsafeUser(g *gin.Context) {
 
 				err = c.datastore.Create(&admin).Error
 				if err == nil {
-					//TODO: improve with http server kill and self execve
-					fmt.Println("configuration set, exiting to allow a restart")
-					os.Exit(0)
+					c.Restart()
+					g.Redirect(http.StatusFound, "/")
+					return
 				}
 			}
 		}

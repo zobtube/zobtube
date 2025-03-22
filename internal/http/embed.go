@@ -37,10 +37,10 @@ func (s *Server) LoadHTMLFromEmbedFS(globPath string) {
 	tmpl := template.Must(
 		root,
 		loadAndAddToRoot(
-			s.Server.FuncMap,
+			s.Router.FuncMap,
 			root,
 			*s.FS,
 			globPath),
 	)
-	s.Server.SetHTMLTemplate(tmpl)
+	s.Router.SetHTMLTemplate(tmpl)
 }

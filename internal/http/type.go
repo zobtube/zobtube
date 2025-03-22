@@ -11,22 +11,23 @@ import (
 )
 
 type Server struct {
-	Server *gin.Engine
+	Server *http.Server
+	Router *gin.Engine
 	FS     *embed.FS
 }
 
 // main http server setup
 func New(c *controller.AbtractController, fs *embed.FS) (*Server, error) {
 	server := &Server{
-		Server: gin.Default(),
+		Router: gin.Default(),
 		FS:     fs,
 	}
 
 	server.setupRoutes(*c)
 	// both next settings are needed for filepath used above
-	server.Server.UseRawPath = true
-	server.Server.UnescapePathValues = false
-	server.Server.RemoveExtraSlash = false
+	server.Router.UseRawPath = true
+	server.Router.UnescapePathValues = false
+	server.Router.RemoveExtraSlash = false
 
 	return server, nil
 }
@@ -34,7 +35,7 @@ func New(c *controller.AbtractController, fs *embed.FS) (*Server, error) {
 // failsafe http server setup - no valid config found
 func NewFailsafeConfig(c controller.AbtractController, embedfs *embed.FS) (*Server, error) {
 	server := &Server{
-		Server: gin.Default(),
+		Router: gin.Default(),
 		FS:     embedfs,
 	}
 
@@ -45,12 +46,12 @@ func NewFailsafeConfig(c controller.AbtractController, embedfs *embed.FS) (*Serv
 	staticFS, _ := fs.Sub(server.FS, "web/static")
 
 	// load static
-	server.Server.StaticFS("/static", http.FS(staticFS))
-	server.Server.GET("/ping", livenessProbe)
+	server.Router.StaticFS("/static", http.FS(staticFS))
+	server.Router.GET("/ping", livenessProbe)
 
 	// failsafe configuration route
-	server.Server.GET("", c.FailsafeConfiguration)
-	server.Server.POST("", c.FailsafeConfiguration)
+	server.Router.GET("", c.FailsafeConfiguration)
+	server.Router.POST("", c.FailsafeConfiguration)
 
 	return server, nil
 }
@@ -58,7 +59,7 @@ func NewFailsafeConfig(c controller.AbtractController, embedfs *embed.FS) (*Serv
 // failsafe http server setup - unexpected error
 func NewUnexpectedError(c controller.AbtractController, embedfs *embed.FS, faultyError error) (*Server, error) {
 	server := &Server{
-		Server: gin.Default(),
+		Router: gin.Default(),
 		FS:     embedfs,
 	}
 
@@ -69,10 +70,10 @@ func NewUnexpectedError(c controller.AbtractController, embedfs *embed.FS, fault
 	staticFS, _ := fs.Sub(server.FS, "web/static")
 
 	// load static
-	server.Server.StaticFS("/static", http.FS(staticFS))
-	server.Server.GET("/ping", livenessProbe)
+	server.Router.StaticFS("/static", http.FS(staticFS))
+	server.Router.GET("/ping", livenessProbe)
 
-	server.Server.GET("", func(g *gin.Context) {
+	server.Router.GET("", func(g *gin.Context) {
 		g.HTML(http.StatusOK, "failsafe/error.html", gin.H{
 			"Error": faultyError,
 		})
@@ -84,7 +85,7 @@ func NewUnexpectedError(c controller.AbtractController, embedfs *embed.FS, fault
 // failsafe http server setup - no valid config found
 func NewFailsafeUser(c controller.AbtractController, embedfs *embed.FS) (*Server, error) {
 	server := &Server{
-		Server: gin.Default(),
+		Router: gin.Default(),
 		FS:     embedfs,
 	}
 
@@ -95,12 +96,12 @@ func NewFailsafeUser(c controller.AbtractController, embedfs *embed.FS) (*Server
 	staticFS, _ := fs.Sub(server.FS, "web/static")
 
 	// load static
-	server.Server.StaticFS("/static", http.FS(staticFS))
-	server.Server.GET("/ping", livenessProbe)
+	server.Router.StaticFS("/static", http.FS(staticFS))
+	server.Router.GET("/ping", livenessProbe)
 
 	// failsafe configuration route
-	server.Server.GET("", c.FailsafeUser)
-	server.Server.POST("", c.FailsafeUser)
+	server.Router.GET("", c.FailsafeUser)
+	server.Router.POST("", c.FailsafeUser)
 
 	return server, nil
 }

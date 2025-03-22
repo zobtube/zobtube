@@ -15,16 +15,16 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	staticFS, _ := fs.Sub(s.FS, "web/static")
 
 	// load static
-	s.Server.StaticFS("/static", http.FS(staticFS))
-	s.Server.GET("/ping", livenessProbe)
+	s.Router.StaticFS("/static", http.FS(staticFS))
+	s.Router.GET("/ping", livenessProbe)
 
 	// authentication
-	auth := s.Server.Group("/auth")
+	auth := s.Router.Group("/auth")
 	auth.GET("", c.AuthPage)
 	auth.POST("/login", c.AuthLogin)
 	auth.GET("/logout", c.AuthLogout)
 
-	authGroup := s.Server.Group("")
+	authGroup := s.Router.Group("")
 	authGroup.Use(UserIsAuthenticated(c))
 
 	// home
