@@ -80,3 +80,27 @@ func NewUnexpectedError(c controller.AbtractController, embedfs *embed.FS, fault
 
 	return server, nil
 }
+
+// failsafe http server setup - no valid config found
+func NewFailsafeUser(c controller.AbtractController, embedfs *embed.FS) (*Server, error) {
+	server := &Server{
+		Server: gin.Default(),
+		FS:     embedfs,
+	}
+
+	// load templates
+	server.LoadHTMLFromEmbedFS("web/page/**/*")
+
+	// prepare subfs
+	staticFS, _ := fs.Sub(server.FS, "web/static")
+
+	// load static
+	server.Server.StaticFS("/static", http.FS(staticFS))
+	server.Server.GET("/ping", livenessProbe)
+
+	// failsafe configuration route
+	server.Server.GET("", c.FailsafeUser)
+	server.Server.POST("", c.FailsafeUser)
+
+	return server, nil
+}

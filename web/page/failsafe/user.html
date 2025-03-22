@@ -1,0 +1,42 @@
+{{ define "failsafe/user.html" }}
+{{ template "top-failsafe" .}}
+<h2>Failsafe mode</h2>
+<hr />
+
+<div class="alert alert-warning">
+  ZobTube started without any user. Please create an initial administrator user.
+</div>
+
+<h4 style="margin: 50px 0 25px 0;">New administrator</h4>
+
+{{ if .Error }}
+<div class="alert alert-danger">
+  An error occured!<br />
+  <code>{{ .Error.Error }}</code>
+</div>
+{{ end }}
+
+<div class="row">
+  <div class="col-md-12">
+    <form action="/" method="post">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" name="username" placeholder="New user name" value="admin">
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" name="password" placeholder="A top secure password">
+      </div>
+      <div class="row">
+        <div class="col-4"></div>
+        <div class="col-4">
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Register new user</button>
+        </div>
+        <div class="col-4"></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{ template "bottom-failsafe" . }}
+{{ end }}

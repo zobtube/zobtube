@@ -88,6 +88,7 @@ type AbtractController interface {
 
 	// Failsafe
 	FailsafeConfiguration(c *gin.Context)
+	FailsafeUser(c *gin.Context)
 }
 
 type Controller struct {

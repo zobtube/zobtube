@@ -1,14 +1,19 @@
 package controller
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v3"
 
 	"github.com/zobtube/zobtube/internal/config"
+	"github.com/zobtube/zobtube/internal/model"
 )
 
 type ConfigNewForm struct {
@@ -48,6 +53,47 @@ func (c *Controller) FailsafeConfiguration(g *gin.Context) {
 	}
 
 	g.HTML(http.StatusOK, "failsafe/config.html", gin.H{
+		"Error": err,
+	})
+}
+
+type UserNewForm struct {
+	Username string `form:"username"`
+	Password string `form:"password"`
+}
+
+func (c *Controller) FailsafeUser(g *gin.Context) {
+	var err error
+
+	if g.Request.Method == "POST" {
+		var form UserNewForm
+		err = g.ShouldBind(&form)
+		if err == nil {
+			if form.Password == "" {
+				err = errors.New("password cannot be empty")
+			} else {
+				now := time.Now()
+				passwordHex := sha256.Sum256([]byte(form.Password))
+				password := hex.EncodeToString(passwordHex[:])
+				admin := &model.User{
+					Username:  form.Username,
+					Admin:     true,
+					CreatedAt: now,
+					UpdatedAt: now,
+					Password:  password,
+				}
+
+				err = c.datastore.Create(&admin).Error
+				if err == nil {
+					//TODO: improve with http server kill and self execve
+					fmt.Println("configuration set, exiting to allow a restart")
+					os.Exit(0)
+				}
+			}
+		}
+	}
+
+	g.HTML(http.StatusOK, "failsafe/user.html", gin.H{
 		"Error": err,
 	})
 }
