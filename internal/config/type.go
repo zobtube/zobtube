@@ -25,11 +25,11 @@ type Config struct {
 	} `yaml:"media"`
 }
 
-func New() (*Config, error) {
+func New(configPath string) (*Config, error) {
 	cfg := &Config{}
 
-	if _, err := os.Stat("./config.yml"); err == nil {
-		f, err := os.Open("config.yml")
+	if _, err := os.Stat(configPath); err == nil {
+		f, err := os.Open(configPath)
 		if err != nil {
 			return cfg, err
 		}

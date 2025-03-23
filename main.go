@@ -16,6 +16,10 @@ import (
 //go:embed web
 var webFS embed.FS
 
+// const
+const cfgPath = "config.yml"
+
+// errors
 var ErrNoUser = errors.New("database does not have any account")
 
 // channel for http server shutdown
@@ -56,7 +60,7 @@ func main() {
 
 	// create controller
 	c := controller.New(shutdownChannel)
-	cfg, err := config.New()
+	cfg, err := config.New(cfgPath)
 	if err != nil {
 		startFailsafeWebServer(err, c)
 		return
