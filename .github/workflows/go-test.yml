@@ -2,6 +2,9 @@
 
 name: go-test
 on:
+  push:
+    branches:
+      - main
   pull_request:
 
 permissions:
@@ -18,4 +21,14 @@ jobs:
         with:
           go-version: stable
       - name: Test with Go CLI
-        run: go test ./...
+        run: go test ./... 
+      - name: Update coverage report
+        uses: ncruces/go-coverage-report@v0
+        with:
+          report: true
+          chart: false
+          amend: true
+        if: |
+          matrix.os == 'ubuntu-latest' &&
+          github.event_name == 'push'
+        continue-on-error: true

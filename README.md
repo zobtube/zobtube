@@ -2,6 +2,10 @@
 
 _ZobTube, passion of the Zob, lube for the Tube!_
 
+
+[![Go Report](https://goreportcard.com/badge/github.com/zobtube/zobtube)](https://goreportcard.com/report/github.com/zobtube/zobtube)
+[![Go Coverage](https://github.com/zobtube/zobtube/wiki/coverage.svg)](https://raw.githack.com/wiki/zobtube/zobtube/coverage.html)
+
 ZobTube is a library viewer and management tools for all your ~~porn~~ scientific videos.
 
 ## Current status
