@@ -96,8 +96,6 @@ Environmental variable name | Configuration variable name | Example values | Des
   - [ ] Validate video viewing
 - [ ] Manually add links of actors
 - [ ] Delete actors
-- [ ] Rename actors
-- [ ] Merge actors
 - [ ] Add actors on video page after selections
 - [x] Fix mini thumb down-sizing scale issue
 - [x] Fix suggestion videos
@@ -107,9 +105,11 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [ ] Add a welcome page when no configuration is specified to bootstrap the app
 - [x] Write onboarding readme
 - [ ] Add actor description
+- [ ] Rename actors
 
 ### Enhancements not expected before 1.1.0
 
 - [ ] Add pagination
 - [ ] Movie scenes
 - [ ] Collections
+- [ ] Merge actors
