@@ -11,7 +11,7 @@ import (
 	"github.com/zobtube/zobtube/internal/config"
 )
 
-var modelToMigrate = []interface{}{
+var modelToMigrate = []any{
 	Actor{},
 	ActorAlias{},
 	ActorLink{},
