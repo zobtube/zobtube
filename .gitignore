@@ -3,3 +3,4 @@ zt.db
 tmp/*
 dist/
 config.yml
+internal/model/zt-test.sqlite
