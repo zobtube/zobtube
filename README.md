@@ -117,3 +117,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [ ] Movie scenes
 - [ ] Collections
 - [ ] Merge actors
+
+## License
+
+ZobTube © 2024 by sblablaha is licensed under CC BY-SA 4.0. To view a copy of this license, visit [CC website](https://creativecommons.org/licenses/by-sa/4.0/)
