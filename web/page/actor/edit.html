@@ -33,7 +33,7 @@ img {
     </div>
     <div id="profile-actions">
       <a class="btn btn-success" style="margin-top: 15px; width: 100%" href="{{ .Actor.URLView }}">View profile</a>
-      <a class="btn btn-danger" style="margin-top: 15px; width: 100%" href="{% url 'actor_remove' actor.id %}">Delete actor profile</a>
+      <a class="btn btn-danger" style="margin-top: 15px; width: 100%" href="{{ .Actor.URLAdmDelete }}">Delete actor profile</a>
       <a class="btn btn-info" style="margin-top: 15px; width: 100%" onclick="showActorPictures()">View link pictures</a>
     </div>
   </div>

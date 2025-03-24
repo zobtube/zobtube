@@ -39,6 +39,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	actors.GET("/:id", c.ActorView)
 	actors.GET("/:id/edit", c.ActorEdit)
 	actors.GET("/:id/thumb", c.ActorThumb)
+	actors.GET("/:id/delete", c.ActorDelete)
 
 	actorAPI := authGroup.Group("/api/actor")
 	{

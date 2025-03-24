@@ -68,3 +68,7 @@ func (a *Actor) URLThumb() string {
 func (a *Actor) URLAdmEdit() string {
 	return fmt.Sprintf("/actor/%s/edit", a.ID)
 }
+
+func (a *Actor) URLAdmDelete() string {
+	return fmt.Sprintf("/actor/%s/delete", a.ID)
+}

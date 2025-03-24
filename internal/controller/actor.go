@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -329,4 +330,73 @@ func (c *Controller) ActorAjaxThumb(g *gin.Context) {
 
 	// all good
 	g.JSON(200, gin.H{})
+}
+
+func (c *Controller) ActorDelete(g *gin.Context) {
+	// get id from path
+	id := g.Param("id")
+
+	// get item from ID
+	actor := &model.Actor{
+		ID: id,
+	}
+	result := c.datastore.First(actor)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	// delete thumb
+	thumbPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id, "thumb.jpg")
+	_, err := os.Stat(thumbPath)
+	if err != nil && !os.IsNotExist(err) {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	if !os.IsNotExist(err) {
+		// exist, deleting it
+		err = os.Remove(thumbPath)
+		if err != nil {
+			g.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	// delete folder
+	folderPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id)
+	_, err = os.Stat(folderPath)
+	if err != nil && !os.IsNotExist(err) {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	if !os.IsNotExist(err) {
+		// exist, deleting it
+		err = os.Remove(folderPath)
+		if err != nil {
+			g.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	// delete object
+	err = c.datastore.Delete(actor).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// all good
+	g.Redirect(http.StatusFound, "/actors")
 }

@@ -37,6 +37,7 @@ type AbtractController interface {
 	ActorNew(c *gin.Context)
 	ActorView(c *gin.Context)
 	ActorThumb(c *gin.Context)
+	ActorDelete(c *gin.Context)
 
 	// Video, used for Clips, Movies and Videos
 	VideoAjaxActors(c *gin.Context)
