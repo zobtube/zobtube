@@ -78,7 +78,7 @@ Environmental variable name | Configuration variable name | Example values | Des
   - [ ] Generate mini thumbnail
   - [ ] Move files
   - [ ] View those tasks on the administration page
-- [ ] List all videos / actors / channels through an admin page
+- [x] List all videos / actors / channels through an admin page
 - [ ] Implement channels for videos
 - [ ] Add categories
 - [ ] Add file/folder deletion in triage

@@ -13,6 +13,16 @@ h2 {
 .float-right {
   float: right;
 }
+
+.card-adm {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-adm-btn {
+  display: inline;
+  align-self: center;
+}
 </style>
 
 <h1>Admin Area</h1>
@@ -33,7 +43,7 @@ h2 {
     <div class="row">
       <div class="col-md-4">
         <div class="card">
-          <div class="card-body">
+          <div class="card-body card-adm">
             <span>
               <div class="d-flex align-items-center">
                 <i class="fas fa-video s16"></i>
@@ -41,12 +51,15 @@ h2 {
               </div>
               <div class="gl-mt-3 text-uppercase">Videos</div>
             </span>
+            <div class="card-adm-btn">
+              <a class="btn btn-primary" href="/adm/videos">View</a>
+            </div>
           </div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card">
-          <div class="card-body">
+          <div class="card-body card-adm">
             <span>
               <div class="d-flex align-items-center">
                 <i class="fas fa-user s16"></i>
@@ -54,12 +67,15 @@ h2 {
               </div>
               <div class="gl-mt-3 text-uppercase">Actors</div>
             </span>
+            <div class="card-adm-btn">
+              <a class="btn btn-primary" href="/adm/actors">View</a>
+            </div>
           </div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="card">
-          <div class="card-body">
+          <div class="card-body card-adm">
             <span>
               <div class="d-flex align-items-center">
                 <i class="fas fa-podcast s16"></i>
@@ -67,6 +83,9 @@ h2 {
               </div>
               <div class="gl-mt-3 text-uppercase">Channels</div>
             </span>
+            <div class="card-adm-btn">
+              <a class="btn btn-primary" href="/adm/channels">View</a>
+            </div>
           </div>
         </div>
       </div>

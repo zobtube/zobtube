@@ -39,3 +39,7 @@ func (c *Channel) URLView() string {
 func (c *Channel) URLThumb() string {
 	return fmt.Sprintf("/channel/%s/thumb", c.ID)
 }
+
+func (c *Channel) URLAdmEdit() string {
+	return fmt.Sprintf("/channel/%s/edit", c.ID)
+}

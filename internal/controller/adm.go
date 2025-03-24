@@ -27,3 +27,39 @@ func (c *Controller) AdmHome(g *gin.Context) {
 		"ChannelCount": channelCount,
 	})
 }
+
+func (c *Controller) AdmVideoList(g *gin.Context) {
+	var videos []model.Video
+
+	c.datastore.Find(&videos)
+
+	g.HTML(http.StatusOK, "adm/object-list.html", gin.H{
+		"User":       g.MustGet("user").(*model.User),
+		"ObjectName": "Video",
+		"Objects":    videos,
+	})
+}
+
+func (c *Controller) AdmActorList(g *gin.Context) {
+	var actors []model.Actor
+
+	c.datastore.Find(&actors)
+
+	g.HTML(http.StatusOK, "adm/object-list.html", gin.H{
+		"User":       g.MustGet("user").(*model.User),
+		"ObjectName": "Actor",
+		"Objects":    actors,
+	})
+}
+
+func (c *Controller) AdmChannelList(g *gin.Context) {
+	var channels []model.Channel
+
+	c.datastore.Find(&channels)
+
+	g.HTML(http.StatusOK, "adm/object-list.html", gin.H{
+		"User":       g.MustGet("user").(*model.User),
+		"ObjectName": "Channel",
+		"Objects":    channels,
+	})
+}

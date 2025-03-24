@@ -102,6 +102,9 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 
 	// adm
 	authGroup.GET("/adm", c.AdmHome)
+	authGroup.GET("/adm/videos", c.AdmVideoList)
+	authGroup.GET("/adm/actors", c.AdmActorList)
+	authGroup.GET("/adm/channels", c.AdmChannelList)
 
 	// profile
 	authGroup.GET("/profile", c.ProfileView)
@@ -127,7 +130,6 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	   path('upload/new', views.upload_new, name='upload_new'),
 	   path('upload/file', views.ChunkedUploadView.as_view(), name='upload_file'),
 	   path('upload/file/<uuid:pk>', views.ChunkedUploadView.as_view(), name='upload_file_view'),
-	   path('adm/actor/list', views.adm_actor_list, name='adm_actor_list'),
 	   path('adm/actor/fix-thumb', views.adm_actor_fix_missing_thumb, name='adm_actor_fix_missing_thumb'),
 	   path('adm/actor/<uuid:id>/fix-thumb', views.adm_actor_fix_thumb, name='adm_actor_fix_thumb'),
 	   path('adm/actor/<uuid:id>/gen-thumb', views.adm_actor_gen_thumb, name='adm_actor_gen_thumb'),

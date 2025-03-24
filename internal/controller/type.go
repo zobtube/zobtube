@@ -12,6 +12,9 @@ import (
 type AbtractController interface {
 	// Back office
 	AdmHome(c *gin.Context)
+	AdmVideoList(c *gin.Context)
+	AdmActorList(c *gin.Context)
+	AdmChannelList(c *gin.Context)
 
 	// Home
 	Home(c *gin.Context)
