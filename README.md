@@ -106,7 +106,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 
 **Enhancement**
 
-- [ ] Add a welcome page when no configuration is specified to bootstrap the app
+- [x] Add a welcome page when no configuration is specified to bootstrap the app
 - [x] Write onboarding readme
 - [ ] Add actor description
 - [ ] Rename actors
