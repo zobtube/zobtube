@@ -109,7 +109,7 @@ img {
   </div>
 </div>
 
-<div class="row" id="profile-picture-propositions-row" {% if not first_time%}style="display: none"{% endif %}>
+<div class="row" id="profile-picture-propositions-row" {{ if or (.Actor.Thumbnail) (eq (len .Actor.Links) 0) }}style="display: none"{{ end }}>
   <div class="col-12">
     <h4 style="margin-top: 65px;">Actor pictures from external links</h4>
     <hr/>
@@ -223,6 +223,9 @@ function actorLinkAutomaticSearch(actorName, providerName, providerSlug, url) {
         actorName+' not found on '+providerName,
       );
     },
+    complete: function() {
+      document.providerInit[providerSlug] = true;
+    },
   });
 
 }
@@ -244,7 +247,7 @@ G_providers = {
 {{ end }}
 };
 
-G_first_time = {{ if .FirstTime }}true{{ else }}false{{ end }};
+G_first_time = {{ if eq ( len .Actor.Links ) 0 }}true{{ else }}false{{ end }};
 
 G_actor_id = "{{ .Actor.ID }}";
 
@@ -256,13 +259,6 @@ function updateProviders() {
       providerLinkPresent(provider_slug, link_url, link_id);
       continue;
     }
-
-    /*
-    if (!(provider_slug in providersInit) && G_first_time) {
-      providerFirstTime(provider_slug);
-      continue;
-    }
-    */
 
     providerLinkAbsent(provider_slug);
   }
@@ -354,9 +350,8 @@ function firstTimeSearch() {
 
   console.debug('First time running, discoverying providers');
 
-  for (const provider_slug in providersAndLinks) {
-    link_url = providersAndLinks[provider_slug].link_url;
-    if (link_url == undefined) {
+  for (const provider_slug in G_providers) {
+    if (!(provider_slug in G_links) || G_links[provider_slug].link_url == undefined) {
       document.getElementById('provider-action-'+provider_slug+'-search').click();
     }
   }
@@ -365,6 +360,10 @@ function firstTimeSearch() {
 updateProviders();
 
 window.onload = function() {
+  // init vars
+  document.providerInit = {};
+
+  // calls
   firstTimeSearch();
   suggestProfilePicture();
 }
@@ -400,14 +399,14 @@ function showActorPictures() {
 }
 
 function suggestProfilePicture() {
-  if ({{ if and (not .FirstTime) .Actor.Thumbnail }}true{{ else }}false{{ end }}) {
+  if ({{ if .Actor.Thumbnail }}true{{ else }}false{{ end }}) {
     return;
   }
 
   // if first time, wait for init
-  if ({{ if .FirstTime }}true{{ else }}false{{ end }}) {
-    for (provider_slug in providersAndLinks) {
-      if (!(provider_slug in providersInit)) {
+  if (G_first_time) {
+    for (provider_slug in G_providers) {
+      if (!(provider_slug in document.providerInit)) {
         console.debug('provider '+provider_slug+' not init, waiting');
         setTimeout(suggestProfilePicture, "1000");
         return
