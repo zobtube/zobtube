@@ -427,6 +427,10 @@ previewModal.addEventListener('show.bs.modal', event => {
   gen_new_crop();
 })
 
+previewModal.addEventListener('hide.bs.modal', event => {
+  cropper.destroy();
+})
+
 var cropper;
 function gen_new_crop() {
   console.debug('halo');
