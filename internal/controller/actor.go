@@ -400,3 +400,64 @@ func (c *Controller) ActorDelete(g *gin.Context) {
 	// all good
 	g.Redirect(http.StatusFound, "/actors")
 }
+
+func (c *Controller) ActorAjaxLinkCreate(g *gin.Context) {
+	var err error
+
+	form := struct {
+		URL      string `form:"url"`
+		Provider string `form:"provider"`
+	}{}
+	err = g.ShouldBind(&form)
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// get actor id from path
+	id := g.Param("id")
+
+	// get actor from ID
+	actor := &model.Actor{
+		ID: id,
+	}
+	result := c.datastore.First(actor)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	// get provider slug from path
+	_, err = c.ProviderGet(form.Provider)
+	if err != nil {
+		g.JSON(404, gin.H{
+			"error":       err.Error(),
+			"error_human": "Unable to retrieve provider",
+		})
+		return
+	}
+
+	// url found, storing it
+	link := &model.ActorLink{
+		Actor:    *actor,
+		Provider: form.Provider,
+		URL:      form.URL,
+	}
+
+	err = c.datastore.Create(link).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{
+		"link_id":  link.ID,
+		"link_url": link.URL,
+	})
+}

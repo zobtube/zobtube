@@ -51,6 +51,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 		// links
 		actorAPI.DELETE("/link/:id", c.ActorAjaxLinkThumbDelete)
 		actorAPI.GET("/link/:id/thumb", c.ActorAjaxLinkThumbGet)
+		actorAPI.POST("/:id/link", c.ActorAjaxLinkCreate)
 
 		// thumb
 		actorAPI.POST("/:id/thumb", c.ActorAjaxThumb)

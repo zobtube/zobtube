@@ -81,7 +81,14 @@ img {
               )">
               <i class="fas fa-search"></i> Automatic search
             </button>
-            <button class="btn btn-primary" id="provider-action-{{ $provider_slug }}-add">
+            <button
+              id="provider-action-{{ $provider_slug }}-add"
+              class="btn btn-primary"
+              onclick="addNewLinkModal(
+                '{{ $.Actor.ID }}',
+                '{{ $provider_slug }}',
+              )"
+              >
               <i class="fas fa-plus"></i> Manual add
             </button>
             <a class="btn btn-success" href="" id="provider-action-{{ $provider_slug }}-view" target="_blank" rel="noopener noreferrer">
@@ -146,6 +153,32 @@ img {
         <div class="btn-toolbar justify-content-between mb-2" role="toolbar" style="width:100%">
           <div class="input-group">
             <a type="button" class="btn btn-primary profilePictureModalValidate" onclick="send_crop()">Set as new profile picture</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End Profile Picture Modal -->
+
+<!-- Start Manual Link Modal -->
+<div class="modal fade" id="manualLinkModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add a new link for {{ .Actor.Name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-floating mb-3">
+          <input type="email" class="form-control" id="newLinkInput">
+          <label for="newLinkInput">URL to the profile</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="btn-toolbar justify-content-between mb-2" role="toolbar" style="width:100%">
+          <div class="input-group">
+            <a type="button" class="btn btn-primary profilePictureModalValidate" onclick="setNewLink()">Set as new profile picture</a>
           </div>
         </div>
       </div>
@@ -464,7 +497,55 @@ function send_crop() {
   });
 }
 
+function addNewLinkModal(actorID, providerSlug) {
+  console.debug("show modal to add link for actor "+actorID+" on "+providerSlug)
+  if (document.modalNewLink == undefined) {
+    document.modalNewLink = document.getElementById("manualLinkModal")
+    document.modalNewLinkModal = new bootstrap.Modal(document.modalNewLink)
+  }
+  document.newLinkActorID = actorID;
+  document.newLinkProviderSlug = providerSlug;
+  document.getElementById("newLinkInput").value = '';
+  document.modalNewLinkModal.show();
+}
 
+function setNewLink() {
+  newURL = document.getElementById("newLinkInput").value;
+
+  $.ajax('/api/actor/'+document.newLinkActorID+'/link', {
+    method: 'POST',
+    data: {
+      'url': newURL,
+      'provider': document.newLinkProviderSlug,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+    success: function (result) {
+      sendToast(
+        'New link added for {{ .Actor.Name }}',
+        '',
+        'bg-success',
+        'Success',
+      );
+      G_links[document.newLinkProviderSlug] = {
+        "link_url": result.link_url,
+        "link_id": result.link_id,
+      };
+      updateProviders();
+      document.modalNewLinkModal.hide();
+    },
+    error: function () {
+      sendToast(
+        'Automatic actor search',
+        '',
+        'bg-warning',
+        'Adding failed',
+      );
+    },
+  });
+}
 
 </script>
 {{ template "bottom" .}}
