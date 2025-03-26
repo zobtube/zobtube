@@ -18,6 +18,7 @@ var modelToMigrate = []any{
 	Channel{},
 	Video{},
 	VideoView{},
+	Task{},
 	User{},
 	UserSession{},
 }

@@ -2,10 +2,19 @@ package model
 
 import (
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+)
+
+type VideoStatus string
+
+const (
+	VideoStatusCreating VideoStatus = "creating"
+	VideoStatusReady    VideoStatus = "ready"
+	VideoStatusDeleting VideoStatus = "deleting"
 )
 
 // Video model defines the generic video type used for videos, clips and movies
@@ -21,8 +30,9 @@ type Video struct {
 	Thumbnail     bool
 	ThumbnailMini bool
 	Duration      time.Duration
-	Type          string `gorm:"size:1;"`
-	Imported      bool   `gorm:"default:false"`
+	Type          string      `gorm:"size:1;"`
+	Imported      bool        `gorm:"default:false"`
+	Status        VideoStatus `gorm:"default:creating"`
 }
 
 var videoTypesAsString = map[string]string{
@@ -92,4 +102,26 @@ func (v *Video) NiceDuration() string {
 
 func (v *Video) String() string {
 	return v.Name
+}
+
+var videoFileTypeToPath = map[string]string{
+	"c": "/clips",
+	"m": "/movies",
+	"v": "/videos",
+}
+
+func (v *Video) FolderRelativePath() string {
+	return filepath.Join(videoFileTypeToPath[v.Type], v.ID)
+}
+
+func (v *Video) RelativePath() string {
+	return filepath.Join(v.FolderRelativePath(), "video.mp4")
+}
+
+func (v *Video) ThumbnailRelativePath() string {
+	return filepath.Join(v.FolderRelativePath(), "thumb.jpg")
+}
+
+func (v *Video) ThumbnailXSRelativePath() string {
+	return filepath.Join(v.FolderRelativePath(), "thumb-xs.jpg")
 }

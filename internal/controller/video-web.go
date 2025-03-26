@@ -131,7 +131,7 @@ func (c *Controller) VideoStream(g *gin.Context) {
 	// construct file path
 	var targetPath string
 	if video.Imported {
-		targetPath = filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "video.mp4")
+		targetPath = filepath.Join(c.config.Media.Path, video.RelativePath())
 	} else {
 		targetPath = filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, video.Filename)
 	}
@@ -163,7 +163,7 @@ func (c *Controller) VideoThumb(g *gin.Context) {
 	}
 
 	// construct file path
-	targetPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "thumb.jpg")
+	targetPath := filepath.Join(c.config.Media.Path, video.ThumbnailRelativePath())
 
 	// give file path
 	g.File(targetPath)
@@ -192,7 +192,7 @@ func (c *Controller) VideoThumbXS(g *gin.Context) {
 	}
 
 	// construct file path
-	targetPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "thumb-xs.jpg")
+	targetPath := filepath.Join(c.config.Media.Path, video.ThumbnailXSRelativePath())
 
 	// give file path
 	g.File(targetPath)

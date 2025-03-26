@@ -5,6 +5,7 @@ import (
 	"github.com/zobtube/zobtube/internal/config"
 	"github.com/zobtube/zobtube/internal/model"
 	"github.com/zobtube/zobtube/internal/provider"
+	"github.com/zobtube/zobtube/internal/runner"
 
 	"gorm.io/gorm"
 )
@@ -42,10 +43,6 @@ type AbtractController interface {
 
 	// Video, used for Clips, Movies and Videos
 	VideoAjaxActors(c *gin.Context)
-	VideoAjaxComputeDuration(c *gin.Context)
-	VideoAjaxGenerateThumbnail(c *gin.Context)
-	VideoAjaxGenerateThumbnailXS(c *gin.Context)
-	VideoAjaxImport(c *gin.Context)
 	VideoAjaxRename(c *gin.Context)
 	VideoAjaxUpload(c *gin.Context)
 	VideoAjaxUploadThumb(c *gin.Context)
@@ -88,6 +85,7 @@ type AbtractController interface {
 	// Init
 	ConfigurationRegister(*config.Config)
 	DatabaseRegister(*gorm.DB)
+	RunnerRegister(*runner.Runner)
 
 	// Cleanup
 	CleanupRoutine()
@@ -105,6 +103,7 @@ type Controller struct {
 	datastore       *gorm.DB
 	providers       map[string]provider.Provider
 	shutdownChannel chan<- int
+	runner          *runner.Runner
 }
 
 func New(shutdownChannel chan int) AbtractController {
@@ -120,4 +119,8 @@ func (c *Controller) ConfigurationRegister(cfg *config.Config) {
 
 func (c *Controller) DatabaseRegister(db *gorm.DB) {
 	c.datastore = db
+}
+
+func (c *Controller) RunnerRegister(r *runner.Runner) {
+	c.runner = r
 }

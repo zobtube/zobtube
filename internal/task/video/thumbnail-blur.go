@@ -1,4 +1,4 @@
-package controller
+package video
 
 import (
 	"image"

@@ -569,47 +569,16 @@ function importVideoAjax(filetype) {
 
       // remove video from view
 
-      // move file
-      $.ajax('/api/video/'+video_id+'/import', {
-        method: 'POST',
-        xhr: function () {
-          var xhr = new XMLHttpRequest();
-          return xhr;
-        },
+      // close modal
+      window.VideoImportModal.hide();
 
-        success: function (data) {
-          generateThumnail(video_id);
-          sendToast(
-            'Import a video',
-            '',
-            'bg-success',
-            'Video ready',
-          );
+      // close off canvas
+      window.DetailPanelOffCanvas.hide();
 
-          // close modal
-          window.VideoImportModal.hide();
-
-          // close off canvas
-          window.DetailPanelOffCanvas.hide();
-
-          // refresh view
-          updatePath();
-
-        },
-
-        error: function (data) {
-          sendToast(
-            'Unable to move video',
-            '',
-            'bg-warning',
-            data.responseJSON.error,
-          );
-        },
-      });
-
+      // refresh view
+      updatePath();
 
     },
-
     error: function (data) {
       sendToast(
         'Unable to import video',
@@ -620,29 +589,6 @@ function importVideoAjax(filetype) {
     },
   });
 
-}
-
-function generateThumnail(video_id) {
-  $.ajax('/api/video/'+video_id+'/generate-thumbnail/0', {
-    method: 'POST',
-    xhr: function () {
-      var xhr = new XMLHttpRequest();
-      return xhr;
-    },
-    success: function(data) {
-      computeDuration(video_id);
-    },
-  });
-}
-
-function computeDuration(video_id) {
-  $.ajax('/api/video/'+video_id+'/compute-duration', {
-    method: 'POST',
-    xhr: function () {
-      var xhr = new XMLHttpRequest();
-      return xhr;
-    },
-  });
 }
 
 // From: https://stackoverflow.com/a/14919494

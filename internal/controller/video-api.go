@@ -2,16 +2,10 @@ package controller
 
 import (
 	"errors"
-	"image"
-	"image/jpeg"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/image/draw"
 
 	"github.com/zobtube/zobtube/internal/model"
 )
@@ -59,226 +53,6 @@ func (c *Controller) VideoAjaxActors(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
-func (c *Controller) VideoAjaxComputeDuration(g *gin.Context) {
-	// get id from path
-	id := g.Param("id")
-
-	// get item from ID
-	video := &model.Video{
-		ID: id,
-	}
-	result := c.datastore.First(video)
-
-	// check result
-	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
-		return
-	}
-
-	filePath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "video.mp4")
-	out, err := exec.Command(
-		"ffprobe",
-		"-v",
-		"error",
-		"-show_entries",
-		"format=duration",
-		"-of",
-		"default=noprint_wrappers=1:nokey=1",
-		filePath,
-	).Output()
-
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-			"out":   string(out[:]),
-		})
-		return
-	}
-
-	duration := strings.TrimSpace(string(out))
-
-	d, err := time.ParseDuration(duration + "s")
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-	}
-
-	video.Duration = d
-	err = c.datastore.Save(&video).Error
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	g.JSON(200, gin.H{
-		"duration": d.String(),
-	})
-}
-
-func (c *Controller) VideoAjaxGenerateThumbnail(g *gin.Context) {
-	// get id from path
-	id := g.Param("id")
-
-	// get timing from path
-	timing := g.Param("timing")
-
-	// get item from ID
-	video := &model.Video{
-		ID: id,
-	}
-	result := c.datastore.First(video)
-
-	// check result
-	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
-		return
-	}
-
-	// construct paths
-	videoPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "video.mp4")
-	videoPath, err := filepath.Abs(videoPath)
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	thumbPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "thumb.jpg")
-	thumbPath, err = filepath.Abs(thumbPath)
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	out, err := exec.Command(
-		"ffmpeg",
-		"-y",
-		"-ss",
-		timing,
-		"-i",
-		videoPath,
-		"-frames:v",
-		"1",
-		"-q:v",
-		"2",
-		thumbPath,
-	).Output()
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-			"out":   string(out[:]),
-		})
-		return
-	}
-
-	video.Thumbnail = true
-	c.datastore.Save(&video)
-
-	g.JSON(200, gin.H{})
-}
-
-func (c *Controller) VideoAjaxGenerateThumbnailXS(g *gin.Context) {
-	// get id from path
-	id := g.Param("id")
-
-	// get item from ID
-	video := &model.Video{
-		ID: id,
-	}
-	result := c.datastore.First(video)
-
-	// check result
-	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
-		return
-	}
-
-	// construct paths
-	thumbPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "thumb.jpg")
-	thumbPath, err := filepath.Abs(thumbPath)
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	thumbXSPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id, "thumb-xs.jpg")
-	thumbXSPath, err = filepath.Abs(thumbXSPath)
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	// open files
-	input, _ := os.Open(thumbPath)
-	defer input.Close()
-
-	output, _ := os.Create(thumbXSPath)
-	defer output.Close()
-
-	// decode the image from jpeg to image.Image
-	src, err := jpeg.Decode(input)
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	targetH := 320
-	targetV := 180
-
-	h := src.Bounds().Dx()
-	v := src.Bounds().Dy()
-
-	originalImageRGBA := image.NewRGBA(image.Rect(0, 0, h, v))
-	draw.Draw(originalImageRGBA, originalImageRGBA.Bounds(), src, src.Bounds().Min, draw.Src)
-
-	ratioH := float32(h) / float32(targetH)
-	ratioV := float32(v) / float32(targetV)
-	ratio := max(ratioH, ratioV)
-
-	h = int(float32(h) / ratio)
-	v = int(float32(v) / ratio)
-
-	// set new size
-	dst := image.NewRGBA(image.Rect(0, 0, targetH, targetV))
-
-	// draw outer
-	outerImg := gaussianBlur(originalImageRGBA, 15)
-	draw.NearestNeighbor.Scale(dst, dst.Bounds(), outerImg, outerImg.Bounds(), draw.Over, nil)
-
-	// draw inner
-	innerH := (targetH - h) / 2
-	innerV := (targetV - v) / 2
-	draw.NearestNeighbor.Scale(dst, image.Rect(innerH, innerV, innerH+h, innerV+v), src, src.Bounds(), draw.Over, nil)
-
-	// encode to jpeg
-	err = jpeg.Encode(output, dst, &jpeg.Options{Quality: 90})
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	// save on db
-	video.ThumbnailMini = true
-	c.datastore.Save(&video)
-
-	// ret
-	g.JSON(200, gin.H{})
-}
-
 func (c *Controller) VideoAjaxStreamInfo(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -300,7 +74,7 @@ func (c *Controller) VideoAjaxStreamInfo(g *gin.Context) {
 		return
 	}
 
-	path := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID, "video.mp4")
+	path := filepath.Join(c.config.Media.Path, video.RelativePath())
 	_, err := os.Stat(path)
 	if err == nil {
 		g.JSON(200, gin.H{})
@@ -354,67 +128,6 @@ func (c *Controller) VideoAjaxRename(g *gin.Context) {
 
 	c.datastore.Save(video)
 	//TODO: check result
-	g.JSON(200, gin.H{})
-}
-
-func (c *Controller) VideoAjaxImport(g *gin.Context) {
-	// get id from path
-	id := g.Param("id")
-
-	// get item from ID
-	video := &model.Video{
-		ID: id,
-	}
-	result := c.datastore.First(video)
-
-	// check result
-	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
-		return
-	}
-
-	// prepare paths
-	previousPath := filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, video.Filename)
-	newFolderPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], id)
-	newPath := filepath.Join(newFolderPath, "video.mp4")
-
-	// ensure folder exists
-	_, err := os.Stat(newFolderPath)
-	if os.IsNotExist(err) {
-		// do not exists, create it
-		err = os.Mkdir(newFolderPath, os.ModePerm)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-	} else if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	// move
-	err = os.Rename(previousPath, newPath)
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	// commit the update on database
-	video.Imported = true
-	err = c.datastore.Save(video).Error
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
 	g.JSON(200, gin.H{})
 }
 
@@ -479,6 +192,15 @@ func (c *Controller) VideoAjaxCreate(g *gin.Context) {
 		}
 	}
 
+	err = c.runner.NewTask("video/create", map[string]string{
+		"videoID":         video.ID,
+		"thumbnailTiming": "0",
+	})
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
 	g.JSON(200, gin.H{
 		"video_id": video.ID,
 	})
@@ -501,7 +223,7 @@ func (c *Controller) VideoAjaxUploadThumb(g *gin.Context) {
 	}
 
 	// ensure folder exists
-	videoFolder := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID)
+	videoFolder := filepath.Join(c.config.Media.Path, video.FolderRelativePath())
 	_, err := os.Stat(videoFolder)
 	if os.IsNotExist(err) {
 		// do not exists, create it
@@ -520,7 +242,7 @@ func (c *Controller) VideoAjaxUploadThumb(g *gin.Context) {
 	}
 
 	// save thumbnail
-	thumbnailPath := filepath.Join(videoFolder, "thumb.jpg")
+	thumbnailPath := video.ThumbnailRelativePath()
 	thumbnail, err := g.FormFile("thumbnail")
 	if err != nil {
 		g.JSON(500, gin.H{
@@ -546,8 +268,13 @@ func (c *Controller) VideoAjaxUploadThumb(g *gin.Context) {
 		return
 	}
 
-	// generate mini thumb
-	c.VideoAjaxGenerateThumbnailXS(g)
+	err = c.runner.NewTask("video/mini-thumb", map[string]string{"videoID": video.ID})
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	g.JSON(200, gin.H{})
 }
 
 func (c *Controller) VideoAjaxUpload(g *gin.Context) {
@@ -567,7 +294,7 @@ func (c *Controller) VideoAjaxUpload(g *gin.Context) {
 	}
 
 	// ensure folder exists
-	videoFolder := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID)
+	videoFolder := filepath.Join(c.config.Media.Path, video.FolderRelativePath())
 	_, err := os.Stat(videoFolder)
 	if os.IsNotExist(err) {
 		// do not exists, create it
@@ -632,7 +359,7 @@ func (c *Controller) VideoAjaxDelete(g *gin.Context) {
 	}
 
 	// check thumb presence
-	thumbPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID, "thumb.jpg")
+	thumbPath := filepath.Join(c.config.Media.Path, video.ThumbnailRelativePath())
 	_, err := os.Stat(thumbPath)
 	if err != nil && !os.IsNotExist(err) {
 		g.JSON(500, gin.H{
@@ -652,7 +379,7 @@ func (c *Controller) VideoAjaxDelete(g *gin.Context) {
 	}
 
 	// check thumb-xs presence
-	thumbXsPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID, "thumb-xs.jpg")
+	thumbXsPath := filepath.Join(c.config.Media.Path, video.ThumbnailXSRelativePath())
 	_, err = os.Stat(thumbXsPath)
 	if err != nil && !os.IsNotExist(err) {
 		g.JSON(500, gin.H{
@@ -672,7 +399,7 @@ func (c *Controller) VideoAjaxDelete(g *gin.Context) {
 	}
 
 	// check video presence
-	videoPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID, "video.mp4")
+	videoPath := filepath.Join(c.config.Media.Path, video.RelativePath())
 	_, err = os.Stat(videoPath)
 	if err != nil && !os.IsNotExist(err) {
 		g.JSON(500, gin.H{
@@ -692,7 +419,7 @@ func (c *Controller) VideoAjaxDelete(g *gin.Context) {
 	}
 
 	// delete folder
-	folderPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID)
+	folderPath := filepath.Join(c.config.Media.Path, video.FolderRelativePath())
 	_, err = os.Stat(folderPath)
 	if err != nil && !os.IsNotExist(err) {
 		g.JSON(500, gin.H{
@@ -740,12 +467,13 @@ func (c *Controller) VideoAjaxMigrate(g *gin.Context) {
 	}
 
 	newType := g.PostForm("new_type")
-	newVid := &model.Video{
-		Type: newType,
-	}
 
-	previousPath := filepath.Join(c.config.Media.Path, fileTypeToPath[video.TypeAsString()], video.ID)
-	newPath := filepath.Join(c.config.Media.Path, fileTypeToPath[newVid.TypeAsString()], video.ID)
+	previousPath := filepath.Join(c.config.Media.Path, video.RelativePath())
+
+	// change object in db
+	video.Type = newType
+
+	newPath := filepath.Join(c.config.Media.Path, video.RelativePath())
 
 	// move
 	err := os.Rename(previousPath, newPath)
@@ -755,9 +483,6 @@ func (c *Controller) VideoAjaxMigrate(g *gin.Context) {
 		})
 		return
 	}
-
-	// change object in db
-	video.Type = newType
 
 	// commit
 	err = c.datastore.Save(video).Error

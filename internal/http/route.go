@@ -85,10 +85,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	videoAPI.POST("/:id/migrate", c.VideoAjaxMigrate)
 	videoAPI.PUT("/:id/actor/:actor_id", c.VideoAjaxActors)
 	videoAPI.DELETE("/:id/actor/:actor_id", c.VideoAjaxActors)
-	videoAPI.POST("/:id/compute-duration", c.VideoAjaxComputeDuration)
-	videoAPI.POST("/:id/generate-thumbnail/:timing", c.VideoAjaxGenerateThumbnail)
-	videoAPI.POST("/:id/generate-thumbnail-xs", c.VideoAjaxGenerateThumbnailXS)
-	videoAPI.POST("/:id/import", c.VideoAjaxImport)
+	//videoAPI.POST("/:id/generate-thumbnail/:timing", c.VideoAjaxGenerateThumbnail)
 	videoAPI.POST("/:id/rename", c.VideoAjaxRename)
 	videoAPI.POST("/:id/count-view", c.VideoViewAjaxIncrement)
 

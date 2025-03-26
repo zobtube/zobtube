@@ -11,6 +11,8 @@ import (
 	"github.com/zobtube/zobtube/internal/http"
 	"github.com/zobtube/zobtube/internal/model"
 	"github.com/zobtube/zobtube/internal/provider"
+	"github.com/zobtube/zobtube/internal/runner"
+	"github.com/zobtube/zobtube/internal/task/video"
 )
 
 //go:embed web
@@ -94,6 +96,11 @@ func main() {
 	c.ProviderRegister(&provider.Pornhub{})
 
 	go c.CleanupRoutine()
+
+	runner := &runner.Runner{}
+	runner.RegisterTask(video.NewVideoCreating())
+	runner.Start(cfg, db)
+	c.RunnerRegister(runner)
 
 	// create http server
 	httpServer, _ = http.New(&c, &webFS)
