@@ -98,7 +98,7 @@ Environmental variable name | Configuration variable name | Example values | Des
   - [ ] Validate routes requiring admin rights
   - [ ] Validate upload
   - [ ] Validate video viewing
-- [ ] Manually add links of actors
+- [x] Manually add links of actors
 - [x] Delete actors
 - [ ] Add actors on video page after selections
 - [x] Fix mini thumb down-sizing scale issue
