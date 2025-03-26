@@ -91,7 +91,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 
 - [x] Fix bug with large uploaded files in triage
 - [ ] Ensure that only admin can use admin routes
-- [ ] Create own favicon
+- [x] Create own favicon
 - [x] Add linting validation
 - [ ] Add tests
   - [ ] Validate routes requiring authentication
