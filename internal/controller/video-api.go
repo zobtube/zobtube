@@ -358,92 +358,22 @@ func (c *Controller) VideoAjaxDelete(g *gin.Context) {
 		return
 	}
 
-	// check thumb presence
-	thumbPath := filepath.Join(c.config.Media.Path, video.ThumbnailRelativePath())
-	_, err := os.Stat(thumbPath)
-	if err != nil && !os.IsNotExist(err) {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	if !os.IsNotExist(err) {
-		// exist, deleting it
-		err = os.Remove(thumbPath)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-	}
-
-	// check thumb-xs presence
-	thumbXsPath := filepath.Join(c.config.Media.Path, video.ThumbnailXSRelativePath())
-	_, err = os.Stat(thumbXsPath)
-	if err != nil && !os.IsNotExist(err) {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	if !os.IsNotExist(err) {
-		// exist, deleting it
-		err = os.Remove(thumbXsPath)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-	}
-
-	// check video presence
-	videoPath := filepath.Join(c.config.Media.Path, video.RelativePath())
-	_, err = os.Stat(videoPath)
-	if err != nil && !os.IsNotExist(err) {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	if !os.IsNotExist(err) {
-		// exist, deleting it
-		err = os.Remove(videoPath)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-	}
-
-	// delete folder
-	folderPath := filepath.Join(c.config.Media.Path, video.FolderRelativePath())
-	_, err = os.Stat(folderPath)
-	if err != nil && !os.IsNotExist(err) {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	if !os.IsNotExist(err) {
-		// exist, deleting it
-		err = os.Remove(folderPath)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-	}
-
-	// delete object
-	err = c.datastore.Delete(video).Error
+	// update status
+	video.Status = model.VideoStatusDeleting
+	err := c.datastore.Save(video).Error
 	if err != nil {
 		g.JSON(500, gin.H{
 			"error": err.Error(),
 		})
+		return
+	}
+
+	// create task
+	err = c.runner.NewTask("video/delete", map[string]string{
+		"videoID": video.ID,
+	})
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 

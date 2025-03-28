@@ -93,3 +93,34 @@ func generateThumbnailMini(ctx *common.Context, params common.Parameters) (strin
 	// ret
 	return "", nil
 }
+
+func deleteThumbnailMini(ctx *common.Context, params common.Parameters) (string, error) {
+	videoID := params["videoID"]
+
+	// get item from ID
+	video := &model.Video{
+		ID: videoID,
+	}
+	result := ctx.DB.First(video)
+
+	// check result
+	if result.RowsAffected < 1 {
+		return "video does not exist", errors.New("id not in db")
+	}
+
+	// check thumb-xs presence
+	thumbXsPath := filepath.Join(ctx.Config.Media.Path, video.ThumbnailXSRelativePath())
+	_, err := os.Stat(thumbXsPath)
+	if err != nil && !os.IsNotExist(err) {
+		return "unable to check mini thumbnail presence", err
+	}
+	if !os.IsNotExist(err) {
+		// exist, deleting it
+		err = os.Remove(thumbXsPath)
+		if err != nil {
+			return "unable to delete mini thumbnail", err
+		}
+	}
+
+	return "", nil
+}

@@ -2,6 +2,7 @@ package video
 
 import (
 	"errors"
+	"os"
 	"os/exec"
 	"path/filepath"
 
@@ -59,6 +60,37 @@ func generateThumbnail(ctx *common.Context, params common.Parameters) (string, e
 
 	video.Thumbnail = true
 	ctx.DB.Save(&video)
+
+	return "", nil
+}
+
+func deleteThumbnail(ctx *common.Context, params common.Parameters) (string, error) {
+	videoID := params["videoID"]
+
+	// get item from ID
+	video := &model.Video{
+		ID: videoID,
+	}
+	result := ctx.DB.First(video)
+
+	// check result
+	if result.RowsAffected < 1 {
+		return "video does not exist", errors.New("id not in db")
+	}
+
+	// check thumb presence
+	thumbPath := filepath.Join(ctx.Config.Media.Path, video.ThumbnailRelativePath())
+	_, err := os.Stat(thumbPath)
+	if err != nil && !os.IsNotExist(err) {
+		return "unable to check thumbnail presence", err
+	}
+	if !os.IsNotExist(err) {
+		// exist, deleting it
+		err = os.Remove(thumbPath)
+		if err != nil {
+			return "unable to delete thumbnail", err
+		}
+	}
 
 	return "", nil
 }

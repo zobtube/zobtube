@@ -24,8 +24,8 @@ func (r *Runner) RegisterTask(t *common.Task) {
 	r.tasks = append(r.tasks, t)
 	if r.tasksChannel == nil {
 		r.tasksChannel = make(map[string]chan RunnerEvent)
-		r.tasksChannel[t.Name] = make(chan RunnerEvent)
 	}
+	r.tasksChannel[t.Name] = make(chan RunnerEvent)
 }
 
 func (r *Runner) Start(cfg *config.Config, db *gorm.DB) {
