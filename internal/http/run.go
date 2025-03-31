@@ -31,9 +31,10 @@ func (s *Server) WaitForStopSignal(c <-chan int) {
 	_ = s.Server.Shutdown(ctx)
 
 	// mode: 1 - shutdown | 2 - restart
-	if mode == 1 {
+	switch mode {
+	case 1:
 		fmt.Println("server shutdown")
-	} else if mode == 2 {
+	case 2:
 		log.Println("server restart")
 		cmd := exec.Command(os.Args[0])
 		cmd.Stdin = os.Stdin

@@ -32,11 +32,12 @@ func startFailsafeWebServer(err error, c controller.AbtractController) {
 	// http server
 	httpServer := &http.Server{}
 
-	if err == config.ErrNoDbDriverSet || err == config.ErrNoDbConnStringSet || err == config.ErrNoMediaPathSet {
+	switch err {
+	case config.ErrNoDbDriverSet, config.ErrNoDbConnStringSet, config.ErrNoMediaPathSet:
 		httpServer, _ = http.NewFailsafeConfig(c, &webFS)
-	} else if err == ErrNoUser {
+	case ErrNoUser:
 		httpServer, _ = http.NewFailsafeUser(c, &webFS)
-	} else {
+	default:
 		httpServer, _ = http.NewUnexpectedError(c, &webFS, err)
 	}
 

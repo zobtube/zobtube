@@ -13,6 +13,7 @@ func gaussianBlur(src *image.RGBA, ksize float64) *image.RGBA {
 	k := make([]float64, ks*ks)
 	for i := 0; i < ks; i++ {
 		for j := 0; j < ks; j++ {
+			//nolint:staticcheck // QF1005 expanding Pow will make it even more unreadable
 			k[i*ks+j] = math.Exp(-(math.Pow(float64(i)-ksize/2, 2)+math.Pow(float64(j)-ksize/2, 2))/(2*math.Pow(ksize/2, 2))) / 256
 		}
 	}

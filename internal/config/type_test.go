@@ -21,7 +21,7 @@ func TestConfigFromFile(t *testing.T) {
 	_, _ = f.WriteString("db:\n")
 	_, _ = f.WriteString("  driver: sqlite\n")
 	_, _ = f.WriteString("  connstring: ./zt-test.sqlite\n")
-	f.Close()
+	_ = f.Close()
 
 	// load configuration
 	cfg, err := config.New(f.Name())
@@ -33,11 +33,16 @@ func TestConfigFromFile(t *testing.T) {
 }
 
 func TestConfigFromEnv(t *testing.T) {
+	var err error
 	// set config from env vars
-	os.Setenv("ZT_SERVER_BIND", "0.0.0.0:8080")
-	os.Setenv("ZT_MEDIA_PATH", "library_test")
-	os.Setenv("ZT_DB_DRIVER", "sqlite")
-	os.Setenv("ZT_DB_CONNSTRING", "./zt-test.sqlite")
+	err = os.Setenv("ZT_SERVER_BIND", "0.0.0.0:8080")
+	assert.Equal(t, nil, err)
+	err = os.Setenv("ZT_MEDIA_PATH", "library_test")
+	assert.Equal(t, nil, err)
+	err = os.Setenv("ZT_DB_DRIVER", "sqlite")
+	assert.Equal(t, nil, err)
+	err = os.Setenv("ZT_DB_CONNSTRING", "./zt-test.sqlite")
+	assert.Equal(t, nil, err)
 
 	// load configuration
 	cfg, err := config.New("null")

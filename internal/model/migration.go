@@ -24,15 +24,16 @@ var modelToMigrate = []any{
 }
 
 func New(cfg *config.Config) (db *gorm.DB, err error) {
-	if cfg.DB.Driver == "sqlite" {
+	switch cfg.DB.Driver {
+	case "sqlite":
 		db, err = gorm.Open(sqlite.Open(cfg.DB.Connstring), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		})
-	} else if cfg.DB.Driver == "postgresql" {
+	case "postgresql":
 		db, err = gorm.Open(postgres.Open(cfg.DB.Connstring), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		})
-	} else {
+	default:
 		return db, errors.New("unsupported driver:" + cfg.DB.Driver)
 	}
 
