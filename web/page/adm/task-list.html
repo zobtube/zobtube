@@ -1,0 +1,15 @@
+{{ define "adm/task-list.html" }}
+{{ template "top" .}}
+
+<h1>Admin Area</h1>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>Task list</h2>
+        {{ template "shards/adm-task-list.html" .Tasks }}
+    </div>
+</div>
+{{ template "bottom" .}}
+{{ end }}

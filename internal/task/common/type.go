@@ -2,6 +2,7 @@ package common
 
 import (
 	"log"
+	"time"
 
 	"github.com/zobtube/zobtube/internal/config"
 	"github.com/zobtube/zobtube/internal/model"
@@ -62,6 +63,8 @@ func (t *Task) runTask(ctx *Context, task *model.Task) {
 	stepNB++
 	if stepNB == len(t.Steps) {
 		task.Status = model.TaskStatusDone
+		now := time.Now()
+		task.DoneAt = &now
 		ctx.DB.Save(&task)
 		log.Println("task done")
 		return

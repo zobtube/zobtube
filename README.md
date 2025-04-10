@@ -72,12 +72,12 @@ Environmental variable name | Configuration variable name | Example values | Des
 
 **Features**
 
-- [ ] Manage external commands through async tasks
+- [x] Manage external commands through async tasks
   - [x] Compute duration
   - [x] Generate thumbnail
   - [x] Generate mini thumbnail
   - [x] Move files
-  - [ ] View those tasks on the administration page
+  - [x] View those tasks on the administration page
 - [x] List all videos / actors / channels through an admin page
 - [ ] Implement channels for videos
 - [ ] Add categories

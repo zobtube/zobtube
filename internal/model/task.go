@@ -21,7 +21,7 @@ type Task struct {
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
-	DoneAt     gorm.DeletedAt `gorm:"index"`
+	DoneAt     *time.Time     `gorm:"index"`
 	Name       string
 	Step       string
 	Status     TaskStatus        `gorm:"default:todo"`

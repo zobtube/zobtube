@@ -1,0 +1,23 @@
+{{ define "shards/adm-task-list.html" }}
+<table class="table table-striped">
+    <thead>
+      <th>Task ID</th>
+      <th>Task</th>
+      <th>Status</th>
+    </thead>
+    <tbody>
+      {{ range $task := . }}
+      <tr>
+        <td><a href="/adm/task/{{ .ID }}"><code>{{ .ID }}</code></a></td>
+        <td>{{ .Name }}</td>
+        <td><span class="badge text-bg-{{
+            if eq .Status "todo" }}secondary{{
+            end }}{{ if eq .Status "in-progress" }}primary{{
+            end }}{{ if eq .Status "done" }}success{{
+            end }}{{ if eq .Status "error" }}danger{{
+            end }}">{{ .Status }}</span></td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+{{ end }}
