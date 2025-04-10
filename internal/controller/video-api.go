@@ -425,3 +425,39 @@ func (c *Controller) VideoAjaxMigrate(g *gin.Context) {
 
 	g.JSON(200, gin.H{})
 }
+
+func (c *Controller) VideoAjaxGenerateThumbnail(g *gin.Context) {
+	// get id from path
+	id := g.Param("id")
+
+	// get item from ID
+	video := &model.Video{
+		ID: id,
+	}
+	result := c.datastore.First(video)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	if video.Status != model.VideoStatusReady {
+		g.JSON(409, gin.H{
+			"error": "video is not ready to be updated",
+		})
+		return
+	}
+
+	// create task
+	err := c.runner.NewTask("video/generate-thumbnail", map[string]string{
+		"videoID":         video.ID,
+		"thumbnailTiming": g.Param("timing"),
+	})
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}

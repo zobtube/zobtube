@@ -101,6 +101,7 @@ func main() {
 	runner := &runner.Runner{}
 	runner.RegisterTask(video.NewVideoCreating())
 	runner.RegisterTask(video.NewVideoDeleting())
+	runner.RegisterTask(video.NewVideoGenerateThumbnail())
 	runner.Start(cfg, db)
 	c.RunnerRegister(runner)
 

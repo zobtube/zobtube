@@ -56,11 +56,11 @@ func creatingToReady(ctx *common.Context, params common.Parameters) (string, err
 		return "video does not exist", errors.New("id not in db")
 	}
 
-	video.Status = model.VideoStatusCreating
+	video.Status = model.VideoStatusReady
 
 	err := ctx.DB.Save(&video).Error
 	if err != nil {
-		return "unable to save video duration", err
+		return "unable to save video readiness", err
 	}
 
 	return "", nil

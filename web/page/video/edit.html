@@ -103,16 +103,7 @@
     <hr />
     <h5>Actions</h5>
     <p>
-      <button class="btn btn-primary btn-sm w-100" onClick="computeDuration('{{ .Video.ID }}')">Compute duration</button>
-    </p>
-    <p>
-      <button class="btn btn-primary btn-sm w-100" onClick="generateThumbnail('{{ .Video.ID }}')">Generate thumbnail</button>
-    </p>
-    <p>
-      <button class="btn btn-primary btn-sm w-100" onClick="generateThumbnailMini('{{ .Video.ID }}')">Generate mini thumbnail</button>
-    </p>
-    <p>
-      <button class="btn btn-primary btn-sm w-100" {{ if .Video.Imported }}disabled{{ end }} onClick="importVideo('{{ .Video.ID }}')">Import</button>
+      <button class="btn btn-primary btn-sm w-100" onClick="generateThumbnail('{{ .Video.ID }}')">New thumbnail from current timecode</button>
     </p>
     <p>
       <button class="btn btn-primary btn-sm w-100" {{ if eq .Video.Type "c" }}disabled{{ end }} onClick="changeTo('c', '{{ .Video.ID }}')">Change to Clip</button>
@@ -458,29 +449,6 @@ window.onload = function() {
     });
 }
 
-function computeDuration(video_id) {
-  url = "/api/video/00000000-0000-0000-0000-000000000000/compute-duration";
-  url = url.replace('00000000-0000-0000-0000-000000000000', video_id);
-  $.ajax(url, {
-    method: 'POST',
-    xhr: function () {
-      var xhr = new XMLHttpRequest();
-      return xhr;
-    },
-
-    success: function (e) {
-      console.debug('success, redirecting');
-      document.getElementById('video-duration').innerText = e.duration;
-    },
-
-    error: function () {
-      console.debug('failed');
-    },
-  });
-
-  return false;
-}
-
 function generateThumbnail(video_id) {
   url = "/api/video/00000000-0000-0000-0000-000000000000/generate-thumbnail/00:00:00";
   url = url.replace('00000000-0000-0000-0000-000000000000', video_id);
@@ -508,32 +476,6 @@ function generateThumbnail(video_id) {
   return false;
 }
 
-function generateThumbnailMini(video_id) {
-  url = "/api/video/00000000-0000-0000-0000-000000000000/generate-thumbnail-xs";
-  url = url.replace('00000000-0000-0000-0000-000000000000', video_id);
-  $.ajax(url, {
-    method: 'POST',
-    xhr: function () {
-      var xhr = new XMLHttpRequest();
-      return xhr;
-    },
-
-    success: function (e) {
-      console.debug('mini thumbnail successfully generated');
-      ext = document.getElementById('video-thumb-mini');
-      ext.innerText = 'Generated';
-      ext.classList.remove('bg-warning');
-      ext.classList.add('bg-success');
-    },
-
-    error: function () {
-      console.debug('failed');
-    },
-  });
-
-  return false;
-}
-
 function deleteVideo(video_id) {
   url = "/api/video/"+video_id;
   $.ajax(url, {
@@ -545,32 +487,6 @@ function deleteVideo(video_id) {
 
     success: function (e) {
       window.location.replace('/');
-    },
-
-    error: function () {
-      console.debug('failed');
-    },
-  });
-
-  return false;
-}
-
-function importVideo(video_id) {
-  url = "/api/video/"+video_id+"/import";
-  $.ajax(url, {
-    method: 'POST',
-    xhr: function () {
-      var xhr = new XMLHttpRequest();
-      return xhr;
-    },
-
-    success: function (e) {
-      console.debug('import successfull');
-      ext = document.getElementById('video-import');
-      ext.innerText = 'Available';
-      ext.classList.remove('bg-warning');
-      ext.classList.add('bg-success');
-
     },
 
     error: function () {
