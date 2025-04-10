@@ -7,4 +7,4 @@ const VIDEO_THUMB_NOT_GENERATED = "/static/images/video-thumb-not-generated.png"
 
 const TRIAGE_FILEPATH = "/triage"
 
-const ZT_VERSION = "0.1.47"
+const ZT_VERSION = "0.1.48"
