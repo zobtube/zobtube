@@ -117,6 +117,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [ ] Movie scenes
 - [ ] Collections
 - [ ] Merge actors
+- [ ] Redirect to requested page after login
 
 ## License
 
