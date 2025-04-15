@@ -36,6 +36,8 @@ type AbtractController interface {
 	ActorAjaxProviderSearch(c *gin.Context)
 	ActorAjaxThumb(c *gin.Context)
 	ActorAjaxLinkCreate(c *gin.Context)
+	ActorAjaxAliasCreate(c *gin.Context)
+	ActorAjaxAliasRemove(c *gin.Context)
 	ActorEdit(c *gin.Context)
 	ActorList(c *gin.Context)
 	ActorNew(c *gin.Context)

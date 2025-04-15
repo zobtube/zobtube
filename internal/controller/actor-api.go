@@ -276,3 +276,66 @@ func (c *Controller) ActorAjaxLinkCreate(g *gin.Context) {
 		"link_url": link.URL,
 	})
 }
+
+func (c *Controller) ActorAjaxAliasCreate(g *gin.Context) {
+	var err error
+
+	form := struct {
+		Alias string `form:"alias"`
+	}{}
+	err = g.ShouldBind(&form)
+	if err != nil {
+		g.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// get actor id from path
+	actorID := g.Param("id")
+
+	alias := model.ActorAlias{
+		Name:    form.Alias,
+		ActorID: actorID,
+	}
+
+	err = c.datastore.Create(&alias).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{
+		"id": alias.ID,
+	})
+}
+
+func (c *Controller) ActorAjaxAliasRemove(g *gin.Context) {
+	var err error
+
+	// get alias id from path
+	aliasID := g.Param("id")
+
+	alias := model.ActorAlias{
+		ID: aliasID,
+	}
+	result := c.datastore.First(&alias)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	err = c.datastore.Delete(&alias).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}

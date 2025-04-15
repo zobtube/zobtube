@@ -55,9 +55,26 @@ img {
         </select>
         <div id="actor-sex-help" class="form-text"></div>
       </div>
+
+      <h4 style="margin-top: 40px;" class="mb-3">Aliases</h4>
+      <div class="form-control chip-selector" id="actor_chip_selector" style="height: unset; display: flex;">
+        <div class="chips" id="aliasChips">
+          {{ range $alias := .Actor.Aliases }}
+          <div class="chip" alias-id="{{ $alias.ID }}">
+            {{ $alias.Name }}
+            <button class="btn btn-danger" onclick="actorAliasRemove('{{ $alias.ID }}');"><i class="fa fa-trash-alt"></i></button>
+          </div>
+          {{ end }}
+          <div class="chip" id="aliasChipsNew">Add an alias
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addActorAliasModal">
+              <i class="fa fa-plus-circle"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <h4 style="margin-top: 65px;">Actor links</h4>
+    <h4 style="margin-top: 40px;">Actor links</h4>
     <table class="table">
       <thead>
         <th>Provider</th>
@@ -186,6 +203,30 @@ img {
   </div>
 </div>
 <!-- End Profile Picture Modal -->
+
+<!-- Preview Add Actor Alias Modal -->
+<div class="modal fade" id="addActorAliasModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add new alias</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-floating" style="margin-bottom: 20px;">
+          <input type="text" class="form-control" id="addActorAliasInput"></input>
+          <label for="addActorInput">Actor alias</label>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" id="modalActorAliasButton" onclick="actorAliasAdd()">Create new alias</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End Add Actor Alias Modal -->
 
 <script>
 function actorLinkAutomaticSearch(actorName, providerName, providerSlug, url) {
@@ -362,6 +403,17 @@ updateProviders();
 window.onload = function() {
   // init vars
   document.providerInit = {};
+
+  // store modals
+  document.modalNewAlias = document.getElementById("addActorAliasModal");
+  document.modalNewAliasModal = new bootstrap.Modal(document.modalNewAlias);
+
+  // register calls on modals
+  $("#addActorAliasInput").on('keyup', function (e) {
+      if (e.key === 'Enter' || e.keyCode === 13) {
+        actorAliasAdd();
+      }
+});
 
   // calls
   firstTimeSearch();
@@ -550,6 +602,113 @@ function setNewLink() {
   });
 }
 
+function actorAliasAdd() {
+  console.log('add new alias for actor');
+
+  // retrieve button
+  button = document.getElementById('modalActorAliasButton');
+
+  // set button as loader
+  button.classList.add('spinner-border', 'text-secondary');
+  button.classList.remove('btn', 'btn-success');
+  button.innerHTML = '<span class="visually-hidden">Loading...</span>';
+
+  // store input
+  aliasInput = document.getElementById('addActorAliasInput');
+
+  // perform http call
+  url = '/api/actor/'+G_actor_id+'/alias';
+  $.ajax(url, {
+    method: 'POST',
+    data: {
+      'alias': aliasInput.value,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+    success: function (result) {
+      sendToast(
+        'Actor\'s new alias',
+        '',
+        'bg-success',
+        'New alias recorded!',
+      );
+
+      // add new alias
+      newAliasChip  = document.createElement('div');
+      newAliasChip.classList.add('chip');
+
+      newAliasChipContent  = aliasInput.value;
+      newAliasChipContent += '<button class="btn btn-danger" onclick="actorAliasRemove(\'';
+      newAliasChipContent += result.id;
+      newAliasChipContent += '\');"><i class="fa fa-trash-alt"></i></button></div>';
+      newAliasChip.innerHTML = newAliasChipContent;
+
+      newChipButton = document.getElementById('aliasChipsNew');
+      newChipParent = newChipButton.parentNode;
+      newChipParent.insertBefore(newAliasChip, newChipButton);
+
+      // reset input field
+      aliasInput.value = '';
+
+      // revert loader button
+      button.classList.remove('spinner-border', 'text-secondary');
+      button.classList.add('btn', 'btn-success');
+      button.innerHTML = 'Create new alias';
+
+      // hide modal
+      document.modalNewAliasModal.hide();
+    },
+    error: function () {
+      sendToast(
+        'Actor\'s new alias',
+        '',
+        'bg-warning',
+        'Unable to create this new alias',
+      );
+    },
+  });
+}
+
+function actorAliasRemove(aliasID) {
+  console.log('remove alias for actor');
+
+  // perform http call
+  url = '/api/actor/alias/'+aliasID;
+  $.ajax(url, {
+    method: 'DELETE',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+    success: function (result) {
+      // send notification
+      sendToast(
+        'Actor\'s alias removal',
+        '',
+        'bg-success',
+        'Successfully removed!',
+      );
+
+      // remove node
+      chips = document.getElementById('aliasChips');
+      for (chip of chips.children) {
+        if (chip.getAttribute('alias-id') == aliasID) {
+          chip.remove();
+        }
+      }
+    },
+    error: function () {
+      sendToast(
+        'Actor\'s alias removal',
+        '',
+        'bg-warning',
+        'Unable to remove alias',
+      );
+    },
+  });
+}
 </script>
 {{ template "bottom" .}}
 {{ end }}

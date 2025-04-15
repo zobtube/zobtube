@@ -55,6 +55,10 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 
 		// thumb
 		actorAPI.POST("/:id/thumb", c.ActorAjaxThumb)
+
+		// alias
+		actorAPI.POST("/:id/alias", c.ActorAjaxAliasCreate)
+		actorAPI.DELETE("/alias/:id", c.ActorAjaxAliasRemove)
 	}
 
 	// channels

@@ -79,7 +79,7 @@ func (c *Controller) ActorEdit(g *gin.Context) {
 	actor := &model.Actor{
 		ID: id,
 	}
-	result := c.datastore.Preload("Links").First(actor)
+	result := c.datastore.Preload("Links").Preload("Aliases").First(actor)
 
 	// check result
 	if result.RowsAffected < 1 {
