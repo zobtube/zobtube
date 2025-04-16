@@ -85,7 +85,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [ ] Add folder creation in triage
 - [ ] Add 'set as image' in triage towards videos / actors / channels
 - [ ] Clips view
-- [ ] Edit actor aliases
+- [x] Edit actor aliases
 
 **Bugs**
 
