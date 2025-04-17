@@ -102,6 +102,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	uploadAPI.POST("/triage/folder", c.UploadAjaxTriageFolder)
 	uploadAPI.POST("/triage/file", c.UploadAjaxTriageFile)
 	uploadAPI.POST("/file", c.UploadAjaxUploadFile)
+	uploadAPI.DELETE("/file", c.UploadAjaxDeleteFile)
 
 	// adm
 	authGroup.GET("/adm", c.AdmHome)

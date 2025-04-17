@@ -168,3 +168,42 @@ func (c *Controller) UploadAjaxUploadFile(g *gin.Context) {
 
 	g.JSON(200, gin.H{})
 }
+
+func (c *Controller) UploadAjaxDeleteFile(g *gin.Context) {
+	// get file from request
+	type fileDeleteForm struct {
+		File string
+	}
+
+	form := fileDeleteForm{}
+	err := g.ShouldBind(&form)
+	if err != nil {
+		g.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// ensure not empty
+	file := form.File
+	if file == "" {
+		g.JSON(400, gin.H{
+			"error": "file name cannot be empty",
+		})
+		return
+	}
+
+	// assemble with triage path
+	file = filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, file)
+
+	// remove file
+	err = os.Remove(file)
+	if err != nil {
+		g.JSON(422, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}
