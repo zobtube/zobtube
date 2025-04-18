@@ -25,7 +25,7 @@ jobs:
       - name: Setup fake DB
         run: ./test/db/generate-empty.sh
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.13'
       - name: Install dependencies
