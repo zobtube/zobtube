@@ -94,7 +94,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [x] Create own favicon
 - [x] Add linting validation
 - [ ] Add tests
-  - [ ] Validate routes requiring authentication
+  - [x] Validate routes requiring authentication
   - [ ] Validate routes requiring admin rights
   - [ ] Validate upload
   - [ ] Validate video viewing

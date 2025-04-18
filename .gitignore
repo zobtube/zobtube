@@ -4,3 +4,4 @@ tmp/*
 dist/
 config.yml
 internal/model/zt-test.sqlite
+__pycache__

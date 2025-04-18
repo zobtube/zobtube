@@ -1,0 +1,93 @@
+import re
+from playwright.sync_api import Page, expect
+
+BASE_URL = 'http://127.0.0.1:8080'
+
+def test_pages_unusable_if_unauthenticated(page: Page):
+    methods = {
+        "GET": [
+            "",
+            "/adm",
+            "/adm/videos",
+            "/adm/actors",
+            "/adm/channels",
+            "/adm/tasks",
+            "/adm/task/:id",
+            "/actors",
+            "/actor/new",
+            "/actor/:id",
+            "/actor/:id/edit",
+            "/actor/:id/thumb",
+            "/actor/:id/delete",
+            "/api/actor/:id/provider/:provider_slug",
+            "/api/actor/link/:id/thumb",
+            "/channels",
+            "/channel/new",
+            "/channel/:id",
+            "/channel/:id/thumb",
+            "/clips",
+            "/movies",
+            "/videos",
+            "/video/:id",
+            "/video/:id/edit",
+            "/video/:id/stream",
+            "/video/:id/thumb",
+            "/video/:id/thumb_xs",
+            "/upload/",
+            "/upload/preview/:filepath",
+            "/profile",
+        ],
+        'POST': [
+            "/actor/new",
+            "/api/actor/",
+            "/api/actor/:id/link",
+            "/api/actor/:id/thumb",
+            "/api/actor/:id/alias",
+            "/channel/new",
+            "/api/video",
+            "/api/video/:id/upload",
+            "/api/video/:id/thumb",
+            "/api/video/:id/migrate",
+            "/api/video/:id/generate-thumbnail/:timing",
+            "/api/video/:id/rename",
+            "/api/video/:id/count-view",
+            "/upload/import",
+            "/api/upload/triage/folder",
+            "/api/upload/triage/file",
+            "/api/upload/file",
+        ],
+        'DELETE': [
+            "/api/actor/link/:id",
+            "/api/actor/alias/:id",
+            "/api/video/:id",
+            "/api/video/:id/actor/:actor_id",
+            "/api/upload/file",
+        ],
+        'HEAD': [
+            "/api/video/:id",
+        ],
+        'PUT': [
+            "/api/video/:id/actor/:actor_id",
+        ],
+    }
+
+    for method, urls in methods.items():
+        print("checking method: "+method)
+        print("checking method: "+'-'.join(urls))
+        for url in urls:
+            url = BASE_URL+url
+            print(f"checking url: {url}")
+            response = None
+            match method:
+                case 'GET':
+                    response = page.request.get(url, max_redirects=0)
+                case 'POST':
+                    response = page.request.post(url, max_redirects=0)
+                case 'DELETE':
+                    response = page.request.delete(url, max_redirects=0)
+                case 'HEAD':
+                    response = page.request.head(url, max_redirects=0)
+                case 'PUT':
+                    response = page.request.put(url, max_redirects=0)
+            assert response.status == 302
+            print(f"    response: {response.status}")
