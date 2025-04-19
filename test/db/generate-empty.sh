@@ -12,6 +12,6 @@ echo 'run zobtube to generate database'
 timeout 5 /tmp/zt
 
 echo 'insert fake user'
-sqlite3 $ZT_DB_CONNSTRING "insert into users values ('b23f4f4a-1c5c-11f0-8822-305a3a05e04d', date('now'), date('now'), null, 'test', 'invalid', 1);"
+sqlite3 $ZT_DB_CONNSTRING "insert into users values ('b23f4f4a-1c5c-11f0-8822-305a3a05e04d', date('now'), date('now'), null, 'validation', '98c41dcd20b86b86830ec0794559835614458ceaae0f0ec77a3ed1cd3a1f7d55', 1);"
 
 echo 'done'

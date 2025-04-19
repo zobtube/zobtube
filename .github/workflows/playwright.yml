@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  test-ui:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:

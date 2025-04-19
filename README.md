@@ -104,8 +104,8 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [ ] Add tests
   - [x] Validate routes requiring authentication
   - [ ] Validate routes requiring admin rights
-  - [ ] Validate upload
-  - [ ] Validate video viewing
+  - [x] Validate upload
+  - [x] Validate video viewing
 - [x] Manually add links of actors
 - [x] Delete actors
 - [ ] Add actors on video page after selections
