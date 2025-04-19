@@ -8,7 +8,7 @@ _ZobTube, passion of the Zob, lube for the Tube!_
 
 ZobTube is a library viewer and management tools for all your ~~porn~~ scientific videos.
 
-## Current status
+## :information_source: Current status
 
 > [!WARNING]
 > ZobTube is under active development! Everything ***should*** work properly.
@@ -18,22 +18,30 @@ ZobTube is a library viewer and management tools for all your ~~porn~~ scientifi
 
 The remaining work towards the incoming stable release is [available below](#coming-developments).
 
-## About piracy
+## :cop: About piracy
 
 Piracy is bad. The FBI will not blow up your door for some downloaded porn. Yet, please respect the hard work of the actors by paying for their content.
 
 > [!CAUTION]
 > This goes without saying but **neither store illegal content nor content you don't own**.
 
-## Everyone welcomed
+## :wave: Everyone welcomed
 
 As healthy sex life goes in pair of welcoming everyone, ZobTube endorses **LGBTQIA+** community.
 
 For now, the only reference to some sexual identity is through the definition of actors. Only `male`, `female` and `shemale` are supported for now. But if anything's missing, feel free to create a pull request or a feature request.
 
-## Getting started
+## :vertical_traffic_light: Getting started
 
 ZobTube works as a single binary. It needs a database to work but can rely on a local sqlite database. Parameters to start the binary can either be passed as a configration file or as environmental variables, as described below.
+
+### Quickstart
+
+Just start the binary without any parameter
+
+```sh
+./zobtube
+```
 
 ### Configuration file example
 
@@ -66,7 +74,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 `ZT_DB_CONNSTRING` | `db.connstring` | `zt.db` - `host=pg user=zt password=topsecret dbname=zobtube port=5432 sslmode=disable` | Connection string to pass to the database driver
 `ZT_MEDIA_PATH` | `media.path` | `/mnt/zobtube` - `./my_library` - `C:\Users\zt\videos` | Library base path, where all content will be stored.
 
-## Coming developments
+## :white_check_mark: Coming developments
 
 ### Road to 1.0.0
 
@@ -119,6 +127,6 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [ ] Merge actors
 - [ ] Redirect to requested page after login
 
-## License
+## :page_facing_up: License
 
 ZobTube © 2024 by sblablaha is licensed under CC BY-SA 4.0. To view a copy of this license, visit [CC website](https://creativecommons.org/licenses/by-sa/4.0/)
