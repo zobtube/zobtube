@@ -105,6 +105,15 @@ type AbtractController interface {
 	// Failsafe
 	FailsafeConfiguration(c *gin.Context)
 	FailsafeUser(c *gin.Context)
+
+	// Build
+	BuildDetailsRegister(string, string, string)
+}
+
+type buildDetails struct {
+	Version   string
+	Commit    string
+	BuildDate string
 }
 
 type Controller struct {
@@ -113,6 +122,7 @@ type Controller struct {
 	providers       map[string]provider.Provider
 	shutdownChannel chan<- int
 	runner          *runner.Runner
+	build           *buildDetails
 }
 
 func New(shutdownChannel chan int) AbtractController {
@@ -132,4 +142,12 @@ func (c *Controller) DatabaseRegister(db *gorm.DB) {
 
 func (c *Controller) RunnerRegister(r *runner.Runner) {
 	c.runner = r
+}
+
+func (c *Controller) BuildDetailsRegister(version, commit, buildDate string) {
+	c.build = &buildDetails{
+		Version: version,
+		Commit: commit,
+		BuildDate: buildDate,
+	}
 }

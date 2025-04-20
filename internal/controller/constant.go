@@ -6,5 +6,3 @@ const ACTOR_PROFILE_PICTURE_MISSING = "/static/images/actor-missing-profile-pict
 const VIDEO_THUMB_NOT_GENERATED = "/static/images/video-thumb-not-generated.png"
 
 const TRIAGE_FILEPATH = "/triage"
-
-const ZT_VERSION = "0.1.50"

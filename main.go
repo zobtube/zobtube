@@ -28,6 +28,13 @@ var ErrNoUser = errors.New("database does not have any account")
 var wg sync.WaitGroup
 var shutdownChannel chan int
 
+// goreleaser build-time variables
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 func startFailsafeWebServer(err error, c controller.AbtractController) {
 	// http server
 	httpServer := &http.Server{}
@@ -104,6 +111,8 @@ func main() {
 	runner.RegisterTask(video.NewVideoGenerateThumbnail())
 	runner.Start(cfg, db)
 	c.RunnerRegister(runner)
+
+	c.BuildDetailsRegister(version, commit, date)
 
 	// create http server
 	httpServer, _ = http.New(&c, &webFS)

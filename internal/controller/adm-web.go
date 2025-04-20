@@ -30,7 +30,7 @@ func (c *Controller) AdmHome(g *gin.Context) {
 
 	g.HTML(http.StatusOK, "adm/home.html", gin.H{
 		"User":         g.MustGet("user").(*model.User),
-		"Version":      ZT_VERSION,
+		"Build":        c.build,
 		"VideoCount":   videoCount,
 		"ActorCount":   actorCount,
 		"ChannelCount": channelCount,

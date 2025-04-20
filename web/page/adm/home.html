@@ -33,7 +33,10 @@ h2 {
   <div class="col-md-12">
     <div class="card">
       <div class="card-body">
-        Zobtube <b>up and running</b>! Version: <b>{{ .Version }}</b>
+        <p>Zobtube <b>up and running</b>!</p>
+        <p>Version: <b>{{ .Build.Version }}</b></p>
+        <p>Commit: <b>{{ .Build.Commit }}</b></p>
+        <p>Build at: <b>{{ .Build.BuildDate }}</b></p>
       </div>
     </div>
   </div>
