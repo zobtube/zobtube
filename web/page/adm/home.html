@@ -41,7 +41,7 @@ h2 {
   <div class="col-md-12">
     <h2>Instance overview</h2>
     <div class="row">
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="card">
           <div class="card-body card-adm">
             <span>
@@ -57,12 +57,12 @@ h2 {
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="card">
           <div class="card-body card-adm">
             <span>
               <div class="d-flex align-items-center">
-                <i class="fas fa-user s16"></i>
+                <i class="far fa-user s16"></i>
                 <h3 class="gl-m-0 gl-ml-3">{{ .ActorCount }}</h3>
               </div>
               <div class="gl-mt-3 text-uppercase">Actors</div>
@@ -73,7 +73,7 @@ h2 {
           </div>
         </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-3">
         <div class="card">
           <div class="card-body card-adm">
             <span>
@@ -89,6 +89,21 @@ h2 {
           </div>
         </div>
       </div>
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-body card-adm">
+            <span>
+              <div class="d-flex align-items-center">
+                <i class="fas fa-user-circle s16"></i>
+                <h3 class="gl-m-0 gl-ml-3">{{ .UserCount }}</h3>
+              </div>
+              <div class="gl-mt-3 text-uppercase">Users</div>
+            </span>
+            <div class="card-adm-btn">
+              <a class="btn btn-primary" href="/adm/users">View</a>
+            </div>
+          </div>
+        </div>
     </div>
   </div>
 

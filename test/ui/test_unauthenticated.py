@@ -36,6 +36,10 @@ def test_pages_unusable_if_unauthenticated(page: Page):
             "/upload/",
             "/upload/preview/:filepath",
             "/profile",
+            "/adm/users",
+            "/adm/user",
+            "/adm/user/:id/delete",
+
         ],
         'POST': [
             "/actor/new",
@@ -55,6 +59,7 @@ def test_pages_unusable_if_unauthenticated(page: Page):
             "/api/upload/triage/folder",
             "/api/upload/triage/file",
             "/api/upload/file",
+            "/adm/user",
         ],
         'DELETE': [
             "/api/actor/link/:id",

@@ -1,0 +1,30 @@
+{{ define "adm/user-list.html" }}
+{{ template "top" .}}
+
+<h1>Admin Area</h1>
+
+<hr />
+
+<div class="row">
+  <div class="col-md-12">
+    <h2>User list <a href="/adm/user"><i class="fas fa-plus-circle"></i></a></h2>
+    <table class="table table-striped table-hover" style="margin-top: 50px;">
+      <thead>
+        <th>Username</th>
+        <th>Has admin rights</th>
+        <th></th>
+      </thead>
+      <tbody>
+        {{ range $object := .Objects }}
+        <tr>
+          <td>{{ .Username }}</td>
+          <td><i class="{{ if .Admin }}far fa-check-circle{{ else }}fas fa-ban{{ end }}"></i></td>
+          <td style="text-align:end"><a href="{{ .URLAdmDelete }}" class="btn btn-sm btn-danger">Delete</a></td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+</div>
+{{ template "bottom" .}}
+{{ end }}

@@ -1,0 +1,39 @@
+{{ define "adm/user-new.html" }}
+{{ template "top" .}}
+
+<h1>Admin Area</h1>
+
+<hr />
+
+<div class="row">
+  <div class="col-md-12">
+    <h2>Add a new user</h2>
+    <form style="margin-top: 50px" method="post">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="username" class="form-control" id="username" name="username" placeholder="my-new-user">
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password"></textarea>
+      </div>
+      <div class="form-check form-switch mb-3">
+        <label class="form-check-label" for="admin">Has admin rights</label>
+        <input class="form-check-input" type="checkbox" id="admin" name="admin" value="x">
+      </div>
+
+      {{ if .Error }}
+      <div class="alert alert-danger">
+        An error occured!<br />
+        <code>{{ .Error.Error }}</code>
+      </div>
+      {{ end }}
+
+      <div>
+        <input class="btn btn-primary" type="submit" value="Create new user"/>
+      </div>
+    </form>
+  </div>
+</div>
+{{ template "bottom" .}}
+{{ end }}

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,4 +32,8 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	return nil
+}
+
+func (u *User) URLAdmDelete() string {
+	return fmt.Sprintf("/adm/user/%s/delete", u.ID)
 }

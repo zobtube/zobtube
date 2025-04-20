@@ -18,6 +18,9 @@ type AbtractController interface {
 	AdmChannelList(c *gin.Context)
 	AdmTaskList(c *gin.Context)
 	AdmTaskView(c *gin.Context)
+	AdmUserList(c *gin.Context)
+	AdmUserNew(c *gin.Context)
+	AdmUserDelete(c *gin.Context)
 
 	// Home
 	Home(c *gin.Context)
