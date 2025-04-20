@@ -27,21 +27,23 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	authGroup := s.Router.Group("")
 	authGroup.Use(UserIsAuthenticated(c))
 
+	admGroup := s.Router.Group("")
+	admGroup.Use(UserIsAuthenticated(c))
+	admGroup.Use(UserIsAdmin(c))
+
 	// home
 	authGroup.GET("", c.Home)
 
 	// actors
 	authGroup.GET("/actors", c.ActorList)
-	actors := authGroup.Group("/actor")
-	actors.Use(UserIsAuthenticated(c))
-	actors.GET("/new", c.ActorNew)
-	actors.POST("/new", c.ActorNew)
-	actors.GET("/:id", c.ActorView)
-	actors.GET("/:id/edit", c.ActorEdit)
-	actors.GET("/:id/thumb", c.ActorThumb)
-	actors.GET("/:id/delete", c.ActorDelete)
+	admGroup.GET("/actor/new", c.ActorNew)
+	admGroup.POST("/actor/new", c.ActorNew)
+	authGroup.GET("/actor/:id", c.ActorView)
+	admGroup.GET("/actor/:id/edit", c.ActorEdit)
+	authGroup.GET("/actor/:id/thumb", c.ActorThumb)
+	admGroup.GET("/actor/:id/delete", c.ActorDelete)
 
-	actorAPI := authGroup.Group("/api/actor")
+	actorAPI := admGroup.Group("/api/actor")
 	{
 		actorAPI.POST("/", c.ActorAjaxNew)
 
@@ -63,24 +65,22 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 
 	// channels
 	authGroup.GET("/channels", c.ChannelList)
-	channels := authGroup.Group("/channel")
-	channels.GET("/new", c.ChannelCreate)
-	channels.POST("/new", c.ChannelCreate)
-	channels.GET("/:id", c.ChannelView)
-	channels.GET("/:id/thumb", c.ChannelThumb)
+	admGroup.GET("/channel/new", c.ChannelCreate)
+	admGroup.POST("/channel/new", c.ChannelCreate)
+	authGroup.GET("/channel/:id", c.ChannelView)
+	authGroup.GET("/channel/:id/thumb", c.ChannelThumb)
 
 	// videos
 	authGroup.GET("/clips", c.ClipList)
 	authGroup.GET("/movies", c.MovieList)
 	authGroup.GET("/videos", c.VideoList)
-	videos := authGroup.Group("/video")
-	videos.GET("/:id", c.VideoView)
-	videos.GET("/:id/edit", c.VideoEdit)
-	videos.GET("/:id/stream", c.VideoStream)
-	videos.GET("/:id/thumb", c.VideoThumb)
-	videos.GET("/:id/thumb_xs", c.VideoThumbXS)
+	authGroup.GET("/video/:id", c.VideoView)
+	admGroup.GET("/video/:id/edit", c.VideoEdit)
+	authGroup.GET("/video/:id/stream", c.VideoStream)
+	authGroup.GET("/video/:id/thumb", c.VideoThumb)
+	authGroup.GET("/video/:id/thumb_xs", c.VideoThumbXS)
 
-	videoAPI := authGroup.Group("/api/video")
+	videoAPI := admGroup.Group("/api/video")
 	videoAPI.POST("", c.VideoAjaxCreate)
 	videoAPI.HEAD("/:id", c.VideoAjaxStreamInfo)
 	videoAPI.DELETE("/:id", c.VideoAjaxDelete)
@@ -94,31 +94,33 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	videoAPI.POST("/:id/count-view", c.VideoViewAjaxIncrement)
 
 	// uploads
-	uploads := authGroup.Group("/upload")
+	uploads := admGroup.Group("/upload")
 	uploads.GET("/", c.UploadTriage)
 	uploads.GET("/preview/:filepath", c.UploadPreview)
 	uploads.POST("/import", c.UploadImport)
-	uploadAPI := authGroup.Group("/api/upload")
+	uploadAPI := admGroup.Group("/api/upload")
 	uploadAPI.POST("/triage/folder", c.UploadAjaxTriageFolder)
 	uploadAPI.POST("/triage/file", c.UploadAjaxTriageFile)
 	uploadAPI.POST("/file", c.UploadAjaxUploadFile)
 	uploadAPI.DELETE("/file", c.UploadAjaxDeleteFile)
 
 	// adm
-	authGroup.GET("/adm", c.AdmHome)
-	authGroup.GET("/adm/videos", c.AdmVideoList)
-	authGroup.GET("/adm/actors", c.AdmActorList)
-	authGroup.GET("/adm/channels", c.AdmChannelList)
-	authGroup.GET("/adm/tasks", c.AdmTaskList)
-	authGroup.GET("/adm/task/:id", c.AdmTaskView)
-	authGroup.GET("/adm/users", c.AdmUserList)
-	authGroup.GET("/adm/user", c.AdmUserNew)
-	authGroup.POST("/adm/user", c.AdmUserNew)
-	authGroup.GET("/adm/user/:id/delete", c.AdmUserDelete)
+	admGroup.GET("/adm", c.AdmHome)
+	admGroup.GET("/adm/videos", c.AdmVideoList)
+	admGroup.GET("/adm/actors", c.AdmActorList)
+	admGroup.GET("/adm/channels", c.AdmChannelList)
+	admGroup.GET("/adm/tasks", c.AdmTaskList)
+	admGroup.GET("/adm/task/:id", c.AdmTaskView)
+	admGroup.GET("/adm/users", c.AdmUserList)
+	admGroup.GET("/adm/user", c.AdmUserNew)
+	admGroup.POST("/adm/user", c.AdmUserNew)
+	admGroup.GET("/adm/user/:id/delete", c.AdmUserDelete)
 
 	// profile
 	authGroup.GET("/profile", c.ProfileView)
 
+	// errors
+	authGroup.Any("/error/unauthorized", c.ErrUnauthorized)
 	// remainings routes to implement
 	/*
 	   path('actor/<uuid:id>/edit/first-time', views.actor_edit, name='actor_edit_first_time', kwargs={'first_time': True}),

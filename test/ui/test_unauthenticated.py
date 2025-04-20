@@ -78,7 +78,6 @@ def test_pages_unusable_if_unauthenticated(page: Page):
 
     for method, urls in methods.items():
         print("checking method: "+method)
-        print("checking method: "+'-'.join(urls))
         for url in urls:
             url = BASE_URL+url
             print(f"checking url: {url}")

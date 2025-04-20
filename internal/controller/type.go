@@ -91,6 +91,9 @@ type AbtractController interface {
 	ProviderRegister(provider.Provider)
 	ProviderGet(string) (provider.Provider, error)
 
+	// Error pages
+	ErrUnauthorized(*gin.Context)
+
 	// Init
 	ConfigurationRegister(*config.Config)
 	DatabaseRegister(*gorm.DB)

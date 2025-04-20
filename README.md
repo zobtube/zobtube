@@ -98,12 +98,11 @@ Environmental variable name | Configuration variable name | Example values | Des
 **Bugs**
 
 - [x] Fix bug with large uploaded files in triage
-- [ ] Ensure that only admin can use admin routes
 - [x] Create own favicon
 - [x] Add linting validation
-- [ ] Add tests
+- [x] Add tests
   - [x] Validate routes requiring authentication
-  - [ ] Validate routes requiring admin rights
+  - [x] Validate routes requiring admin rights
   - [x] Validate upload
   - [x] Validate video viewing
 - [x] Manually add links of actors
