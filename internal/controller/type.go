@@ -60,6 +60,7 @@ type AbtractController interface {
 	VideoAjaxMigrate(*gin.Context)
 	VideoAjaxGenerateThumbnail(*gin.Context)
 	VideoEdit(*gin.Context)
+	VideoAjaxEditChannel(*gin.Context)
 	VideoStream(*gin.Context)
 	VideoThumb(*gin.Context)
 	VideoThumbXS(*gin.Context)
@@ -78,6 +79,8 @@ type AbtractController interface {
 	ChannelList(*gin.Context)
 	ChannelView(*gin.Context)
 	ChannelThumb(*gin.Context)
+	ChannelAjaxList(*gin.Context)
+	ChannelEdit(*gin.Context)
 
 	// Uploads
 	UploadTriage(*gin.Context)

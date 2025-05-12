@@ -22,7 +22,7 @@ echo 'insert fake channel'
 sqlite3 $ZT_DB_CONNSTRING "insert into channels values ('8c50735e-1dc4-11f0-b1fc-305a3a05e04d', date('now'), date('now'), null, 'test', 0);"
 
 echo 'insert fake video'
-sqlite3 $ZT_DB_CONNSTRING "insert into videos values ('d8045d56-1dc4-11f0-9970-305a3a05e04d', date('now'), date('now'), null, 'test', 'test-filename', 0, 0, 0, 'v', 1, 'ready');"
+sqlite3 $ZT_DB_CONNSTRING "insert into videos (id, created_at, updated_at, deleted_at, name, filename, thumbnail, thumbnail_mini, duration, type, imported, status, channel_id) values ('d8045d56-1dc4-11f0-9970-305a3a05e04d', date('now'), date('now'), null, 'test', 'test-filename', 0, 0, 0, 'v', 1, 'ready', null);"
 
 echo 'copy fake video'
 mkdir -p $ZT_MEDIA_PATH/videos/d8045d56-1dc4-11f0-9970-305a3a05e04d

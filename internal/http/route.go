@@ -69,6 +69,11 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	admGroup.POST("/channel/new", c.ChannelCreate)
 	authGroup.GET("/channel/:id", c.ChannelView)
 	authGroup.GET("/channel/:id/thumb", c.ChannelThumb)
+	admGroup.GET("/channel/:id/edit", c.ChannelEdit)
+	admGroup.POST("/channel/:id/edit", c.ChannelEdit)
+
+	// channels API
+	authGroup.GET("/api/channels", c.ChannelAjaxList)
 
 	// videos
 	authGroup.GET("/clips", c.ClipList)
@@ -80,6 +85,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	authGroup.GET("/video/:id/thumb", c.VideoThumb)
 	authGroup.GET("/video/:id/thumb_xs", c.VideoThumbXS)
 
+	// videos API
 	videoAPI := admGroup.Group("/api/video")
 	videoAPI.POST("", c.VideoAjaxCreate)
 	videoAPI.HEAD("/:id", c.VideoAjaxStreamInfo)
@@ -92,6 +98,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	videoAPI.POST("/:id/generate-thumbnail/:timing", c.VideoAjaxGenerateThumbnail)
 	videoAPI.POST("/:id/rename", c.VideoAjaxRename)
 	videoAPI.POST("/:id/count-view", c.VideoViewAjaxIncrement)
+	videoAPI.POST("/:id/channel", c.VideoAjaxEditChannel)
 
 	// uploads
 	uploads := admGroup.Group("/upload")

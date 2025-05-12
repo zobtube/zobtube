@@ -25,8 +25,9 @@ type Video struct {
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
 	Name          string
 	Filename      string
-	Actors        []Actor  `gorm:"many2many:video_actors;"`
-	Channel       *Channel `gorm:"foreignKey:ID"`
+	Actors        []Actor `gorm:"many2many:video_actors;"`
+	Channel       *Channel
+	ChannelID     *string
 	Thumbnail     bool
 	ThumbnailMini bool
 	Duration      time.Duration

@@ -190,7 +190,11 @@ window.onload = function() {
     "timeupdate",
     function(event){
       onTrackedVideoFrame(this.currentTime);
-    });
+    }
+  );
+
+  document.modalChannelEdit = document.getElementById("editChannelModal");
+  document.modalChannelEditModal = new bootstrap.Modal(document.modalChannelEdit);
 }
 
 function generateThumbnail(video_id) {
@@ -320,6 +324,61 @@ function video_title_send() {
   });
 
   return false;
+}
+
+function video_channel_edit() {
+  // get channel list
+  $.ajax("/api/channels", {
+    method: 'GET',
+
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+
+      return xhr;
+    },
+
+    success: function (result) {
+      // prepare channel list for the select
+      selectChannelList = '<option value="x">None</option>';
+      for (const [channelID, channelName] of Object.entries(result.channels)) {
+        selectChannelList += '<option value="'+channelID+'">'+channelName+'</option>';
+      }
+      document.getElementById('channel-list').innerHTML = selectChannelList;
+
+      // get channel edition modal and display it
+      document.modalChannelEditModal.show();
+    },
+
+    error: function () {
+      console.debug('failed');
+    },
+  });
+}
+
+function video_channel_send() {
+  // send channel
+  $.ajax("/api/video/"+video_id+"/channel", {
+    method: 'POST',
+    data: {
+      'channelID': document.getElementById('channel-list').value,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function () {
+      // get channel edition modal and hide it
+      document.modalChannelEditModal.hide();
+
+      // to improve later: reload to show new channel
+      window.location.reload();
+    },
+
+    error: function () {
+      console.debug('failed');
+    },
+  });
 }
 
 {{ end }}

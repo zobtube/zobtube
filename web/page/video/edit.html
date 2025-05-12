@@ -130,6 +130,15 @@
     </div>
   </div>
 
+  <!-- form: channel -->
+  <div class="col-12">
+    <div class="mb-3 form-floating input-group">
+      <input type="text" disabled class="form-control" name="channel" id="video-channel" value="{{ if .Video.ChannelID }}{{ .Video.Channel.Name }}{{ else }}None{{ end }}">
+      <label for="channel">Channel</label>
+      <button class="btn btn-outline-warning" type="button" id="video-channel-edit" onClick="video_channel_edit()">Change</button>
+    </div>
+  </div>
+
   <!-- form: actors -->
   <div class="col-12 mb-3">
     <div class="form-floating">
@@ -154,6 +163,38 @@
   </div>
 
 </div>
+
+<!-- Channel Edit Modal -->
+<div class="modal fade" id="editChannelModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <form action="" method="">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Change video channel</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+        <div class="form-floating" style="margin-bottom: 20px;">
+          <select class="form-select" name="channel-list" id="channel-list">
+            <option selected>Open this select menu</option>
+            <option value="1">One</option>
+            <option value="2">Two</option>
+            <option value="3">Three</option>
+          </select>
+          <label for="channel-list">Channel list</label>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" onclick="video_channel_send();">Change</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- End Channel Edit Modal -->
 
 <!-- Preview Add Actor Modal -->
 <div class="modal fade" id="addActorModal" tabindex="-1">

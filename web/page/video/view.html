@@ -25,16 +25,16 @@
         <div class="video-post-title">
           {{ if .Video.Channel }}
           <span class="video-icons">
-            <img src="{{ .Video.Channel.URLView }}" />
+            <img src="{{ .Video.Channel.URLThumb }}" />
           </span>
           {{ else }}
           <span class="video-icons" style="background-color:#f44336;"><i class="fa fa-info-circle"></i></span>
           {{ end }}
           <div class="video-post-info">
-            {{ if .Video.Channel }}
+            {{ if .Video.ChannelID }}
             <h4><a id="page_view_video_channel" href="{{ .Video.Channel.URLView }}">{{ .Video.Channel.Name }}</a></h4>
             {{ else }}
-            <h4><a id="page_view_video_channel" href="#">Unknown channel</a></h4>
+            <h4><a id="page_view_video_channel" href="#">No channel</a></h4>
             {{ end }}
             <div class="video-post-date">
               <span><i class="fa fa-calendar"></i></span>

@@ -63,9 +63,13 @@ func (c *Controller) ChannelView(g *gin.Context) {
 		return
 	}
 
+	var videos []model.Video
+	c.datastore.Where("channel_id = ?", channel.ID).Find(&videos)
+
 	g.HTML(http.StatusOK, "channel/view.html", gin.H{
 		"User":    g.MustGet("user").(*model.User),
 		"Channel": channel,
+		"Videos":  videos,
 	})
 }
 
@@ -92,8 +96,62 @@ func (c *Controller) ChannelThumb(g *gin.Context) {
 	}
 
 	// construct file path
-	targetPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id, "thumb.jpg")
+	targetPath := filepath.Join(c.config.Media.Path, CHANNEL_FILEPATH, id, "thumb.jpg")
 
 	// give file path
 	g.File(targetPath)
+}
+
+func (c *Controller) ChannelEdit(g *gin.Context) {
+	// get id from path
+	id := g.Param("id")
+
+	// get item from ID
+	channel := &model.Channel{
+		ID: id,
+	}
+	result := c.datastore.First(channel)
+
+	// check result
+	if result.RowsAffected < 1 {
+		//TODO: return to homepage
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	// construct file path
+	targetPath := filepath.Join(c.config.Media.Path, CHANNEL_FILEPATH, id, "thumb.jpg")
+
+	if g.Request.Method == "POST" {
+		file, err := g.FormFile("profile")
+		if err != nil {
+			g.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		//save thumb on disk
+		err = g.SaveUploadedFile(file, targetPath)
+		if err != nil {
+			g.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		channel.Thumbnail = true
+		err = c.datastore.Save(channel).Error
+		if err != nil {
+			g.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+	}
+
+	g.HTML(http.StatusOK, "channel/edit.html", gin.H{
+		"User":    g.MustGet("user").(*model.User),
+		"Channel": channel,
+	})
 }

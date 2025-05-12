@@ -18,7 +18,7 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 	video := &model.Video{
 		ID: id,
 	}
-	result := c.datastore.Preload("Actors").First(video)
+	result := c.datastore.Preload("Actors").Preload("Channel").First(video)
 
 	var actors []model.Actor
 	c.datastore.Find(&actors)
@@ -78,7 +78,7 @@ func (c *Controller) VideoView(g *gin.Context) {
 	video := &model.Video{
 		ID: id,
 	}
-	result := c.datastore.Preload("Actors").First(video)
+	result := c.datastore.Preload("Actors").Preload("Channel").First(video)
 
 	// check result
 	if result.RowsAffected < 1 {

@@ -87,7 +87,7 @@ Environmental variable name | Configuration variable name | Example values | Des
   - [x] Move files
   - [x] View those tasks on the administration page
 - [x] List all videos / actors / channels through an admin page
-- [ ] Implement channels for videos
+- [x] Implement channels for videos
 - [ ] Add categories
 - [x] Add file/folder deletion in triage
 - [ ] Add folder creation in triage

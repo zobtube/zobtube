@@ -461,3 +461,64 @@ func (c *Controller) VideoAjaxGenerateThumbnail(g *gin.Context) {
 
 	g.JSON(200, gin.H{})
 }
+
+func (c *Controller) VideoAjaxEditChannel(g *gin.Context) {
+	if g.Request.Method != "POST" {
+		// method not allowed
+		g.JSON(405, gin.H{})
+		return
+	}
+
+	form := struct {
+		ChannelID string `form:"channelID"`
+	}{}
+
+	err := g.ShouldBind(&form)
+	if err != nil {
+		// method not allowed
+		g.JSON(406, gin.H{})
+		return
+	}
+
+	// get id from path
+	id := g.Param("id")
+
+	// get item from ID
+	video := &model.Video{
+		ID: id,
+	}
+	result := c.datastore.First(video)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	if form.ChannelID == "x" {
+		video.ChannelID = nil
+	} else {
+		channel := &model.Channel{
+			ID: form.ChannelID,
+		}
+
+		result := c.datastore.First(channel)
+		// check result
+		if result.RowsAffected < 1 {
+			g.JSON(404, gin.H{})
+			return
+		}
+
+		video.Channel = channel
+	}
+
+	err = c.datastore.Save(video).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}
