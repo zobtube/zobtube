@@ -283,6 +283,9 @@ function importVideo(filename, filepath) {
   const filepathInput = window.VideoImport.querySelector('#videoImportFilePath');
   filepathInput.innerText = filepath;
 
+  // store filepath as global to avoid html whitespace stripping
+  window.G_filepath = filepath;
+
   // display modal
   window.VideoImportModal.show();
 }
@@ -371,14 +374,13 @@ function importAsVideoButtonUpdate(sel) {
 
 function importVideoAjax(filetype) {
   oc = document.getElementById('importAsVideoOffCanvas');
-  const filename = window.VideoImport.querySelector('#videoImportFilePath').innerText;
   const title = window.VideoImport.querySelector('#videoImportFileName').innerText;
 
   $.ajax('/api/video', {
     method: 'POST',
     data: {
       'name': title,
-      'filename': filename,
+      'filename': window.G_filepath,
       'type': filetype,
     },
     xhr: function () {
