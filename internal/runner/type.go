@@ -60,3 +60,8 @@ func (r *Runner) NewTask(action string, params map[string]string) error {
 
 	return nil
 }
+
+
+func (r *Runner) TaskRetry(action string) {
+	r.tasksChannel[action] <- NewTaskEvent
+}

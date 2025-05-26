@@ -19,7 +19,11 @@
                     end }}{{ if eq .Task.Status "in-progress" }}primary{{
                     end }}{{ if eq .Task.Status "done" }}success{{
                     end }}{{ if eq .Task.Status "error" }}danger{{
-                    end }}">{{ .Task.Status }}</span></td></tr>
+                    end }}">{{ .Task.Status }}</span>
+                    {{ if eq .Task.Status "error" }}
+                    <button class="btn btn-warning btn-sm" style="float: right" onclick="restartTask('{{ .Task.ID }}');"><i class="fas fa-sync-alt"></i> Restart task in error</button>
+                    {{ end }}
+                    </td></tr>
                 <tr><td>Task type</td><td>{{ .Task.Name }}</td></tr>
                 <tr><td>Step</td><td>{{ .Task.Step }}</td></tr>
                 <tr><td>Created at</td><td>{{ .Task.CreatedAt }}</td></tr>
@@ -32,5 +36,8 @@
         </table>
     </div>
 </div>
+<script>
+{{ template "adm/task-view.js" . }}
+</script>
 {{ template "bottom" .}}
 {{ end }}

@@ -115,6 +115,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	admGroup.GET("/adm/user", c.AdmUserNew)
 	admGroup.POST("/adm/user", c.AdmUserNew)
 	admGroup.GET("/adm/user/:id/delete", c.AdmUserDelete)
+	admGroup.POST("/adm/task/:id/retry", c.AdmTaskRetry)
 
 	// profile
 	authGroup.GET("/profile", c.ProfileView)

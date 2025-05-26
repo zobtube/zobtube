@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -111,6 +112,38 @@ func (c *Controller) AdmTaskList(g *gin.Context) {
 		"User":  g.MustGet("user").(*model.User),
 		"Tasks": tasks,
 	})
+}
+
+func (c *Controller) AdmTaskRetry(g *gin.Context) {
+	// get id from path
+	id := g.Param("id")
+
+	// get item from ID
+	task := &model.Task{
+		ID: id,
+	}
+	result := c.datastore.First(task)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	task.Status = model.TaskStatusTodo
+
+	err := c.datastore.Save(task).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.runner.TaskRetry(task.Name)
+
+	taskURL := fmt.Sprintf("/adm/task/%s", task.ID)
+	g.Redirect(http.StatusFound, taskURL)
 }
 
 func (c *Controller) AdmUserList(g *gin.Context) {

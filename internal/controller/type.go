@@ -17,6 +17,7 @@ type AbtractController interface {
 	AdmActorList(c *gin.Context)
 	AdmChannelList(c *gin.Context)
 	AdmTaskList(c *gin.Context)
+	AdmTaskRetry(*gin.Context)
 	AdmTaskView(c *gin.Context)
 	AdmUserList(c *gin.Context)
 	AdmUserNew(c *gin.Context)
