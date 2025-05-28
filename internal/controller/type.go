@@ -12,19 +12,19 @@ import (
 
 type AbtractController interface {
 	// Back office
-	AdmHome(c *gin.Context)
-	AdmVideoList(c *gin.Context)
-	AdmActorList(c *gin.Context)
-	AdmChannelList(c *gin.Context)
-	AdmTaskList(c *gin.Context)
+	AdmHome(*gin.Context)
+	AdmVideoList(*gin.Context)
+	AdmActorList(*gin.Context)
+	AdmChannelList(*gin.Context)
+	AdmTaskList(*gin.Context)
 	AdmTaskRetry(*gin.Context)
-	AdmTaskView(c *gin.Context)
-	AdmUserList(c *gin.Context)
-	AdmUserNew(c *gin.Context)
-	AdmUserDelete(c *gin.Context)
+	AdmTaskView(*gin.Context)
+	AdmUserList(*gin.Context)
+	AdmUserNew(*gin.Context)
+	AdmUserDelete(*gin.Context)
 
 	// Home
-	Home(c *gin.Context)
+	Home(*gin.Context)
 
 	// Auth
 	AuthPage(*gin.Context)
@@ -34,55 +34,55 @@ type AbtractController interface {
 	GetUser(*model.User) *gorm.DB
 
 	// Actors
-	ActorAjaxLinkThumbGet(c *gin.Context)
-	ActorAjaxLinkThumbDelete(c *gin.Context)
-	ActorAjaxNew(c *gin.Context)
-	ActorAjaxProviderSearch(c *gin.Context)
-	ActorAjaxThumb(c *gin.Context)
-	ActorAjaxLinkCreate(c *gin.Context)
-	ActorAjaxAliasCreate(c *gin.Context)
-	ActorAjaxAliasRemove(c *gin.Context)
-	ActorEdit(c *gin.Context)
-	ActorList(c *gin.Context)
-	ActorNew(c *gin.Context)
-	ActorView(c *gin.Context)
-	ActorThumb(c *gin.Context)
-	ActorDelete(c *gin.Context)
+	ActorAjaxLinkThumbGet(*gin.Context)
+	ActorAjaxLinkThumbDelete(*gin.Context)
+	ActorAjaxNew(*gin.Context)
+	ActorAjaxProviderSearch(*gin.Context)
+	ActorAjaxThumb(*gin.Context)
+	ActorAjaxLinkCreate(*gin.Context)
+	ActorAjaxAliasCreate(*gin.Context)
+	ActorAjaxAliasRemove(*gin.Context)
+	ActorEdit(*gin.Context)
+	ActorList(*gin.Context)
+	ActorNew(*gin.Context)
+	ActorView(*gin.Context)
+	ActorThumb(*gin.Context)
+	ActorDelete(*gin.Context)
 
 	// Video, used for Clips, Movies and Videos
-	VideoAjaxActors(c *gin.Context)
-	VideoAjaxRename(c *gin.Context)
-	VideoAjaxUpload(c *gin.Context)
-	VideoAjaxUploadThumb(c *gin.Context)
-	VideoAjaxCreate(c *gin.Context)
-	VideoAjaxStreamInfo(c *gin.Context)
-	VideoAjaxDelete(c *gin.Context)
-	VideoAjaxMigrate(c *gin.Context)
-	VideoAjaxGenerateThumbnail(c *gin.Context)
-	VideoEdit(c *gin.Context)
-	VideoStream(c *gin.Context)
-	VideoThumb(c *gin.Context)
-	VideoThumbXS(c *gin.Context)
-	VideoView(c *gin.Context)
+	VideoAjaxActors(*gin.Context)
+	VideoAjaxRename(*gin.Context)
+	VideoAjaxUpload(*gin.Context)
+	VideoAjaxUploadThumb(*gin.Context)
+	VideoAjaxCreate(*gin.Context)
+	VideoAjaxStreamInfo(*gin.Context)
+	VideoAjaxDelete(*gin.Context)
+	VideoAjaxMigrate(*gin.Context)
+	VideoAjaxGenerateThumbnail(*gin.Context)
+	VideoEdit(*gin.Context)
+	VideoStream(*gin.Context)
+	VideoThumb(*gin.Context)
+	VideoThumbXS(*gin.Context)
+	VideoView(*gin.Context)
 
 	// Video Views
-	VideoViewAjaxIncrement(g *gin.Context)
+	VideoViewAjaxIncrement(*gin.Context)
 
-	ClipList(c *gin.Context)
-	MovieList(c *gin.Context)
-	VideoList(c *gin.Context)
-	GenericVideoList(vt string, c *gin.Context)
+	ClipList(*gin.Context)
+	MovieList(*gin.Context)
+	VideoList(*gin.Context)
+	GenericVideoList(string, *gin.Context)
 
 	// Channels
-	ChannelCreate(c *gin.Context)
-	ChannelList(c *gin.Context)
-	ChannelView(c *gin.Context)
-	ChannelThumb(c *gin.Context)
+	ChannelCreate(*gin.Context)
+	ChannelList(*gin.Context)
+	ChannelView(*gin.Context)
+	ChannelThumb(*gin.Context)
 
 	// Uploads
-	UploadTriage(c *gin.Context)
-	UploadPreview(c *gin.Context)
-	UploadImport(c *gin.Context)
+	UploadTriage(*gin.Context)
+	UploadPreview(*gin.Context)
+	UploadImport(*gin.Context)
 	UploadAjaxTriageFolder(*gin.Context)
 	UploadAjaxTriageFile(*gin.Context)
 	UploadAjaxUploadFile(*gin.Context)
@@ -104,11 +104,11 @@ type AbtractController interface {
 	CleanupRoutine()
 
 	// Profile
-	ProfileView(c *gin.Context)
+	ProfileView(*gin.Context)
 
 	// Failsafe
-	FailsafeConfiguration(c *gin.Context)
-	FailsafeUser(c *gin.Context)
+	FailsafeConfiguration(*gin.Context)
+	FailsafeUser(*gin.Context)
 
 	// Build
 	BuildDetailsRegister(string, string, string)
@@ -150,8 +150,8 @@ func (c *Controller) RunnerRegister(r *runner.Runner) {
 
 func (c *Controller) BuildDetailsRegister(version, commit, buildDate string) {
 	c.build = &buildDetails{
-		Version: version,
-		Commit: commit,
+		Version:   version,
+		Commit:    commit,
 		BuildDate: buildDate,
 	}
 }
