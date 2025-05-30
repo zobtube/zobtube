@@ -3,6 +3,13 @@
 <h2>Add new channel</h2>
 <br />
 
+{{ if .Error }}
+<div class="alert alert-danger mb-3">
+  An error occured!<br />
+  <code>{{ .Error.Error }}</code>
+</div>
+{{ end }}
+
 <form method="post">
   <div class="input-group">
     <input class="form-control" type="text" name="name" id="name" placeholder="New channel name">

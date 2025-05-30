@@ -20,8 +20,7 @@ func (c *Controller) ChannelList(g *gin.Context) {
 }
 
 type ChannelNewForm struct {
-	Name    string `form:"name"`
-	SexEnum string `form:"sex"`
+	Name string `form:"name"`
 }
 
 func (c *Controller) ChannelCreate(g *gin.Context) {
