@@ -36,6 +36,12 @@
           </select>
           <div id="actor-sex-help" class="form-text"></div>
         </div>
+        {{ if .Error }}
+        <div class="alert alert-danger">
+          An error occured!<br />
+          <code>{{ .Error.Error }}</code>
+        </div>
+        {{ end }}
         <div class="mb-3">
           <input type="submit" class="btn btn-primary disabled" id="preform-next" value="Next" />
         </div>
