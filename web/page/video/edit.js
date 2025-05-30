@@ -41,6 +41,18 @@ var actors_complete;
 /* videoAddActorInVideo - FilterPresentActors */
 function videoAddActorInVideoFilterPresentActors() {
   console.log('update actors presents in video');
+  // actors presents in the video
+  var actors_chips = document.getElementsByClassName('video-actor-list');
+  for (const actor_chip of actors_chips) {
+    actor_id = actor_chip.getAttribute('actor-id');
+    if (actor_id in actors_in_video) {
+      actor_chip.style.display = '';
+    } else {
+      actor_chip.style.display = 'none';
+    }
+  }
+
+  // actors available for actor add/removal modal
   var actors_chips = document.getElementsByClassName('add-actor-list');
   for (const actor_chip of actors_chips) {
     actor_id = actor_chip.getAttribute('actor-id');

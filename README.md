@@ -107,7 +107,7 @@ Environmental variable name | Configuration variable name | Example values | Des
   - [x] Validate video viewing
 - [x] Manually add links of actors
 - [x] Delete actors
-- [ ] Add actors on video page after selections
+- [x] Add actors on video page after selections
 - [x] Fix mini thumb down-sizing scale issue
 - [x] Fix suggestion videos
 
