@@ -16,7 +16,7 @@ ZobTube is a library viewer and management tools for all your ~~porn~~ scientifi
 
 **TL;DR**: Not stable yet but should work fine.
 
-The remaining work towards the incoming stable release is [available below](#coming-developments).
+The remaining work towards the incoming stable release is [available below](#white_check_mark-coming-developments).
 
 ## :cop: About piracy
 
@@ -91,7 +91,6 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [ ] Add categories
 - [x] Add file/folder deletion in triage
 - [x] Add folder creation in triage
-- [ ] Add 'set as image' in triage towards videos / actors / channels
 - [ ] Clips view
 - [x] Edit actor aliases
 
@@ -103,17 +102,18 @@ Environmental variable name | Configuration variable name | Example values | Des
 
 - [x] Add a welcome page when no configuration is specified to bootstrap the app
 - [x] Write onboarding readme
-- [ ] Add actor description
 - [ ] Rename actors
 
-### Enhancements not expected before 1.1.0
+### Enhancements not expected before 1.0.0
 
 - [ ] Add pagination
 - [ ] Movie scenes
 - [ ] Collections
 - [ ] Merge actors
 - [ ] Redirect to requested page after login
+- [ ] Add 'set as image' in triage towards videos / actors / channels
+- [ ] Add actor description
 
 ## :page_facing_up: License
 
-ZobTube © 2024 by sblablaha is licensed under CC BY-SA 4.0. To view a copy of this license, visit [CC website](https://creativecommons.org/licenses/by-sa/4.0/)
+ZobTube © 2025 by sblablaha is licensed under CC BY-SA 4.0. To view a copy of this license, visit [CC website](https://creativecommons.org/licenses/by-sa/4.0/)
