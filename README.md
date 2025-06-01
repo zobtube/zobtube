@@ -97,19 +97,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 
 **Bugs**
 
-- [x] Fix bug with large uploaded files in triage
-- [x] Create own favicon
-- [x] Add linting validation
-- [x] Add tests
-  - [x] Validate routes requiring authentication
-  - [x] Validate routes requiring admin rights
-  - [x] Validate upload
-  - [x] Validate video viewing
-- [x] Manually add links of actors
-- [x] Delete actors
-- [x] Add actors on video page after selections
-- [x] Fix mini thumb down-sizing scale issue
-- [x] Fix suggestion videos
+:tada: No more known bugs!
 
 **Enhancement**
 
