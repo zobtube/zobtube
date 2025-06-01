@@ -90,7 +90,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [x] Implement channels for videos
 - [ ] Add categories
 - [x] Add file/folder deletion in triage
-- [ ] Add folder creation in triage
+- [x] Add folder creation in triage
 - [ ] Add 'set as image' in triage towards videos / actors / channels
 - [ ] Clips view
 - [x] Edit actor aliases

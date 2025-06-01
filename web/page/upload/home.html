@@ -31,7 +31,10 @@ code {
 <!-- header -->
 <div style="display: flex; justify-content: space-between;">
   <h4>Upload and triage folder</h4>
-  <button class="btn btn-outline-success" onclick="clickInputButton()">Upload file</button>
+  <div>
+    <button class="btn btn-outline-success" onclick="clickInputButton()">Upload file</button>
+    <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#newFolderModal">New folder</button>
+  </div>
 </div>
 <hr />
 
@@ -148,6 +151,29 @@ code {
   </div>
 </div>
 <!-- End import as video modal -->
+
+<!-- New Folder Modal -->
+<div class="modal fade modal-xl" id="newFolderModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create new folder in current path</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-floating" style="margin-bottom: 20px;">
+          <input type="text" class="form-control" id="folder-new" placeholder="New folder name">
+          <label for="folder-new">New folder name</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-success" onclick="new_folder_send();">Create</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End New Folder Modal -->
 
 <!-- Toast template -->
 <div style="display: none">

@@ -365,6 +365,13 @@ window.onload = function() {
   // initialize video import modal
   window.VideoImport = document.getElementById('video-import-modal');
   window.VideoImportModal = new bootstrap.Modal(window.VideoImport);
+
+  // "enter" handling on folder creation
+  document.getElementById('folder-new').addEventListener("keydown", function (e) {
+    if (e.code === "Enter") {
+        new_folder_send();
+    }
+  });
 }
 
 function importAsVideoButtonUpdate(sel) {
@@ -477,8 +484,55 @@ function deleteFile(file) {
   });
 }
 
+function new_folder_send() {
+  url = "/api/upload/folder";
+  folder_name = CURRENT_PATH;
+  if (folder_name != '/') {
+    folder_name += '/';
+  }
+  folder_name += document.getElementById('folder-new').value;
 
+  $.ajax(url, {
+    method: 'POST',
+    data: {
+      'name': folder_name,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
 
+    success: function (e) {
+      // notify success
+      sendToast(
+        'New folder created',
+        '',
+        'bg-success',
+        'Folder '+folder_name+' created',
+      );
+
+      // hide modal
+      $('#newFolderModal').modal('hide');
+
+      // cleanup input
+      document.getElementById('folder-new').value = '';
+
+      // update folder list
+      updatePath();
+    },
+
+    error: function (data) {
+      sendToast(
+        'Unable to create folder',
+        '',
+        'bg-warning',
+        data.responseJSON.error,
+      );
+    },
+  });
+
+  return false;
+}
 
 
 // From: https://stackoverflow.com/a/14919494

@@ -90,6 +90,7 @@ def test_access(page: Page):
                 "/api/upload/triage/folder",
                 "/api/upload/triage/file",
                 "/api/upload/file",
+                "/api/upload/folder",
                 "/adm/user",
             ],
             'HEAD': [

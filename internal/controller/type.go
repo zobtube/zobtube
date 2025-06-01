@@ -90,6 +90,7 @@ type AbtractController interface {
 	UploadAjaxTriageFile(*gin.Context)
 	UploadAjaxUploadFile(*gin.Context)
 	UploadAjaxDeleteFile(*gin.Context)
+	UploadAjaxFolderCreate(*gin.Context)
 
 	// Providers
 	ProviderRegister(provider.Provider)

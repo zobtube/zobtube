@@ -207,3 +207,31 @@ func (c *Controller) UploadAjaxDeleteFile(g *gin.Context) {
 
 	g.JSON(200, gin.H{})
 }
+
+func (c *Controller) UploadAjaxFolderCreate(g *gin.Context) {
+	// get new folder name
+	name := g.PostForm("name")
+
+	// construct absolute path
+	path := filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, name)
+
+	// check if folder already exists
+	_, err := os.Stat(path)
+	if !os.IsNotExist(err) {
+		g.JSON(409, gin.H{
+			"error": "Folder already exists",
+		})
+		return
+	}
+
+	// do not exists, create it
+	err = os.Mkdir(path, os.ModePerm)
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}
