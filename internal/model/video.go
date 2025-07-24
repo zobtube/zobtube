@@ -31,9 +31,10 @@ type Video struct {
 	Thumbnail     bool
 	ThumbnailMini bool
 	Duration      time.Duration
-	Type          string      `gorm:"size:1;"`
-	Imported      bool        `gorm:"default:false"`
-	Status        VideoStatus `gorm:"default:creating"`
+	Type          string        `gorm:"size:1;"`
+	Imported      bool          `gorm:"default:false"`
+	Status        VideoStatus   `gorm:"default:creating"`
+	Categories    []CategorySub `gorm:"many2many:video_categories;"`
 }
 
 var videoTypesAsString = map[string]string{

@@ -710,6 +710,43 @@ ul.nav > li:hover > a {
         padding-left:10px;
 }
 
+/*****************************************
+
+15. Start Tags And Share Options
+
+******************************************/
+.tagcloud li {
+	display:inline-block;
+}
+.tagcloud li a{
+ display:block;
+ padding:8px 20px;
+ border:1px solid #ddd;
+ color:#666;
+ font-size:16px;
+ font-weight:400;
+ text-transform:capitalize;
+ -webkit-transition: all .4s linear 0s;
+ transition:all .4s linear 0s;
+ margin-right:10px;
+}
+.tagcloud li a:hover {
+ background-color:#f44336;
+ color:#fff;
+ border-color:#f44336;	
+}
+.tagcloud li:last-child a {
+	margin-right:0;
+}
+.tags-and-share {
+	margin:50px 0;
+	overflow: hidden;
+}
+.tags-and-share .post-tags{
+	display:inline-block;
+	float:left;
+}
+
 /*********************************************************
 
  22. scroll-top

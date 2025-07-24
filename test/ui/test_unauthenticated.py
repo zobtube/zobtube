@@ -10,6 +10,7 @@ def test_pages_unusable_if_unauthenticated(page: Page):
             "/adm",
             "/adm/videos",
             "/adm/actors",
+            "/adm/categories",
             "/adm/channels",
             "/adm/tasks",
             "/adm/task/:id",
@@ -21,6 +22,7 @@ def test_pages_unusable_if_unauthenticated(page: Page):
             "/actor/:id/delete",
             "/api/actor/:id/provider/:provider_slug",
             "/api/actor/link/:id/thumb",
+            "/category-sub/:id/thumb",
             "/channels",
             "/channel/new",
             "/channel/:id",
@@ -47,6 +49,10 @@ def test_pages_unusable_if_unauthenticated(page: Page):
             "/api/actor/:id/link",
             "/api/actor/:id/thumb",
             "/api/actor/:id/alias",
+            "/api/category",
+            "/api/category-sub",
+            "/api/category-sub/d17232c1-1512-46c9-8b7a-158c4d89df6b/rename",
+            "/api/category-sub/d17232c1-1512-46c9-8b7a-158c4d89df6b/thumb",
             "/channel/new",
             "/api/video",
             "/api/video/:id/upload",
@@ -65,15 +71,21 @@ def test_pages_unusable_if_unauthenticated(page: Page):
         'DELETE': [
             "/api/actor/link/:id",
             "/api/actor/alias/:id",
+            "/api/category/:id",
             "/api/video/:id",
             "/api/video/:id/actor/:actor_id",
+            "/api/video/:id/category/:category_id",
             "/api/upload/file",
+            "/api/actor/:id/category/:category_id",
+            "/api/category-sub/:id/thumb",
         ],
         'HEAD': [
             "/api/video/:id",
         ],
         'PUT': [
+            "/api/actor/:id/category/:category_id",
             "/api/video/:id/actor/:actor_id",
+            "/api/video/:id/category/:category_id",
         ],
     }
 

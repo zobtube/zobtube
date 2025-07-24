@@ -5,7 +5,7 @@
 // store video id
 const video_id = '{{ .Video.ID }}';
 const url_video_actor_edit = '/api/video/{{ .Video.ID }}/actor/00000000-0000-0000-0000-000000000000';
-var csrf_token = '{% csrf_token %}';
+const url_video_category_edit = '/api/video/{{ .Video.ID }}/category/00000000-0000-0000-0000-000000000000';
 
 /*
     'aliases': [
@@ -31,6 +31,25 @@ var actors_in_video = {
   '{{ $actor.ID }}': undefined,
   {{ end }}
 };
+
+// store all categories at start
+var categories_all = {
+  {{ range $category := .Categories }}
+  {{ range $sub:= $category.Sub }}
+  '{{ $sub.ID }}': {
+    'name': '{{ $sub.Name }}',
+  },
+  {{ end }}
+  {{ end }}
+};
+
+// store all categories in the video at start
+var categories_in_video = {
+  {{ range $sub := .Video.Categories }}
+  '{{ $sub.ID }}': undefined,
+  {{ end }}
+};
+
 
 /* -- end globals set at boot -- */
 
@@ -96,15 +115,39 @@ function videoAddActorInVideoFilterActorsFromInput(filter = '') {
   }
 }
 
+function videoUpdateCategoryStatus() {
+  console.log('update categories presents in video');
+  // categories presents in the video
+  var categoriess_chips = document.getElementsByClassName('video-category-list');
+  for (const category_chip of categoriess_chips) {
+    category_id = category_chip.getAttribute('category-id');
+    if (category_id in categories_in_video) {
+      category_chip.style.display = '';
+    } else {
+      category_chip.style.display = 'none';
+    }
+  }
+
+  // categories available for category add/removal modal
+  var categories_chips = document.getElementsByClassName('add-category-list');
+  for (const category_chip of categories_chips) {
+    category_id = category_chip.getAttribute('category-id');
+    if (category_id in categories_in_video) {
+      category_chip.querySelector('.btn-success').style.display = 'none';
+      category_chip.querySelector('.btn-danger').style.display = '';
+    } else {
+      category_chip.querySelector('.btn-success').style.display = '';
+      category_chip.querySelector('.btn-danger').style.display = 'none';
+    }
+  }
+}
+
 /* videoRemoveActor */
 function videoRemoveActor(actor_id) {
   console.log('remove actor '+actor_id+' from video '+video_id);
   url = url_video_actor_edit.replace('00000000-0000-0000-0000-000000000000', actor_id);
   $.ajax(url, {
     method: 'DELETE',
-    headers: {
-      'X-CSRFToken': '{% csrf_token %}',
-    },
 
     xhr: function () {
       var xhr = new XMLHttpRequest();
@@ -128,15 +171,11 @@ function videoRemoveActor(actor_id) {
   });
 }
 
-/* videoRemoveActor */
 function videoAddActor(actor_id) {
   console.log('add actor '+actor_id+' in video '+video_id);
   url = url_video_actor_edit.replace('00000000-0000-0000-0000-000000000000', actor_id);
   $.ajax(url, {
     method: 'PUT',
-    headers: {
-      'X-CSRFToken': '{% csrf_token %}',
-    },
 
     xhr: function () {
       var xhr = new XMLHttpRequest();
@@ -156,6 +195,56 @@ function videoAddActor(actor_id) {
     },
 
     complete: function () {
+    },
+  });
+}
+
+function videoAddCategory(category_id) {
+  console.log('add category'+category_id+' in video '+video_id);
+  url = url_video_category_edit.replace('00000000-0000-0000-0000-000000000000', category_id);
+  $.ajax(url, {
+    method: 'PUT',
+
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (res) {
+      console.debug('success, got', res);
+      sendToast('Category added', '', 'bg-success', categories_all[category_id]['name']+' added.');
+      categories_in_video[category_id] = undefined;
+      videoUpdateCategoryStatus();
+    },
+
+    error: function () {
+      console.debug('failed');
+      sendToast('Category not added', '', 'bg-danger', categories_all[category_id]['name']+' not added, call failed.');
+    },
+  });
+}
+
+function videoRemoveCategory(category_id) {
+  console.log('remove category '+category_id+' from video '+video_id);
+  url = url_video_category_edit.replace('00000000-0000-0000-0000-000000000000', category_id);
+  $.ajax(url, {
+    method: 'DELETE',
+
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (res) {
+      console.debug('success, got', res);
+      sendToast('Category removed', '', 'bg-success', categories_all[category_id]['name']+' removed.');
+      delete categories_in_video[category_id];
+      videoUpdateCategoryStatus();
+    },
+
+    error: function () {
+      console.debug('failed');
+      sendToast('Category not removed', '', 'bg-danger', categories_all[category_id]['name']+' not removed, call failed.');
     },
   });
 }
@@ -186,27 +275,6 @@ function updateActorEntries(filter = '') {
   } else {
     $(".cs-menu").show();
   }
-}
-
-window.onload = function() {
-  // toggle right button in modal
-  videoAddActorInVideoFilterPresentActors();
-
-  // add event on modal input
-  document.getElementById('addActorInput').addEventListener('input', actorInputUpdate);
-  videoAddActorInVideoFilterActorsFromInput('');
-
-  // for thumbnail generation
-  video = document.getElementById("video")
-  video.addEventListener(
-    "timeupdate",
-    function(event){
-      onTrackedVideoFrame(this.currentTime);
-    }
-  );
-
-  document.modalChannelEdit = document.getElementById("editChannelModal");
-  document.modalChannelEditModal = new bootstrap.Modal(document.modalChannelEdit);
 }
 
 function generateThumbnail(video_id) {
@@ -391,6 +459,30 @@ function video_channel_send() {
       console.debug('failed');
     },
   });
+}
+
+window.onload = function() {
+  // toggle right button in modal
+  videoAddActorInVideoFilterPresentActors();
+
+  // toggle correct status for categories
+  videoUpdateCategoryStatus();
+
+  // add event on modal input
+  document.getElementById('addActorInput').addEventListener('input', actorInputUpdate);
+  videoAddActorInVideoFilterActorsFromInput('');
+
+  // for thumbnail generation
+  video = document.getElementById("video")
+  video.addEventListener(
+    "timeupdate",
+    function(event){
+      onTrackedVideoFrame(this.currentTime);
+    }
+  );
+
+  document.modalChannelEdit = document.getElementById("editChannelModal");
+  document.modalChannelEditModal = new bootstrap.Modal(document.modalChannelEdit);
 }
 
 {{ end }}

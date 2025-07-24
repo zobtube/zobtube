@@ -53,6 +53,55 @@ func (c *Controller) VideoAjaxActors(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+func (c *Controller) VideoAjaxCategories(g *gin.Context) {
+	// get id from path
+	id := g.Param("id")
+	category_id := g.Param("category_id")
+
+	// get item from ID
+	video := &model.Video{
+		ID: id,
+	}
+	result := c.datastore.First(video)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{
+			"error": "video not found",
+		})
+		return
+	}
+
+	subCategory := &model.CategorySub{
+		ID: category_id,
+	}
+	result = c.datastore.First(&subCategory)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{
+			"error": "sub-category not found",
+		})
+		return
+	}
+
+	var res error
+	if g.Request.Method == "PUT" {
+		res = c.datastore.Model(video).Association("Categories").Append(subCategory)
+	} else {
+		res = c.datastore.Model(video).Association("Categories").Delete(subCategory)
+	}
+
+	if res != nil {
+		g.JSON(500, gin.H{
+			"error": res.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}
+
 func (c *Controller) VideoAjaxStreamInfo(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")

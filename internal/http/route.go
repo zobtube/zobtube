@@ -61,7 +61,22 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 		// alias
 		actorAPI.POST("/:id/alias", c.ActorAjaxAliasCreate)
 		actorAPI.DELETE("/alias/:id", c.ActorAjaxAliasRemove)
+
+		// categories
+		actorAPI.PUT("/:id/category/:category_id", c.ActorAjaxCategories)
+		actorAPI.DELETE("/:id/category/:category_id", c.ActorAjaxCategories)
 	}
+
+	// categories
+	admGroup.POST("/api/category", c.CategoryAjaxAdd)
+	admGroup.DELETE("/api/category/:id", c.CategoryAjaxDelete)
+
+	// sub categories
+	authGroup.GET("/category-sub/:id/thumb", c.CategorySubThumb)
+	admGroup.POST("/api/category-sub/:id/thumb", c.CategorySubAjaxThumbSet)
+	admGroup.DELETE("/api/category-sub/:id/thumb", c.CategorySubAjaxThumbRemove)
+	admGroup.POST("/api/category-sub", c.CategorySubAjaxAdd)
+	admGroup.POST("/api/category-sub/:id/rename", c.CategorySubAjaxRename)
 
 	// channels
 	authGroup.GET("/channels", c.ChannelList)
@@ -95,6 +110,8 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	videoAPI.POST("/:id/migrate", c.VideoAjaxMigrate)
 	videoAPI.PUT("/:id/actor/:actor_id", c.VideoAjaxActors)
 	videoAPI.DELETE("/:id/actor/:actor_id", c.VideoAjaxActors)
+	videoAPI.PUT("/:id/category/:category_id", c.VideoAjaxCategories)
+	videoAPI.DELETE("/:id/category/:category_id", c.VideoAjaxCategories)
 	videoAPI.POST("/:id/generate-thumbnail/:timing", c.VideoAjaxGenerateThumbnail)
 	videoAPI.POST("/:id/rename", c.VideoAjaxRename)
 	videoAPI.POST("/:id/count-view", c.VideoViewAjaxIncrement)
@@ -116,6 +133,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	admGroup.GET("/adm", c.AdmHome)
 	admGroup.GET("/adm/videos", c.AdmVideoList)
 	admGroup.GET("/adm/actors", c.AdmActorList)
+	admGroup.GET("/adm/categories", c.AdmCategory)
 	admGroup.GET("/adm/channels", c.AdmChannelList)
 	admGroup.GET("/adm/tasks", c.AdmTaskList)
 	admGroup.GET("/adm/task/:id", c.AdmTaskView)

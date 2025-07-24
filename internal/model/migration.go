@@ -15,6 +15,8 @@ var modelToMigrate = []any{
 	Actor{},
 	ActorAlias{},
 	ActorLink{},
+	Category{},
+	CategorySub{},
 	Channel{},
 	Video{},
 	VideoView{},

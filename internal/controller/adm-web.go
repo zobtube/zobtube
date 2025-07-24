@@ -152,8 +152,8 @@ func (c *Controller) AdmUserList(g *gin.Context) {
 	c.datastore.Find(&users)
 
 	g.HTML(http.StatusOK, "adm/user-list.html", gin.H{
-		"User":       g.MustGet("user").(*model.User),
-		"Objects":    users,
+		"User":    g.MustGet("user").(*model.User),
+		"Objects": users,
 	})
 }
 
@@ -232,4 +232,20 @@ func (c *Controller) AdmUserDelete(g *gin.Context) {
 	}
 
 	g.Redirect(http.StatusFound, "/adm/users")
+}
+
+func (c *Controller) AdmCategory(g *gin.Context) {
+	categories := []model.Category{}
+	err := c.datastore.Preload("Sub").Find(&categories).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.HTML(http.StatusOK, "adm/category.html", gin.H{
+		"User":       g.MustGet("user").(*model.User),
+		"Categories": categories,
+	})
 }

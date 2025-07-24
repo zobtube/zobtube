@@ -1,5 +1,111 @@
 {{ define "actor/edit.js" }}
 
+/* -- start globals set at boot -- */
+
+// store actor id
+const actor_id = '{{ .actor.ID }}';
+const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-0000-0000-0000-000000000000';
+
+// store all categories at start
+var categories_all = {
+  {{ range $category := .Categories }}
+  {{ range $sub:= $category.Sub }}
+  '{{ $sub.ID }}': {
+    'name': '{{ $sub.Name }}',
+  },
+  {{ end }}
+  {{ end }}
+};
+
+// store all categories in the video at start
+var categories_in_actor = {
+  {{ range $sub := .Actor.Categories }}
+  '{{ $sub.ID }}': undefined,
+  {{ end }}
+};
+/* -- end globals set at boot -- */
+
+/* -- start of categories scripts -- */
+function actorUpdateCategoryStatus() {
+  console.log('update categories presents for actor');
+  // categories presents for the actor
+  var categoriess_chips = document.getElementsByClassName('actor-category-list');
+  for (const category_chip of categoriess_chips) {
+    category_id = category_chip.getAttribute('category-id');
+    if (category_id in categories_in_actor) {
+      category_chip.style.display = '';
+    } else {
+      category_chip.style.display = 'none';
+    }
+  }
+
+  // categories available for category add/removal modal
+  var categories_chips = document.getElementsByClassName('add-category-list');
+  for (const category_chip of categories_chips) {
+    category_id = category_chip.getAttribute('category-id');
+    if (category_id in categories_in_actor) {
+      category_chip.querySelector('.btn-success').style.display = 'none';
+      category_chip.querySelector('.btn-danger').style.display = '';
+    } else {
+      category_chip.querySelector('.btn-success').style.display = '';
+      category_chip.querySelector('.btn-danger').style.display = 'none';
+    }
+  }
+}
+
+function actorAddCategory(category_id) {
+  console.log('add category'+category_id+' for actor '+actor_id);
+  url = url_actor_category_edit.replace('00000000-0000-0000-0000-000000000000', category_id);
+  $.ajax(url, {
+    method: 'PUT',
+
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (res) {
+      console.debug('success, got', res);
+      sendToast('Category added', '', 'bg-success', categories_all[category_id]['name']+' added.');
+      categories_in_actor[category_id] = undefined;
+      actorUpdateCategoryStatus();
+    },
+
+    error: function () {
+      console.debug('failed');
+      sendToast('Category not added', '', 'bg-danger', categories_all[category_id]['name']+' not added, call failed.');
+    },
+  });
+}
+
+function actorRemoveCategory(category_id) {
+  console.log('remove category '+category_id+' from actor '+actor_id);
+  url = url_actor_category_edit.replace('00000000-0000-0000-0000-000000000000', category_id);
+  $.ajax(url, {
+    method: 'DELETE',
+
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (res) {
+      console.debug('success, got', res);
+      sendToast('Category removed', '', 'bg-success', categories_all[category_id]['name']+' removed.');
+      delete categories_in_actor[category_id];
+      actorUpdateCategoryStatus();
+    },
+
+    error: function () {
+      console.debug('failed');
+      sendToast('Category not removed', '', 'bg-danger', categories_all[category_id]['name']+' not removed, call failed.');
+    },
+  });
+}
+
+
+/* -- end of categories scripts -- */
+
 function actorLinkAutomaticSearch(actorName, providerName, providerSlug, url) {
   sendToast(
     'Automatic actor search',
@@ -189,6 +295,9 @@ window.onload = function() {
   // calls
   firstTimeSearch();
   suggestProfilePicture();
+
+  // update categories
+  actorUpdateCategoryStatus();
 }
 
 function showActorPictures() {

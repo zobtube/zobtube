@@ -18,10 +18,20 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 	video := &model.Video{
 		ID: id,
 	}
-	result := c.datastore.Preload("Actors").Preload("Channel").First(video)
+	result := c.datastore.Preload("Actors").Preload("Channel").Preload("Categories").First(video)
 
 	var actors []model.Actor
 	c.datastore.Find(&actors)
+
+	// get categories
+	categories := []model.Category{}
+	err := c.datastore.Preload("Sub").Find(&categories).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
 	// check result
 	if result.RowsAffected < 1 {
@@ -30,9 +40,10 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 	}
 
 	g.HTML(http.StatusOK, "video/edit.html", gin.H{
-		"Actors": actors,
-		"User":   g.MustGet("user").(*model.User),
-		"Video":  video,
+		"Actors":     actors,
+		"User":       g.MustGet("user").(*model.User),
+		"Video":      video,
+		"Categories": categories,
 	})
 }
 
@@ -78,7 +89,7 @@ func (c *Controller) VideoView(g *gin.Context) {
 	video := &model.Video{
 		ID: id,
 	}
-	result := c.datastore.Preload("Actors").Preload("Channel").First(video)
+	result := c.datastore.Preload("Actors.Categories").Preload("Channel").Preload("Categories").First(video)
 
 	// check result
 	if result.RowsAffected < 1 {
@@ -100,11 +111,23 @@ func (c *Controller) VideoView(g *gin.Context) {
 		viewCount = count.Count
 	}
 
+	// get categories
+	categories := make(map[string]string)
+	for _, category := range video.Categories {
+		categories[category.ID] = category.Name
+	}
+	for _, actor := range video.Actors {
+		for _, category := range actor.Categories {
+			categories[category.ID] = category.Name
+		}
+	}
+
 	g.HTML(http.StatusOK, "video/view.html", gin.H{
-		"Type":      video.Type,
-		"User":      user,
-		"Video":     video,
-		"ViewCount": viewCount,
+		"Type":       video.Type,
+		"User":       user,
+		"Video":      video,
+		"ViewCount":  viewCount,
+		"Categories": categories,
 		"RandomVideos": gin.H{
 			"Videos":    randomVideos,
 			"VideoType": video.Type,

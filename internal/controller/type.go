@@ -16,6 +16,7 @@ type AbtractController interface {
 	AdmVideoList(*gin.Context)
 	AdmActorList(*gin.Context)
 	AdmChannelList(*gin.Context)
+	AdmCategory(*gin.Context)
 	AdmTaskList(*gin.Context)
 	AdmTaskRetry(*gin.Context)
 	AdmTaskView(*gin.Context)
@@ -34,6 +35,7 @@ type AbtractController interface {
 	GetUser(*model.User) *gorm.DB
 
 	// Actors
+	ActorAjaxCategories(*gin.Context)
 	ActorAjaxLinkThumbGet(*gin.Context)
 	ActorAjaxLinkThumbDelete(*gin.Context)
 	ActorAjaxNew(*gin.Context)
@@ -49,8 +51,20 @@ type AbtractController interface {
 	ActorThumb(*gin.Context)
 	ActorDelete(*gin.Context)
 
+	// Categories
+	CategoryAjaxAdd(*gin.Context)
+	CategoryAjaxDelete(*gin.Context)
+
+	// Sub categories
+	CategorySubAjaxAdd(*gin.Context)
+	CategorySubAjaxRename(*gin.Context)
+	CategorySubAjaxThumbSet(*gin.Context)
+	CategorySubAjaxThumbRemove(*gin.Context)
+	CategorySubThumb(*gin.Context)
+
 	// Video, used for Clips, Movies and Videos
 	VideoAjaxActors(*gin.Context)
+	VideoAjaxCategories(*gin.Context)
 	VideoAjaxRename(*gin.Context)
 	VideoAjaxUpload(*gin.Context)
 	VideoAjaxUploadThumb(*gin.Context)

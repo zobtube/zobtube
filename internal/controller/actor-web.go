@@ -79,7 +79,7 @@ func (c *Controller) ActorEdit(g *gin.Context) {
 	actor := &model.Actor{
 		ID: id,
 	}
-	result := c.datastore.Preload("Links").Preload("Aliases").First(actor)
+	result := c.datastore.Preload("Links").Preload("Aliases").Preload("Categories").First(actor)
 
 	// check result
 	if result.RowsAffected < 1 {
@@ -88,10 +88,21 @@ func (c *Controller) ActorEdit(g *gin.Context) {
 		return
 	}
 
+	// get categories
+	categories := []model.Category{}
+	err := c.datastore.Preload("Sub").Find(&categories).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	g.HTML(http.StatusOK, "actor/edit.html", gin.H{
-		"User":      g.MustGet("user").(*model.User),
-		"Actor":     actor,
-		"Providers": c.providers,
+		"User":       g.MustGet("user").(*model.User),
+		"Actor":      actor,
+		"Providers":  c.providers,
+		"Categories": categories,
 	})
 }
 
