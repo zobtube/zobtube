@@ -114,6 +114,22 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [ ] Add 'set as image' in triage towards videos / actors / channels
 - [ ] Add actor description
 
+## :hammer_and_wrench: Development
+
+If you want to implement a new feature or just try to run the raw source code, you can use the following commnand.
+
+__Linux__
+```
+tools/dev-linux.sh
+```
+
+__Windows__
+```
+tools/dev-win.sh
+```
+
+This will start the build and live reload using `air` ([a golang tool to help build binaries in developement](https://github.com/air-verse/air)) and it will be accessible on [http://127.0.0.1:8069](http://127.0.0.1:8069).
+
 ## :page_facing_up: License
 
 ZobTube © 2025 by sblablaha is licensed under CC BY-SA 4.0. To view a copy of this license, visit [CC website](https://creativecommons.org/licenses/by-sa/4.0/)
