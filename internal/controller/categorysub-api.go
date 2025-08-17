@@ -187,4 +187,3 @@ func (c *Controller) CategorySubAjaxRename(g *gin.Context) {
 	// all good
 	g.JSON(200, gin.H{})
 }
-

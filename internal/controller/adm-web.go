@@ -15,28 +15,31 @@ import (
 func (c *Controller) AdmHome(g *gin.Context) {
 	// get counts
 	var (
-		videoCount   int64
-		actorCount   int64
-		channelCount int64
-		userCount    int64
+		videoCount    int64
+		actorCount    int64
+		channelCount  int64
+		userCount     int64
+		categoryCount int64
 	)
 
 	c.datastore.Table("videos").Count(&videoCount)
 	c.datastore.Table("actors").Count(&actorCount)
 	c.datastore.Table("channels").Count(&channelCount)
 	c.datastore.Table("users").Count(&userCount)
+	c.datastore.Table("categories").Count(&categoryCount)
 
 	var tasks []model.Task
 	c.datastore.Limit(5).Order("created_at DESC").Find(&tasks)
 
 	g.HTML(http.StatusOK, "adm/home.html", gin.H{
-		"User":         g.MustGet("user").(*model.User),
-		"Build":        c.build,
-		"VideoCount":   videoCount,
-		"ActorCount":   actorCount,
-		"ChannelCount": channelCount,
-		"UserCount":    userCount,
-		"Tasks":        tasks,
+		"User":          g.MustGet("user").(*model.User),
+		"Build":         c.build,
+		"VideoCount":    videoCount,
+		"ActorCount":    actorCount,
+		"ChannelCount":  channelCount,
+		"UserCount":     userCount,
+		"CategoryCount": categoryCount,
+		"Tasks":         tasks,
 	})
 }
 
