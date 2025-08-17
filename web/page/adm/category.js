@@ -9,7 +9,7 @@ function modal_category_delete_show(id, value) {
 function modal_category_delete_send(category_id) {
   category_id = document.getElementById('modal-category-delete-id').value;
 
-  $.ajax("/api/adm/category/"+category_id, {
+  $.ajax("/api/category/"+category_id, {
     method: 'DELETE',
     processData: false,
     contentType: false,
@@ -38,7 +38,7 @@ function modal_category_value_show(parent) {
 function modal_category_send() {
   var formData = new FormData(document.getElementById("modal-category-form"));
 
-  $.ajax("/api/adm/category", {
+  $.ajax("/api/category", {
     method: 'POST',
     data: formData,
     processData: false,
@@ -63,7 +63,7 @@ function modal_category_send() {
 function modal_category_value_send() {
   var formData = new FormData(document.getElementById("modal-category-value-form"));
 
-  $.ajax("/api/adm/category-sub", {
+  $.ajax("/api/category-sub", {
     method: 'POST',
     data: formData,
     processData: false,
