@@ -14,7 +14,7 @@ type CategorySub struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Name      string
-	Category  string
+	Category  string `gorm:"type:uuid"`
 	Thumbnail bool
 }
 
