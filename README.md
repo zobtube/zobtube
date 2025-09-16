@@ -80,19 +80,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 
 **Features**
 
-- [x] Manage external commands through async tasks
-  - [x] Compute duration
-  - [x] Generate thumbnail
-  - [x] Generate mini thumbnail
-  - [x] Move files
-  - [x] View those tasks on the administration page
-- [x] List all videos / actors / channels through an admin page
-- [x] Implement channels for videos
-- [x] Add categories
-- [x] Add file/folder deletion in triage
-- [x] Add folder creation in triage
-- [ ] Clips view
-- [x] Edit actor aliases
+Almost all initial features are implemented. The last one before 1.0.0 will be the implementation of small videos (aka clips) view.
 
 **Bugs**
 
@@ -100,9 +88,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 
 **Enhancement**
 
-- [x] Add a welcome page when no configuration is specified to bootstrap the app
-- [x] Write onboarding readme
-- [x] Rename actors
+:tada: No more expected enhancements before 1.0.0!
 
 ### Enhancements not expected before 1.0.0
 
@@ -113,6 +99,8 @@ Environmental variable name | Configuration variable name | Example values | Des
 - [ ] Redirect to requested page after login
 - [ ] Add 'set as image' in triage towards videos / actors / channels
 - [ ] Add actor description
+
+And more to come! This list will migrate this Github project view as soon as 1.0.0 is ready.
 
 ## :page_facing_up: License
 
