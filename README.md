@@ -102,7 +102,7 @@ Environmental variable name | Configuration variable name | Example values | Des
 
 - [x] Add a welcome page when no configuration is specified to bootstrap the app
 - [x] Write onboarding readme
-- [ ] Rename actors
+- [x] Rename actors
 
 ### Enhancements not expected before 1.0.0
 

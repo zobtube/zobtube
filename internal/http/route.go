@@ -46,6 +46,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	actorAPI := admGroup.Group("/api/actor")
 	{
 		actorAPI.POST("/", c.ActorAjaxNew)
+		actorAPI.POST("/:id/rename", c.ActorAjaxRename)
 
 		// providers
 		actorAPI.GET("/:id/provider/:provider_slug", c.ActorAjaxProviderSearch)

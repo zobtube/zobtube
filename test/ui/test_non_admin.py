@@ -88,6 +88,7 @@ def test_access(page: Page):
                 "/api/actor/045e1b0e-1dc4-11f0-a04a-305a3a05e04d/alias",
                 "/api/actor/045e1b0e-1dc4-11f0-a04a-305a3a05e04d/link",
                 "/api/actor/045e1b0e-1dc4-11f0-a04a-305a3a05e04d/thumb",
+                "/api/actor/045e1b0e-1dc4-11f0-a04a-305a3a05e04d/rename",
                 "/api/category",
                 "/api/category-sub",
                 "/api/category-sub/d17232c1-1512-46c9-8b7a-158c4d89df6b/thumb",

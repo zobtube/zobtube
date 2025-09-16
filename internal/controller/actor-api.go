@@ -388,3 +388,51 @@ func (c *Controller) ActorAjaxCategories(g *gin.Context) {
 
 	g.JSON(200, gin.H{})
 }
+
+func (c *Controller) ActorAjaxRename(g *gin.Context) {
+	var err error
+
+	form := struct {
+		Name string `form:"name"`
+	}{}
+	err = g.ShouldBind(&form)
+	if err != nil {
+		g.JSON(400, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if form.Name == "" {
+		g.JSON(400, gin.H{
+			"error": "actor name cannot be empty",
+		})
+		return
+	}
+
+	// get actor id from path
+	id := g.Param("id")
+
+	// get actor from ID
+	actor := &model.Actor{
+		ID: id,
+	}
+	result := c.datastore.First(actor)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	actor.Name = form.Name
+	err = c.datastore.Save(actor).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}

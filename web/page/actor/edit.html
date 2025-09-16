@@ -17,6 +17,14 @@ img {
 }
 </style>
 
+<script>
+/* -- start globals set at boot -- */
+
+// store actor id
+const actor_id = '{{ .Actor.ID }}';
+const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-0000-0000-0000-000000000000';
+</script>
+
 <h2>Edit actor information</h2>
 <hr />
 <br />
@@ -42,9 +50,11 @@ img {
     <br/>
     <div id="profile-info">
       <div class="mb-3">
-        <label for="actor-name" class="form-label">Name:</label>
-        <input type="text" class="form-control" id="actor-name" name="name" value="{{ .Actor.Name }}" readonly>
-        <div id="actor-name-help" class="form-text"></div>
+        <div class="form-floating input-group">
+          <input type="text" class="form-control" id="actor-name" name="name" value="{{ .Actor.Name }}" disabled>
+          <label for="name">Name</label>
+          <button class="btn btn-outline-warning" type="button" id="actor-name-edit" onClick="actorNameEdit()">Edit</button>
+        </div>
       </div>
       <div class="mb-3">
         <label for="actor-sex" class="form-label">Sex:</label>

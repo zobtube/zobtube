@@ -1,11 +1,5 @@
 {{ define "actor/edit.js" }}
 
-/* -- start globals set at boot -- */
-
-// store actor id
-const actor_id = '{{ .actor.ID }}';
-const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-0000-0000-0000-000000000000';
-
 // store all categories at start
 var categories_all = {
   {{ range $category := .Categories }}
@@ -590,5 +584,48 @@ function actorAliasRemove(aliasID) {
   });
 }
 
+function actorNameEdit() {
+  title = document.getElementById('actor-name');
+  title.disabled = false;
+
+  btn = document.getElementById('actor-name-edit');
+  btn.classList.remove('btn-outline-warning');
+  btn.classList.add('btn-outline-success');
+  btn.innerText = 'Send';
+  btn.onclick = actorNameSend;
+}
+
+function actorNameSend() {
+  url = "/api/actor/"+actor_id+"/rename";
+  $.ajax(url, {
+    method: 'POST',
+    data: {
+      'name': document.getElementById('actor-name').value,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (e) {
+      console.debug('actor renaming successful');
+
+      title = document.getElementById('actor-name');
+      title.disabled = true;
+
+      btn = document.getElementById('actor-name-edit');
+      btn.classList.add('btn-outline-warning');
+      btn.classList.remove('btn-outline-success');
+      btn.innerText = 'Edit';
+      btn.onclick = actorNameEdit;
+    },
+
+    error: function () {
+      console.debug('failed');
+    },
+  });
+
+  return false;
+}
 
 {{ end }}
