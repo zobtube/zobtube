@@ -395,7 +395,7 @@ function video_title_send() {
       btn.classList.add('btn-outline-warning');
       btn.classList.remove('btn-outline-success');
       btn.innerText = 'Edit';
-      btn.onClick = video_title_edit;
+      btn.onclick = video_title_edit;
     },
 
     error: function () {
