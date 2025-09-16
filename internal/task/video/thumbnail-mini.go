@@ -12,20 +12,7 @@ import (
 	"golang.org/x/image/draw"
 )
 
-func generateThumbnailMini(ctx *common.Context, params common.Parameters) (string, error) {
-	videoID := params["videoID"]
-
-	// get item from ID
-	video := &model.Video{
-		ID: videoID,
-	}
-	result := ctx.DB.First(video)
-
-	// check result
-	if result.RowsAffected < 1 {
-		return "video does not exist", errors.New("id not in db")
-	}
-
+func generateHorizontalMiniThumnail(ctx *common.Context, video *model.Video) (string, error) {
 	// construct paths
 	thumbPath := filepath.Join(ctx.Config.Media.Path, video.ThumbnailRelativePath())
 	thumbPath, err := filepath.Abs(thumbPath)
@@ -84,6 +71,98 @@ func generateThumbnailMini(ctx *common.Context, params common.Parameters) (strin
 	err = jpeg.Encode(output, dst, &jpeg.Options{Quality: 90})
 	if err != nil {
 		return "unable to encode new thumbnail", err
+	}
+
+	return "", nil
+}
+
+func generateSameRatioMiniThumnail(ctx *common.Context, video *model.Video) (string, error) {
+	// construct paths
+	thumbPath := filepath.Join(ctx.Config.Media.Path, video.ThumbnailRelativePath())
+	thumbPath, err := filepath.Abs(thumbPath)
+	if err != nil {
+		return "Unable to get absolute path of the thumbnail", err
+	}
+
+	thumbXSPath := filepath.Join(ctx.Config.Media.Path, video.ThumbnailXSRelativePath())
+	thumbXSPath, err = filepath.Abs(thumbXSPath)
+	if err != nil {
+		return "Unable to get absolute path of the new mini thumbnail", err
+	}
+
+	// open files
+	input, _ := os.Open(thumbPath)
+	defer input.Close()
+
+	output, _ := os.Create(thumbXSPath)
+	defer output.Close()
+
+	// decode the image from jpeg to image.Image
+	src, err := jpeg.Decode(input)
+	if err != nil {
+		return "unable to read the jpg file", err
+	}
+
+	targetH := 320
+
+	// store image size
+	h := src.Bounds().Dx()
+	v := src.Bounds().Dy()
+
+	// create final image object
+	var dst *image.RGBA
+
+	if h <= targetH {
+		// resizing will not be usefull, just copy the source
+		dst = image.NewRGBA(image.Rect(0, 0, h, v))
+		draw.NearestNeighbor.Scale(dst, dst.Bounds(), src, src.Bounds(), draw.Over, nil)
+	} else {
+		// downscale the image
+
+		// compute downscaling ratio
+		ratio := float32(h) / float32(targetH)
+
+		v = int(float32(v) / ratio)
+
+		// set new size
+		dst = image.NewRGBA(image.Rect(0, 0, targetH, v))
+
+		// render the image
+		draw.NearestNeighbor.Scale(dst, dst.Bounds(), src, src.Bounds(), draw.Over, nil)
+	}
+
+	// encode to jpeg
+	err = jpeg.Encode(output, dst, &jpeg.Options{Quality: 90})
+	if err != nil {
+		return "unable to encode new thumbnail", err
+	}
+
+	return "", nil
+}
+
+func generateThumbnailMini(ctx *common.Context, params common.Parameters) (string, error) {
+	videoID := params["videoID"]
+
+	// get item from ID
+	video := &model.Video{
+		ID: videoID,
+	}
+	result := ctx.DB.First(video)
+
+	// check result
+	if result.RowsAffected < 1 {
+		return "video does not exist", errors.New("id not in db")
+	}
+
+	var err error
+	var errMsg string
+	if video.Type == "c" {
+		errMsg, err = generateSameRatioMiniThumnail(ctx, video)
+	} else {
+		errMsg, err = generateHorizontalMiniThumnail(ctx, video)
+	}
+	if err != nil {
+		return errMsg, err
 	}
 
 	// save on db

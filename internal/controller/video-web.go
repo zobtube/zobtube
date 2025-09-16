@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"math/rand"
 	"net/http"
 	"path/filepath"
 
@@ -132,6 +133,65 @@ func (c *Controller) VideoView(g *gin.Context) {
 			"Videos":    randomVideos,
 			"VideoType": video.Type,
 		},
+	})
+}
+
+func (c *Controller) ClipView(g *gin.Context) {
+	// get id from path
+	id := g.Param("id")
+
+	// get item from ID
+	video := &model.Video{
+		ID: id,
+	}
+	result := c.datastore.Preload("Actors").Preload("Categories").First(video)
+
+	// check result
+	if result.RowsAffected < 1 {
+		//TODO: return to homepage
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	user := g.MustGet("user").(*model.User)
+
+	// create clip random list
+	type ClipID struct {
+		ID string 
+	}
+
+	var clipIDs []ClipID
+	err := c.datastore.Model(&model.Video{}).Where("type = ?", "c").Find(&clipIDs).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	var clipList []string
+
+	// store all clip ids in the array
+	for _, clipID := range clipIDs {
+		if clipID.ID != id {
+			clipList = append(clipList, clipID.ID)
+		}
+	}
+
+	// randomize it
+	for i := range clipList {
+		j := rand.Intn(i +1)
+		clipList[i], clipList[j] = clipList[j], clipList[i]
+	}
+
+	// add the current video as first item
+	clipList = append([]string{id}, clipList...)
+
+	// render
+	g.HTML(http.StatusOK, "clip/view.html", gin.H{
+		"User":  user,
+		"Video": video,
+		"Clips": clipList,
 	})
 }
 

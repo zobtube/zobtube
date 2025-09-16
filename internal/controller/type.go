@@ -87,6 +87,7 @@ type AbtractController interface {
 	VideoViewAjaxIncrement(*gin.Context)
 
 	ClipList(*gin.Context)
+	ClipView(*gin.Context)
 	MovieList(*gin.Context)
 	VideoList(*gin.Context)
 	GenericVideoList(string, *gin.Context)

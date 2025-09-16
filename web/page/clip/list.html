@@ -2,36 +2,37 @@
 {{ template "top" .}}
 <style>
 .container-grid {
-    display: grid;
-    grid-auto-rows: 1fr;
-    grid-template-columns: repeat(6, 1fr);
+  column-count: 4;
+  column-gap: 5px;
 }
 .container-grid .grid-column {
-    width: 100%;
+  width: 100%;
+  margin-top: 0px;
+  margin-bottom: 5px;
 }
 </style>
 <div class="row">
-    <div class="col-md-12">
-      <div class="themeix-section-h">
-        <span class="heading-icon"><i class="fa fa-bolt"></i></span>
-        <h3>All {{ .Type }}s</h3>
-      </div>
-      {{ if not .Videos }}
-      <div class="alert alert-warning" role="alert">
-        No {{ .Type }} available so far!
-      </div>
-      {{ else }}
-      <div class="container-grid">
-        {{ range $video := .Videos }}
-        <div class="grid-column">
-          <a href="{{ .URLView }}">
-            <img class="lazy" alt="Video" data-src="{{ .URLThumbXS }}">
-          </a>
-        </div>
-        {{ end }}
+  <div class="col-md-12">
+    <div class="themeix-section-h">
+      <span class="heading-icon"><i class="fa fa-bolt"></i></span>
+      <h3>All {{ .Type }}s</h3>
+    </div>
+    {{ if not .Videos }}
+    <div class="alert alert-warning" role="alert">
+      No {{ .Type }} available so far!
+    </div>
+    {{ else }}
+    <div class="container-grid">
+      {{ range $video := .Videos }}
+      <div class="grid-column">
+        <a href="{{ .URLView }}">
+          <img class="lazy" alt="Video" data-src="{{ .URLThumbXS }}">
+        </a>
       </div>
       {{ end }}
     </div>
+    {{ end }}
   </div>
+</div>
 {{ template "bottom" .}}
 {{ end }}

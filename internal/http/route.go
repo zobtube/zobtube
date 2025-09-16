@@ -95,6 +95,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 
 	// videos
 	authGroup.GET("/clips", c.ClipList)
+	authGroup.GET("/clip/:id", c.ClipView)
 	authGroup.GET("/movies", c.MovieList)
 	authGroup.GET("/videos", c.VideoList)
 	authGroup.GET("/video/:id", c.VideoView)

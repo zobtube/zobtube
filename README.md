@@ -78,17 +78,8 @@ Environmental variable name | Configuration variable name | Example values | Des
 
 ### Road to 1.0.0
 
-**Features**
-
-Almost all initial features are implemented. The last one before 1.0.0 will be the implementation of small videos (aka clips) view.
-
-**Bugs**
-
-:tada: No more known bugs!
-
-**Enhancement**
-
-:tada: No more expected enhancements before 1.0.0!
+:tada: Finally, all features, enhancements and bug fixed expected for 1.0.0 are released.
+ZobTube will now enter a phase of testing to ensure acceptable quality for the 1.0.0 release.
 
 ### Enhancements not expected before 1.0.0
 

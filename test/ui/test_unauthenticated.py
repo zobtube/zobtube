@@ -30,6 +30,7 @@ def test_pages_unusable_if_unauthenticated(page: Page):
             "/channel/:id",
             "/channel/:id/thumb",
             "/clips",
+            "/clip/:id",
             "/movies",
             "/videos",
             "/video/:id",

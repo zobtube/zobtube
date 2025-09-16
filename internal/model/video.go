@@ -61,6 +61,10 @@ func (v *Video) TypeAsString() string {
 }
 
 func (v *Video) URLView() string {
+	if v.Type == "c" {
+		return fmt.Sprintf("/clip/%s", v.ID)
+	}
+
 	return fmt.Sprintf("/video/%s", v.ID)
 }
 
