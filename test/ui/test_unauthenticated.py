@@ -22,6 +22,8 @@ def test_pages_unusable_if_unauthenticated(page: Page):
             "/actor/:id/delete",
             "/api/actor/:id/provider/:provider_slug",
             "/api/actor/link/:id/thumb",
+            "/categories",
+            "/category/:id",
             "/category-sub/:id/thumb",
             "/channels",
             "/channel/new",
