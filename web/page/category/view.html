@@ -1,0 +1,19 @@
+{{ define "category/view.html" }}
+{{ template "top" .}}
+
+<h2 class="card-title actor_name">Category: {{ .Sub.Name }}</h2>
+<hr />
+
+<div class="row row-cols-1 row-cols-md-6 g-4">
+  {{ range $video := .Sub.Videos }}
+  {{ template "shards/thumb-preview-line.html" $video }}
+  {{ end }}
+  {{ range $actor := .Sub.Actors }}
+  {{ range $video := $actor.Videos }}
+  {{ template "shards/thumb-preview-line.html" $video }}
+  {{ end }}
+  {{ end }}
+</div>
+
+{{ template "bottom" .}}
+{{ end }}

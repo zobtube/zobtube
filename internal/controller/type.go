@@ -54,6 +54,7 @@ type AbtractController interface {
 	// Categories
 	CategoryAjaxAdd(*gin.Context)
 	CategoryAjaxDelete(*gin.Context)
+	CategoryList(*gin.Context)
 
 	// Sub categories
 	CategorySubAjaxAdd(*gin.Context)
@@ -61,6 +62,7 @@ type AbtractController interface {
 	CategorySubAjaxThumbSet(*gin.Context)
 	CategorySubAjaxThumbRemove(*gin.Context)
 	CategorySubThumb(*gin.Context)
+	CategorySubView(*gin.Context)
 
 	// Video, used for Clips, Movies and Videos
 	VideoAjaxActors(*gin.Context)

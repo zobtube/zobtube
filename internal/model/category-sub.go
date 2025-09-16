@@ -16,6 +16,8 @@ type CategorySub struct {
 	Name      string
 	Category  string `gorm:"type:uuid"`
 	Thumbnail bool
+	Videos    []*Video `gorm:"many2many:video_categories;"`
+	Actors    []*Actor `gorm:"many2many:actor_categories;"`
 }
 
 // UUID pre-hook

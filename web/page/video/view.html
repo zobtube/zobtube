@@ -84,7 +84,7 @@
           <ul class="tagcloud">
             {{ if .Categories }}
             {{ range $category_id, $category_name := .Categories }}
-            <li><a>{{ $category_name }}</a></li>
+            <li><a href="/category/{{ $category_id }}">{{ $category_name }}</a></li>
             {{ end }}
             {{ else }}
             <li><a href="#">No tags</a></li>

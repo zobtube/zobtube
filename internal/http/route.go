@@ -68,10 +68,12 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	}
 
 	// categories
+	admGroup.GET("/categories", c.CategoryList)
 	admGroup.POST("/api/category", c.CategoryAjaxAdd)
 	admGroup.DELETE("/api/category/:id", c.CategoryAjaxDelete)
 
 	// sub categories
+	admGroup.GET("/category/:id", c.CategorySubView)
 	authGroup.GET("/category-sub/:id/thumb", c.CategorySubThumb)
 	admGroup.POST("/api/category-sub/:id/thumb", c.CategorySubAjaxThumbSet)
 	admGroup.DELETE("/api/category-sub/:id/thumb", c.CategorySubAjaxThumbRemove)

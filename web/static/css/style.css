@@ -968,3 +968,21 @@ header .modal-body .btn.btn-primary {
   width: 50px;
   border-radius: 5px;
 }
+
+/* categories */
+.categories {
+  align-content: flex-start;
+  display: flex;
+  flex-basis: max-content;
+  flex-flow: wrap;
+  gap: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.categories .category {
+  padding: 0 10px;
+  background-color: #dadada;
+  border-radius: 6px;
+  gap: 4px;
+}

@@ -22,6 +22,11 @@
     {{ if .User.Admin }}
     <a href="/actor/{{ .Actor.ID }}/edit"><i>Edit profile</i></a>
     {{ end }}
+    <div class="categories" style="padding-top: 25px;">
+    {{ range $sub := .Actor.Categories }}
+      <div class="category">{{ $sub.Name }}</div>
+    {{ end }}
+    </div>
   </div>
 
   <div style="display: flex;">
