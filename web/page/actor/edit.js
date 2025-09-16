@@ -179,7 +179,6 @@ function updateProviders() {
 function providerFirstTime(provider_slug) {
   // hide buttons
   document.getElementById('provider-action-'+provider_slug+'-view').style.display = 'none';
-  document.getElementById('provider-action-'+provider_slug+'-edit').style.display = 'none';
   document.getElementById('provider-action-'+provider_slug+'-delete').style.display = 'none';
   document.getElementById('provider-action-'+provider_slug+'-search').style.display = 'none';
   document.getElementById('provider-action-'+provider_slug+'-add').style.display = 'none';
@@ -197,21 +196,11 @@ function providerLinkPresent(provider_slug, link_url, link_id) {
   // show edit ones
   btnView = document.getElementById('provider-action-'+provider_slug+'-view');
   btnView.style.display = '';
-  btnEdit = document.getElementById('provider-action-'+provider_slug+'-edit');
-  btnEdit.style.display = '';
   btnDelete = document.getElementById('provider-action-'+provider_slug+'-delete');
   btnDelete.style.display = '';
 
   // update urls
   btnView.href = link_url;
-
-  urlEdit   = "{% url 'actor_link_delete' '00000000-0000-0000-0000-000000000000' %}";
-  urlEdit   = urlEdit.replace('00000000-0000-0000-0000-000000000000', link_id);
-
-  btnEdit.href = urlEdit;
-  btnDelete.onclick = function() {
-    linkDelete(provider_slug);
-  }
 }
 
 function linkDelete(provider_slug) {
@@ -247,7 +236,6 @@ function linkDelete(provider_slug) {
 function providerLinkAbsent(provider_slug) {
   // hide buttons
   document.getElementById('provider-action-'+provider_slug+'-view').style.display = 'none';
-  document.getElementById('provider-action-'+provider_slug+'-edit').style.display = 'none';
   document.getElementById('provider-action-'+provider_slug+'-delete').style.display = 'none';
   document.getElementById('provider-text-'+provider_slug+'-first-time').style.display = 'none';
   // show search ones
