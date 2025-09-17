@@ -111,6 +111,17 @@ function goHome() {
   window.location = '/';
 }
 
+function redirectToClipEdition() {
+  // get video item
+  video = document.getElementById('video-clip');
+
+  // get video id
+  currentID = video.getAttribute('clip-id');
+
+  // redirect
+  window.location = '/video/'+currentID+'/edit';
+}
+
 document.body.addEventListener('wheel', checkScrollDirection);
 
 function checkScrollDirection(event) {

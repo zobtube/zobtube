@@ -8,6 +8,7 @@
     <title>ZobTube</title>
     <link rel="icon" type="image/png" href="/static/images/favicon.png">
     <link href="/static/css/font-poppins.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
 </head>
 <body style="position: fixed; top: 0px; left: 0px; right: 0px; bottom: 0px; margin: 0; background-color: #111; height: 100%; font-family: Poppins;">
 <style>
@@ -50,6 +51,9 @@
       <img onclick="goHome();" style="display: block; margin-left: auto; cursor: pointer;" src="/static/images/logo_clip.png">
       <svg id="clip-change-previous" class="clip-change-disabled" onclick="previousVideo();" style="width: 40px; display: block; margin-top: 25px; margin-left: auto; transform: rotate(180deg);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" class="MultiplayerNav_navArrow__8XnJ2 MultiplayerNav_arrowUp__lqw3k"><path d="M21.71 13.29a.996.996 0 0 0-1.41 0l-5.29 5.29V7c0-.55-.45-1-1-1s-1 .45-1 1v11.59L7.72 13.3a.996.996 0 1 0-1.41 1.41l7 7c.09.09.2.17.33.22.12.05.25.08.38.08s.26-.03.38-.08.23-.12.33-.22l7-7a.996.996 0 0 0 0-1.41Z" fill="currentColor"></path><path fill="none" d="M0 0h28v28H0z"></path></svg>
       <svg id="clip-change-next" class="clip-change" onclick="nextVideo();" style="width: 40px; display: block; margin-top: 25px; margin-left: auto;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" class="MultiplayerNav_navArrow__8XnJ2"><path d="M21.71 13.29a.996.996 0 0 0-1.41 0l-5.29 5.29V7c0-.55-.45-1-1-1s-1 .45-1 1v11.59L7.72 13.3a.996.996 0 1 0-1.41 1.41l7 7c.09.09.2.17.33.22.12.05.25.08.38.08s.26-.03.38-.08.23-.12.33-.22l7-7a.996.996 0 0 0 0-1.41Z" fill="currentColor"></path><path fill="none" d="M0 0h28v28H0z"></path></svg>
+      <div style="width: 40px; display: block; margin-top: 25px; margin-left: auto; text-align: center;">
+        <i class="fas fa-pen clip-change" onclick="redirectToClipEdition();" style="width: 100%; height: 100%; font-size: 24px;"></i>
+      </div>
     </div>
   </div>
   <div style="position: absolute; bottom: 56px; right: 0px; width: 100%;">
