@@ -571,3 +571,40 @@ func (c *Controller) VideoAjaxEditChannel(g *gin.Context) {
 
 	g.JSON(200, gin.H{})
 }
+
+func (c *Controller) VideoAjaxGet(g *gin.Context) {
+	// get id from path
+	id := g.Param("id")
+
+	// get item from ID
+	video := &model.Video{
+		ID: id,
+	}
+	result := c.datastore.Preload("Actors.Categories").Preload("Categories").First(video)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	var actors []string
+	var categories []string
+
+	for _, actor := range video.Actors {
+		actors = append(actors, actor.Name)
+		for _, category := range actor.Categories {
+			categories = append(categories, category.Name)
+		}
+	}
+
+	for _, category := range video.Categories {
+		categories = append(categories, category.Name)
+	}
+
+	g.JSON(200, gin.H{
+		"title": video.Name,
+		"actors": actors,
+		"categories": categories,
+	})
+}

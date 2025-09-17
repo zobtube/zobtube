@@ -55,16 +55,7 @@ function nextVideo() {
   previousButton.classList.remove('clip-change-disabled');
   previousButton.classList.add('clip-change');
 
-  video = document.getElementById('video-clip');
-  if (video.paused) {
-    video.play();
-  }
-  video.src = '/video/'+nextClipID+'/stream';
-  video.setAttribute('clip-id', nextClipID);
-  video.preload = 'metadata';
-  video.preload = 'auto';
-
-  video.play();
+  setVideoByID(nextClipID);
 }
 
 function previousVideo() {
@@ -95,16 +86,47 @@ function previousVideo() {
   nextButton.classList.remove('clip-change-disabled');
   nextButton.classList.add('clip-change');
 
+  setVideoByID(nextClipID);
+}
 
-  video = document.getElementById('video-clip');
-  if (video.paused) {
-    video.play();
-  }
-  video.src = '/video/'+nextClipID+'/stream';
-  video.setAttribute('clip-id', nextClipID);
+function setVideoByID(id) {
+  var paused = video.paused;
+  video.poster = '/video/'+id+'/thumb';
+  video.src = '/video/'+id+'/stream';
+  video.setAttribute('clip-id', id);
   video.preload = 'metadata';
   video.preload = 'auto';
-  video.play();
+  if (!paused) {
+    video.play();
+  }
+
+  // get info async
+  $.ajax('/api/video/'+id, {
+    method: 'GET',
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+    success: function(data) {
+      titleDiv = document.getElementById('clip-title');
+      titleDiv.innerText = data.title;
+
+      descDiv = document.getElementById('clip-description');
+      description = '';
+      if (data.actors != null) {
+        for (const actor of data.actors) {
+          description += '<b>@'+actor+'</b> ';
+        }
+      }
+      if (data.categories != null) {
+        for (const category of data.categories) {
+          description += '<b>#'+category+'</b> ';
+        }
+      }
+      descDiv.innerHTML = description;
+    },
+  });
+
 }
 
 function goHome() {

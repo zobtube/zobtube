@@ -144,7 +144,7 @@ func (c *Controller) ClipView(g *gin.Context) {
 	video := &model.Video{
 		ID: id,
 	}
-	result := c.datastore.Preload("Actors").Preload("Categories").First(video)
+	result := c.datastore.Preload("Actors.Categories").Preload("Categories").First(video)
 
 	// check result
 	if result.RowsAffected < 1 {

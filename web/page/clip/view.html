@@ -62,6 +62,7 @@
         <div id="clip-title">{{ .Video }}</div>
         <div id="clip-description">
           {{ range $actor := .Video.Actors }}<b>@{{ $actor.Name }}</b> {{ end }}
+          {{ range $actor := .Video.Actors }}{{ range $category := $actor.Categories }}<b>#{{ $category.Name }}</b> {{end}}{{end}}
           {{ range $category_id, $category_name := .Categories }}<b>#{{ $category_name }}</b> {{end}}
         </div>
       </div>

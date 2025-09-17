@@ -38,6 +38,7 @@ def test_pages_unusable_if_unauthenticated(page: Page):
             "/video/:id/stream",
             "/video/:id/thumb",
             "/video/:id/thumb_xs",
+            "/api/video/:id",
             "/upload/",
             "/upload/preview/:filepath",
             "/profile",

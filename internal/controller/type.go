@@ -66,6 +66,7 @@ type AbtractController interface {
 	CategorySubView(*gin.Context)
 
 	// Video, used for Clips, Movies and Videos
+	VideoAjaxGet(*gin.Context)
 	VideoAjaxActors(*gin.Context)
 	VideoAjaxCategories(*gin.Context)
 	VideoAjaxRename(*gin.Context)

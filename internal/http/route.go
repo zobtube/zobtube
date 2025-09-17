@@ -108,6 +108,7 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	videoAPI := admGroup.Group("/api/video")
 	videoAPI.POST("", c.VideoAjaxCreate)
 	videoAPI.HEAD("/:id", c.VideoAjaxStreamInfo)
+	videoAPI.GET("/:id", c.VideoAjaxGet)
 	videoAPI.DELETE("/:id", c.VideoAjaxDelete)
 	videoAPI.POST("/:id/upload", c.VideoAjaxUpload)
 	videoAPI.POST("/:id/thumb", c.VideoAjaxUploadThumb)
