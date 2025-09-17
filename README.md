@@ -10,13 +10,10 @@ ZobTube is a library viewer and management tools for all your ~~porn~~ scientifi
 
 ## :information_source: Current status
 
-> [!WARNING]
-> ZobTube is under active development! Everything ***should*** work properly.
-> Yet, as long as `1.0.0` is not released, there will be no promises.
+:tada: Finally, all features, enhancements and bug fixed expected for 1.0.0 are released.
+ZobTube will now enter a testing / QA phase to ensure acceptable quality for the 1.0.0 release.
 
-**TL;DR**: Not stable yet but should work fine.
-
-The remaining work towards the incoming stable release is [available below](#white_check_mark-coming-developments).
+All future developments will be followed on the [Kanban project view](https://github.com/orgs/zobtube/projects/1).
 
 ## :cop: About piracy
 
@@ -73,25 +70,6 @@ Environmental variable name | Configuration variable name | Example values | Des
 `ZT_DB_DRIVER` | `db.driver` | `postgresql` - `sqlite` | Driver used for the database
 `ZT_DB_CONNSTRING` | `db.connstring` | `zt.db` - `host=pg user=zt password=topsecret dbname=zobtube port=5432 sslmode=disable` | Connection string to pass to the database driver
 `ZT_MEDIA_PATH` | `media.path` | `/mnt/zobtube` - `./my_library` - `C:\Users\zt\videos` | Library base path, where all content will be stored.
-
-## :white_check_mark: Coming developments
-
-### Road to 1.0.0
-
-:tada: Finally, all features, enhancements and bug fixed expected for 1.0.0 are released.
-ZobTube will now enter a phase of testing to ensure acceptable quality for the 1.0.0 release.
-
-### Enhancements not expected before 1.0.0
-
-- [ ] Add pagination
-- [ ] Movie scenes
-- [ ] Collections
-- [ ] Merge actors
-- [ ] Redirect to requested page after login
-- [ ] Add 'set as image' in triage towards videos / actors / channels
-- [ ] Add actor description
-
-And more to come! This list will migrate this Github project view as soon as 1.0.0 is ready.
 
 ## :page_facing_up: License
 
