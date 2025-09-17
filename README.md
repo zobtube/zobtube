@@ -32,13 +32,26 @@ For now, the only reference to some sexual identity is through the definition of
 
 ZobTube works as a single binary. It needs a database to work but can rely on a local sqlite database. Parameters to start the binary can either be passed as a configration file or as environmental variables, as described below.
 
-### Quickstart
+### Docker quickstart
+
+The easiest way to start ZobTube is through its docker image, with the following command.
+
+```
+docker run -v ./zt-config:/config -v ./zt-data:/data -e ZT_DB_DRIVER=sqlite -e ZT_DB_CONNSTRING=/config/db.sqlite -e ZT_MEDIA_PATH=/data -e ZT_SERVER_BIND="0.0.0.0:8080" -p 8080:8080 ghcr.io/zobtube/zobtube:0.1.67
+```
+
+Then, ZobTube will be reachable on [http://127.0.0.1:8080](http://127.0.0.1:8080).
+
+### Binary quickstart
 
 Just start the binary without any parameter
 
 ```sh
 ./zobtube
 ```
+
+If no configuration is provided, a default one will be created.
+Then, ZobTube will be reachable on [http://127.0.0.1:8080](http://127.0.0.1:8080).
 
 ### Configuration file example
 
