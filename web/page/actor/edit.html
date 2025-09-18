@@ -61,7 +61,7 @@ const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-00
         <select class="form-select" id="actor-sex" name="sex" disabled>
           <option value="m" {{ if eq .Actor.Sex "m" }}selected{{ end }}>Male</option>
           <option value="f" {{ if eq .Actor.Sex "f" }}selected{{ end }}>Female</option>
-          <option value="s" {{ if eq .Actor.Sex "s" }}selected{{ end }}>Shemale</option>
+          <option value="tw" {{ if eq .Actor.Sex "tw" }}selected{{ end }}>Trans women</option>
         </select>
         <div id="actor-sex-help" class="form-text"></div>
       </div>

@@ -17,7 +17,7 @@ type Actor struct {
 	Name       string
 	Videos     []Video `gorm:"many2many:video_actors;"`
 	Thumbnail  bool
-	Sex        string `gorm:"size:1;"`
+	Sex        string `gorm:"size:2;"`
 	Aliases    []ActorAlias
 	Links      []ActorLink
 	Categories []CategorySub `gorm:"many2many:actor_categories;"`
@@ -41,7 +41,7 @@ func (a *Actor) BeforeCreate(tx *gorm.DB) error {
 var sexTypesAsString = map[string]string{
 	"m": "male",
 	"f": "female",
-	"s": "shemale",
+	"tw": "trans-women",
 }
 
 func (a *Actor) SexTypeAsString() string {

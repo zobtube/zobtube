@@ -26,7 +26,7 @@ Piracy is bad. The FBI will not blow up your door for some downloaded porn. Yet,
 
 As healthy sex life goes in pair of welcoming everyone, ZobTube endorses **LGBTQIA+** community.
 
-For now, the only reference to some sexual identity is through the definition of actors. Only `male`, `female` and `shemale` are supported for now. But if anything's missing, feel free to create a pull request or a feature request.
+For now, the only reference to some sexual identity is through the definition of actors. Only `male`, `female` and `trans women` are supported for now. But if anything's missing, feel free to create a pull request or a feature request.
 
 ## :vertical_traffic_light: Getting started
 
