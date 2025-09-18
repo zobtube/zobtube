@@ -37,7 +37,7 @@ func (c *Controller) ActorNew(g *gin.Context) {
 			}
 			err = c.datastore.Create(&actor).Error
 			if err == nil {
-				g.Redirect(http.StatusFound, "/actor/"+actor.ID)
+				g.Redirect(http.StatusFound, "/actor/"+actor.ID+"/edit")
 				return
 			}
 		}
