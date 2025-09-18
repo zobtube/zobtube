@@ -18,7 +18,7 @@
 
 <div class="row">
   <div class="col-md-12">
-    <form action="/" method="post">
+    <form action="/" method="post" id="user">
       <div class="mb-3">
         <label for="username" class="form-label">Username</label>
         <input type="text" class="form-control" name="username" placeholder="New user name" value="admin">
@@ -30,13 +30,41 @@
       <div class="row">
         <div class="col-4"></div>
         <div class="col-4">
-          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Register new user</button>
+          <button type="button" id="submitButton" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Register new user</button>
         </div>
         <div class="col-4"></div>
       </div>
     </form>
   </div>
 </div>
+
+<script>
+// this function check if the healthcheck endpoint is up
+// then redirect to the reloaded app
+function checkForReload() {
+  $.ajax({
+    url: '/ping',
+    type: 'GET',
+    success: function() {
+      console.log('reloading');
+      window.location.reload();
+    }
+  });
+}
+
+window.onload = function() {
+  $('button#submitButton').click( function() {
+    $.ajax({
+      url: '/',
+      type: 'POST',
+      data: $('form#user').serialize(),
+      success: function() {
+        setTimeout(checkForReload(), 500);
+      }
+    });
+  });
+}
+</script>
 
 {{ template "bottom-failsafe" . }}
 {{ end }}
