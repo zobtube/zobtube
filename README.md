@@ -37,7 +37,7 @@ ZobTube works as a single binary. It needs a database to work but can rely on a 
 The easiest way to start ZobTube is through its docker image, with the following command.
 
 ```
-docker run -v ./zt-config:/config -v ./zt-data:/data -e ZT_DB_DRIVER=sqlite -e ZT_DB_CONNSTRING=/config/db.sqlite -e ZT_MEDIA_PATH=/data -e ZT_SERVER_BIND="0.0.0.0:8080" -p 8080:8080 ghcr.io/zobtube/zobtube:0.1.67
+docker run -v ./zt-config:/config -v ./zt-data:/data -e ZT_DB_DRIVER=sqlite -e ZT_DB_CONNSTRING=/config/db.sqlite -e ZT_MEDIA_PATH=/data -e ZT_SERVER_BIND="0.0.0.0:8080" -p 8080:8080 ghcr.io/zobtube/zobtube
 ```
 
 Then, ZobTube will be reachable on [http://127.0.0.1:8080](http://127.0.0.1:8080).
