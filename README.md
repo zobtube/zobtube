@@ -58,7 +58,8 @@ Then, ZobTube will be reachable on [http://127.0.0.1:8080](http://127.0.0.1:8080
 In `config.yml`, in the same folder as where ZobTube is started.
 
 ```yaml
-bind: "127.0.0.1:8080"
+server:
+    bind: "127.0.0.1:8080"
 db:
   driver: "sqlite"
   connstring: "zt.db"
