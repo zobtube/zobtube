@@ -1,0 +1,30 @@
+---
+
+version: '3.8'
+services:
+  zobtube:
+    image: ghcr.io/zobtube/zobtube:latest
+    container_name: zobtube
+    restart: unless-stopped
+    ## the container's port must be the same with the one set on ZT_SERVER_BIND in the environment section
+    ports:
+      - "8080:8080"
+    ## If you intend to use stash's DLNA functionality uncomment the below network mode and comment out the above ports section
+    # network_mode: host
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "2m"
+    environment:
+      - ZT_SERVER_BIND=0.0.0.0:8080
+      - ZT_DB_DRIVER=sqlite
+      - ZT_DB_CONNSTRING=/etc/zobtube/db.sqlite
+      - ZT_MEDIA_PATH=/var/lib/zobtube
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # Location used to store the sqlite database
+      # Can be removed with PostgreSQL
+      - ./config:/etc/zobtube
+      ## Point this at your collection.
+      - ./data:/var/lib/zobtube
