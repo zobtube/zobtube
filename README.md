@@ -83,6 +83,27 @@ Environmental variable name | Configuration variable name | Example values | Des
 `ZT_DB_CONNSTRING` | `db.connstring` | `zt.db` - `host=pg user=zt password=topsecret dbname=zobtube port=5432 sslmode=disable` | Connection string to pass to the database driver
 `ZT_MEDIA_PATH` | `media.path` | `/mnt/zobtube` - `./my_library` - `C:\Users\zt\videos` | Library base path, where all content will be stored.
 
+## :bar_chart: Alternatives
+
+### Stash
+
+The [Stash](https://github.com/stashapp/stash) project is a very similar project.
+To be honest, it is way more advanced than ZobTube.
+It has more features, more commits, more contributors, more Github stars.
+
+ZobTube is aiming to include progressively those features.
+
+Also, here is a short list of what ZobTube provides which is absent from Stash:
+
+- A dedicated interface for short videos (a TikTok-like view, see the [screenshots page](docs/screenshots.md#short-video-viewer-tiktok-like))
+- More third-party to retrieve information from about actors (like Pornhub, Boobpedia, Babepedia and Babes Directory)
+
+### Whisparr
+
+The [Whisparr](https://github.com/Whisparr/Whisparr) project is more oriented towards downloading and organizing content.
+
+ZobTube, on the other hand, is more around organizing and viewing.
+
 ## :page_facing_up: License
 
 ZobTube © 2025 by sblablaha is licensed under the MIT license.
