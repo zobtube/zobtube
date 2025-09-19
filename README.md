@@ -8,6 +8,10 @@ _ZobTube, passion of the Zob, lube for the Tube!_
 
 ZobTube is a library viewer and management tools for all your ~~porn~~ scientific videos.
 
+![demo viewer](docs/readme_assets/demo_viewer.png)
+
+To view more screenshots :camera:, see the [docs/screenshots.md](docs/screenshots.md) file.
+
 ## :information_source: Current status
 
 :tada: Finally, all features, enhancements and bug fixed expected for 1.0.0 are released.
