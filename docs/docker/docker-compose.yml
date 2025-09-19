@@ -9,8 +9,6 @@ services:
     ## the container's port must be the same with the one set on ZT_SERVER_BIND in the environment section
     ports:
       - "8080:8080"
-    ## If you intend to use stash's DLNA functionality uncomment the below network mode and comment out the above ports section
-    # network_mode: host
     logging:
       driver: "json-file"
       options:
