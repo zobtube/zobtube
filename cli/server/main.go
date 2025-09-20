@@ -170,6 +170,7 @@ func Start(params *Parameters) error {
 		&provider.Babepedia{},
 		&provider.Boobpedia{},
 		&provider.Pornhub{},
+		&provider.IAFD{},
 	}
 
 	for _, provider := range providers {

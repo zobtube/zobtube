@@ -140,7 +140,7 @@ const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-00
             <a class="btn btn-success" href="" id="provider-action-{{ $provider.ID }}-view" target="_blank" rel="noopener noreferrer">
               <i class="fas fa-globe"></i> View page
             </a>
-            <button class="btn btn-danger" id="provider-action-{{ $provider.ID }}-delete">
+            <button class="btn btn-danger" id="provider-action-{{ $provider.ID }}-delete" onclick="linkDelete('{{ $provider.ID }}')">
               <i class="fas fa-trash"></i> Remove link
             </button>
             <div id="provider-text-{{ $provider.ID }}-first-time" style="display: none"><i>Automatic reseach will begin shortly...</i></div>
