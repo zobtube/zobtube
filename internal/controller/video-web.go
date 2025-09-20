@@ -101,7 +101,7 @@ func (c *Controller) VideoView(g *gin.Context) {
 
 	// get random videos
 	var randomVideos []model.Video
-	c.datastore.Limit(8).Order("RANDOM()").Find(&randomVideos)
+	c.datastore.Limit(8).Where("type = ? and id != ?", video.Type, video.ID).Order("RANDOM()").Find(&randomVideos)
 
 	// get video count
 	user := g.MustGet("user").(*model.User)
