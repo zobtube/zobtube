@@ -15,7 +15,7 @@ func TestConfigFromFile(t *testing.T) {
 	defer os.Remove(f.Name())
 
 	_, _ = f.WriteString("server:\n")
-	_, _ = f.WriteString("  bind: 0.0.0.0:8080\n")
+	_, _ = f.WriteString("  bind: 0.0.0.0:8069\n")
 	_, _ = f.WriteString("media:\n")
 	_, _ = f.WriteString("  path: library_test\n")
 	_, _ = f.WriteString("db:\n")
@@ -26,7 +26,7 @@ func TestConfigFromFile(t *testing.T) {
 	// load configuration
 	cfg, err := config.New(f.Name())
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "0.0.0.0:8080", cfg.Server.Bind)
+	assert.Equal(t, "0.0.0.0:8069", cfg.Server.Bind)
 	assert.Equal(t, "library_test", cfg.Media.Path)
 	assert.Equal(t, "sqlite", cfg.DB.Driver)
 	assert.Equal(t, "./zt-test.sqlite", cfg.DB.Connstring)
@@ -35,7 +35,7 @@ func TestConfigFromFile(t *testing.T) {
 func TestConfigFromEnv(t *testing.T) {
 	var err error
 	// set config from env vars
-	err = os.Setenv("ZT_SERVER_BIND", "0.0.0.0:8080")
+	err = os.Setenv("ZT_SERVER_BIND", "0.0.0.0:8069")
 	assert.Equal(t, nil, err)
 	err = os.Setenv("ZT_MEDIA_PATH", "library_test")
 	assert.Equal(t, nil, err)
@@ -47,7 +47,7 @@ func TestConfigFromEnv(t *testing.T) {
 	// load configuration
 	cfg, err := config.New("null")
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "0.0.0.0:8080", cfg.Server.Bind)
+	assert.Equal(t, "0.0.0.0:8069", cfg.Server.Bind)
 	assert.Equal(t, "library_test", cfg.Media.Path)
 	assert.Equal(t, "sqlite", cfg.DB.Driver)
 	assert.Equal(t, "./zt-test.sqlite", cfg.DB.Connstring)

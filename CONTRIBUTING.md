@@ -20,4 +20,4 @@ __Windows__
 tools/dev-win.sh
 ```
 
-This will start the build and live reload using `air` ([a golang tool to help build binaries in developement](https://github.com/air-verse/air)) and it will be accessible on [http://127.0.0.1:8069](http://127.0.0.1:8069).
+This will start the build and live reload using `air` ([a golang tool to help build binaries in developement](https://github.com/air-verse/air)) and it will be accessible on [http://127.0.0.1:8080](http://127.0.0.1:8080).

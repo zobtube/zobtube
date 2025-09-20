@@ -1,7 +1,7 @@
 import re
 from playwright.sync_api import Page, expect
 
-BASE_URL = 'http://127.0.0.1:8080'
+BASE_URL = 'http://127.0.0.1:8069'
 
 def test_pages_unusable_if_unauthenticated(page: Page):
     methods = {

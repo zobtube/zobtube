@@ -61,7 +61,7 @@ func New(configPath string) (*Config, error) {
 	}
 
 	if cfg.Server.Bind == "" {
-		cfg.Server.Bind = "127.0.0.1:8080"
+		cfg.Server.Bind = "127.0.0.1:8069"
 	}
 
 	return cfg, nil

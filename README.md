@@ -49,7 +49,7 @@ Just start the binary without any parameter
 ```
 
 If no configuration is provided, a default one will be created.
-Then, ZobTube will be reachable on [http://127.0.0.1:8080](http://127.0.0.1:8080).
+Then, ZobTube will be reachable on [http://127.0.0.1:8069](http://127.0.0.1:8069).
 
 ### Configuration file example
 
@@ -57,7 +57,7 @@ In `config.yml`, in the same folder as where ZobTube is started.
 
 ```yaml
 server:
-    bind: "127.0.0.1:8080"
+    bind: "127.0.0.1:8069"
 db:
   driver: "sqlite"
   connstring: "zt.db"
@@ -68,7 +68,7 @@ media:
 ### Environmental variables example
 
 ```sh
-ZT_SERVER_BIND="0.0.0.0:8080"
+ZT_SERVER_BIND="0.0.0.0:8069"
 ZT_MEDIA_PATH="/mnt/zobtube"
 ZT_DB_DRIVER="postgresql"
 ZT_DB_CONNSTRING="host=pg user=zt password=topsecret dbname=zobtube port=5432 sslmode=disable"
@@ -78,7 +78,7 @@ ZT_DB_CONNSTRING="host=pg user=zt password=topsecret dbname=zobtube port=5432 ss
 
 Environmental variable name | Configuration variable name | Example values | Description
 -|-|-|-
-`ZT_SERVER_BIND` | `bind` | `127.0.0.1:8080` - `0.0.0.0:8080` | IP and port to lisen to.
+`ZT_SERVER_BIND` | `bind` | `127.0.0.1:8069` - `0.0.0.0:8069` | IP and port to lisen to.
 `ZT_DB_DRIVER` | `db.driver` | `postgresql` - `sqlite` | Driver used for the database
 `ZT_DB_CONNSTRING` | `db.connstring` | `zt.db` - `host=pg user=zt password=topsecret dbname=zobtube port=5432 sslmode=disable` | Connection string to pass to the database driver
 `ZT_MEDIA_PATH` | `media.path` | `/mnt/zobtube` - `./my_library` - `C:\Users\zt\videos` | Library base path, where all content will be stored.

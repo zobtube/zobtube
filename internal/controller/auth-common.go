@@ -24,7 +24,7 @@ func (c *Controller) createSession(g *gin.Context) {
 
 	// cookie not set, creating it
 	cookieMaxAge := int(sessionTimePending / time.Second)
-	g.SetCookie(cookieName, session.ID, cookieMaxAge, "/", "127.0.0.1:8080", cookieSecure, cookieHttpOnly)
+	g.SetCookie(cookieName, session.ID, cookieMaxAge, "/", "127.0.0.1:8069", cookieSecure, cookieHttpOnly)
 }
 
 func (c *Controller) GetSession(session *model.UserSession) *gorm.DB {

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export ZT_SERVER_BIND='127.0.0.1:8080'
+export ZT_SERVER_BIND='127.0.0.1:8069'
 export ZT_DB_DRIVER='sqlite'
 export ZT_DB_CONNSTRING='/tmp/zt-db.sqlite3'
 export ZT_MEDIA_PATH='/tmp/zt-data'

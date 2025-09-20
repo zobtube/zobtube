@@ -51,7 +51,7 @@ func startFailsafeWebServer(err error, c controller.AbtractController) {
 	// handle shutdown
 	go httpServer.WaitForStopSignal(shutdownChannel)
 
-	httpServer.Start("0.0.0.0:8080")
+	httpServer.Start("0.0.0.0:8069")
 
 	// Wait for all HTTP fetches to complete.
 	wg.Wait()

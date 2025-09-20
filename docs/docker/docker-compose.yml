@@ -8,14 +8,14 @@ services:
     restart: unless-stopped
     ## the container's port must be the same with the one set on ZT_SERVER_BIND in the environment section
     ports:
-      - "8080:8080"
+      - "8069:8069"
     logging:
       driver: "json-file"
       options:
         max-file: "10"
         max-size: "2m"
     environment:
-      - ZT_SERVER_BIND=0.0.0.0:8080
+      - ZT_SERVER_BIND=0.0.0.0:8069
       - ZT_DB_DRIVER=sqlite
       - ZT_DB_CONNSTRING=/etc/zobtube/db.sqlite
       - ZT_MEDIA_PATH=/var/lib/zobtube

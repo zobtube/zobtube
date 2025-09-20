@@ -73,7 +73,7 @@ func (c *Controller) AuthLogin(g *gin.Context) {
 
 	// set auth cookie
 	cookieMaxAge := int(sessionTimeValidated / time.Second)
-	g.SetCookie(cookieName, session.ID, cookieMaxAge, "/", "127.0.0.1:8080", cookieSecure, cookieHttpOnly)
+	g.SetCookie(cookieName, session.ID, cookieMaxAge, "/", "127.0.0.1:8069", cookieSecure, cookieHttpOnly)
 
 	g.JSON(200, gin.H{})
 }
