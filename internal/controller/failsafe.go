@@ -43,8 +43,8 @@ func (c *Controller) FailsafeConfiguration(g *gin.Context) {
 				err = encoder.Encode(newConfig)
 
 				if err == nil {
+					g.JSON(http.StatusOK, gin.H{})
 					c.Restart()
-					g.Redirect(http.StatusFound, "/")
 					return
 				}
 			}
@@ -84,8 +84,8 @@ func (c *Controller) FailsafeUser(g *gin.Context) {
 
 				err = c.datastore.Create(&admin).Error
 				if err == nil {
+					g.JSON(http.StatusOK, gin.H{})
 					c.Restart()
-					g.Redirect(http.StatusFound, "/")
 					return
 				}
 			}

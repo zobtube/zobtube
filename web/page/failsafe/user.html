@@ -42,14 +42,26 @@
 // this function check if the healthcheck endpoint is up
 // then redirect to the reloaded app
 function checkForReload() {
-  $.ajax({
+  console.debug('checking the /ping endpoint to determine when to reload');
+  ajaxSettings = {
     url: '/ping',
     type: 'GET',
-    success: function() {
+    retry: 10,
+    success: function(data) {
+      console.debug(data);
       console.log('reloading');
       window.location.reload();
-    }
-  });
+    },
+  };
+
+  $.ajax(ajaxSettings).fail(onFail);
+
+  function onFail(){
+    if (ajaxSettings.retry-- > 0)
+      setTimeout(function(){
+        $.ajax(ajaxSettings).fail(onFail);
+      }, 1000);
+  }
 }
 
 window.onload = function() {

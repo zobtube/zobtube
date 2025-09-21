@@ -53,6 +53,11 @@ func NewFailsafeConfig(c controller.AbtractController, embedfs *embed.FS) (*Serv
 	server.Router.GET("", c.FailsafeConfiguration)
 	server.Router.POST("", c.FailsafeConfiguration)
 
+	// add rerouting for other requests
+	server.Router.NoRoute(func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/")
+	})
+
 	return server, nil
 }
 
@@ -102,6 +107,11 @@ func NewFailsafeUser(c controller.AbtractController, embedfs *embed.FS) (*Server
 	// failsafe configuration route
 	server.Router.GET("", c.FailsafeUser)
 	server.Router.POST("", c.FailsafeUser)
+
+	// add rerouting for other requests
+	server.Router.NoRoute(func(c *gin.Context) {
+		c.Redirect(http.StatusFound, "/")
+	})
 
 	return server, nil
 }
