@@ -1,0 +1,59 @@
+{{ define "adm/config-auth.html" }}
+{{ template "top" .}}
+<h1>Admin Area</h1>
+
+<hr />
+
+<div class="row">
+  <div class="col-md-12 mb-4">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link" href="/adm">Statistics</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active">Authentication</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/adm/task/home">Tasks</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="col-md-12 mb-4">
+    <h4 class="mb-4">Authentication settings</h4>
+    The authentication is currently:
+    {{ if .AuthenticationEnabled }}
+    <span class="badge text-bg-success">Enabled</span>
+    {{ else }}
+    <span class="badge text-bg-warning">Disabled</span>
+    {{ end }}
+  </div>
+
+  <div class="col-md-12 mb-4">
+    <h4 class="mb-4">Change setting</h4>
+    <p>To {{ if .AuthenticationEnabled }}disable{{ else }}enable{{ end }} authentication, please read the following disclamer.</p>
+    {{ if .AuthenticationEnabled }}
+    <div class="alert alert-warning" role="alert">
+      Disabling the authentication will remove the possibility to change user.
+      Only the first admin user created will be available and always auto-logged-in.
+    </div>
+    {{ else }}
+    <div class="alert alert-warning" role="alert">
+      Once authentication is enabled, login will be required at all time.
+      If your account does not have a password yet, you can run the password reset command.
+      <code>
+        zobtube password-reset
+      </code>
+    </div>
+    {{ end }}
+    {{ if .AuthenticationEnabled }}
+    <a class="btn btn-xl btn-danger" href="/adm/config/auth/disable">Disable authentication</a>
+    {{ else }}
+    <a class="btn btn-xl btn-danger" href="/adm/config/auth/enable">Enable authentication</a>
+    {{ end }}
+  </div>
+
+
+</div>
+{{ template "bottom" .}}
+{{ end }}

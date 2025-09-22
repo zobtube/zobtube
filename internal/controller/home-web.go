@@ -13,8 +13,7 @@ func (c *Controller) Home(g *gin.Context) {
 	var videos []model.Video
 	c.datastore.Where("type = ?", "v").Order("created_at desc").Find(&videos)
 
-	g.HTML(http.StatusOK, "home/home.html", gin.H{
-		"User":      g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "home/home.html", gin.H{
 		"Videos":    videos,
 		"VideoType": "video",
 	})

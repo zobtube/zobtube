@@ -54,12 +54,16 @@
                               <div class="user-info">
                                 <i class="fa fa-user"></i>
                                 <a href="/profile">{{ .User.Username }}</a>
+                                {{ if .AuthenticationEnabled }}
                                 <span class="sepator">|</span>
+                                {{ end }}
                               </div>
+                              {{ if .AuthenticationEnabled }}
                               <div class="user-logout">
                                 <i class="fa fa-sign-out-alt"></i>
                                 <a href="/auth/logout">logout</a>
                               </div>
+                              {{ end }}
                             </div>
                         </div>
                     </div>

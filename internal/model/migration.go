@@ -18,6 +18,7 @@ var modelToMigrate = []any{
 	Category{},
 	CategorySub{},
 	Channel{},
+	Configuration{},
 	Video{},
 	VideoView{},
 	Task{},

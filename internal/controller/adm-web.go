@@ -28,18 +28,13 @@ func (c *Controller) AdmHome(g *gin.Context) {
 	c.datastore.Table("users").Count(&userCount)
 	c.datastore.Table("categories").Count(&categoryCount)
 
-	var tasks []model.Task
-	c.datastore.Limit(5).Order("created_at DESC").Find(&tasks)
-
-	g.HTML(http.StatusOK, "adm/home.html", gin.H{
-		"User":          g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "adm/home.html", gin.H{
 		"Build":         c.build,
 		"VideoCount":    videoCount,
 		"ActorCount":    actorCount,
 		"ChannelCount":  channelCount,
 		"UserCount":     userCount,
 		"CategoryCount": categoryCount,
-		"Tasks":         tasks,
 	})
 }
 
@@ -48,8 +43,7 @@ func (c *Controller) AdmVideoList(g *gin.Context) {
 
 	c.datastore.Find(&videos)
 
-	g.HTML(http.StatusOK, "adm/object-list.html", gin.H{
-		"User":       g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "adm/object-list.html", gin.H{
 		"ObjectName": "Video",
 		"Objects":    videos,
 	})
@@ -60,8 +54,7 @@ func (c *Controller) AdmActorList(g *gin.Context) {
 
 	c.datastore.Find(&actors)
 
-	g.HTML(http.StatusOK, "adm/object-list.html", gin.H{
-		"User":       g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "adm/object-list.html", gin.H{
 		"ObjectName": "Actor",
 		"Objects":    actors,
 	})
@@ -72,8 +65,7 @@ func (c *Controller) AdmChannelList(g *gin.Context) {
 
 	c.datastore.Find(&channels)
 
-	g.HTML(http.StatusOK, "adm/object-list.html", gin.H{
-		"User":       g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "adm/object-list.html", gin.H{
 		"ObjectName": "Channel",
 		"Objects":    channels,
 	})
@@ -95,8 +87,7 @@ func (c *Controller) AdmTaskView(g *gin.Context) {
 		return
 	}
 
-	g.HTML(http.StatusOK, "adm/task-view.html", gin.H{
-		"User": g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "adm/task-view.html", gin.H{
 		"Task": task,
 	})
 }
@@ -111,8 +102,7 @@ func (c *Controller) AdmTaskList(g *gin.Context) {
 		return
 	}
 
-	g.HTML(http.StatusOK, "adm/task-list.html", gin.H{
-		"User":  g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "adm/task-list.html", gin.H{
 		"Tasks": tasks,
 	})
 }
@@ -154,8 +144,7 @@ func (c *Controller) AdmUserList(g *gin.Context) {
 
 	c.datastore.Find(&users)
 
-	g.HTML(http.StatusOK, "adm/user-list.html", gin.H{
-		"User":    g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "adm/user-list.html", gin.H{
 		"Objects": users,
 	})
 }
@@ -203,8 +192,7 @@ func (c *Controller) AdmUserNew(g *gin.Context) {
 		}
 	}
 
-	g.HTML(http.StatusOK, "adm/user-new.html", gin.H{
-		"User":  g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "adm/user-new.html", gin.H{
 		"Error": err,
 	})
 }
@@ -247,8 +235,52 @@ func (c *Controller) AdmCategory(g *gin.Context) {
 		return
 	}
 
-	g.HTML(http.StatusOK, "adm/category.html", gin.H{
-		"User":       g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "adm/category.html", gin.H{
 		"Categories": categories,
 	})
+}
+
+func (c *Controller) AdmTaskHome(g *gin.Context) {
+	var tasks []model.Task
+	c.datastore.Limit(5).Order("created_at DESC").Find(&tasks)
+
+	c.HTML(g, http.StatusOK, "adm/task-home.html", gin.H{
+		"Tasks": tasks,
+	})
+}
+
+func (c *Controller) AdmConfigAuth(g *gin.Context) {
+	c.HTML(g, http.StatusOK, "adm/config-auth.html", gin.H{})
+}
+
+func (c *Controller) AdmConfigAuthUpdate(g *gin.Context) {
+	action := g.Param("action")
+	if action != "enable" && action != "disable" {
+		g.Redirect(http.StatusFound, "/adm/config/auth")
+		return
+	}
+
+	// loading configuration from database
+	dbconfig := &model.Configuration{}
+	result := c.datastore.First(dbconfig)
+
+	// check result
+	if result.RowsAffected < 1 {
+		c.HTML(g, http.StatusOK, "adm/config-auth.html", gin.H{
+			"error": errors.New("configuration not found"),
+		})
+		return
+	}
+
+	dbconfig.UserAuthentication = action == "enable"
+	err := c.datastore.Save(&dbconfig).Error
+	if result.RowsAffected < 1 {
+		c.HTML(g, http.StatusOK, "adm/config-auth.html", gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	c.ConfigurationFromDBApply(dbconfig)
+	g.Redirect(http.StatusFound, "/adm/config/auth")
 }

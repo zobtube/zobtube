@@ -11,9 +11,8 @@ import (
 func (c *Controller) CategoryList(g *gin.Context) {
 	var categories []model.Category
 	c.datastore.Preload("Sub").Find(&categories)
-	g.HTML(http.StatusOK, "category/list.html", gin.H{
+	c.HTML(g, http.StatusOK, "category/list.html", gin.H{
 		"Categories": categories,
-		"User":     g.MustGet("user").(*model.User),
 	})
 }
 
@@ -34,8 +33,7 @@ func (c *Controller) CategorySubView(g *gin.Context) {
 		return
 	}
 
-	g.HTML(http.StatusOK, "category/view.html", gin.H{
-		"User":    g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "category/view.html", gin.H{
 		"Sub": sub,
 	})
 }

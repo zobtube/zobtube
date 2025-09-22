@@ -603,8 +603,8 @@ func (c *Controller) VideoAjaxGet(g *gin.Context) {
 	}
 
 	g.JSON(200, gin.H{
-		"title": video.Name,
-		"actors": actors,
+		"title":      video.Name,
+		"actors":     actors,
 		"categories": categories,
 	})
 }

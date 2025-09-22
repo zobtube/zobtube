@@ -40,9 +40,8 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 		return
 	}
 
-	g.HTML(http.StatusOK, "video/edit.html", gin.H{
+	c.HTML(g, http.StatusOK, "video/edit.html", gin.H{
 		"Actors":     actors,
-		"User":       g.MustGet("user").(*model.User),
 		"Video":      video,
 		"Categories": categories,
 	})
@@ -51,9 +50,8 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 func (c *Controller) ClipList(g *gin.Context) {
 	var videos []model.Video
 	c.datastore.Where("type = ?", "c").Order("created_at desc").Preload(clause.Associations).Find(&videos)
-	g.HTML(http.StatusOK, "clip/list.html", gin.H{
+	c.HTML(g, http.StatusOK, "clip/list.html", gin.H{
 		"Type":   "clip",
-		"User":   g.MustGet("user").(*model.User),
 		"Videos": videos,
 	})
 }
@@ -61,9 +59,8 @@ func (c *Controller) ClipList(g *gin.Context) {
 func (c *Controller) MovieList(g *gin.Context) {
 	var videos []model.Video
 	c.datastore.Where("type = ?", "m").Order("created_at desc").Preload(clause.Associations).Find(&videos)
-	g.HTML(http.StatusOK, "movie/list.html", gin.H{
+	c.HTML(g, http.StatusOK, "movie/list.html", gin.H{
 		"Type":   "movie",
-		"User":   g.MustGet("user").(*model.User),
 		"Videos": videos,
 	})
 }
@@ -75,9 +72,8 @@ func (c *Controller) VideoList(g *gin.Context) {
 func (c *Controller) GenericVideoList(videoType string, g *gin.Context) {
 	var videos []model.Video
 	c.datastore.Where("type = ?", videoType[0:1]).Order("created_at desc").Find(&videos)
-	g.HTML(http.StatusOK, "video/list.html", gin.H{
+	c.HTML(g, http.StatusOK, "video/list.html", gin.H{
 		"Type":   videoType,
-		"User":   g.MustGet("user").(*model.User),
 		"Videos": videos,
 	})
 }
@@ -123,9 +119,8 @@ func (c *Controller) VideoView(g *gin.Context) {
 		}
 	}
 
-	g.HTML(http.StatusOK, "video/view.html", gin.H{
+	c.HTML(g, http.StatusOK, "video/view.html", gin.H{
 		"Type":       video.Type,
-		"User":       user,
 		"Video":      video,
 		"ViewCount":  viewCount,
 		"Categories": categories,
@@ -157,7 +152,7 @@ func (c *Controller) ClipView(g *gin.Context) {
 
 	// create clip random list
 	type ClipID struct {
-		ID string 
+		ID string
 	}
 
 	var clipIDs []ClipID
@@ -180,7 +175,7 @@ func (c *Controller) ClipView(g *gin.Context) {
 
 	// randomize it
 	for i := range clipList {
-		j := rand.Intn(i +1)
+		j := rand.Intn(i + 1)
 		clipList[i], clipList[j] = clipList[j], clipList[i]
 	}
 
@@ -188,7 +183,7 @@ func (c *Controller) ClipView(g *gin.Context) {
 	clipList = append([]string{id}, clipList...)
 
 	// render
-	g.HTML(http.StatusOK, "clip/view.html", gin.H{
+	c.HTML(g, http.StatusOK, "clip/view.html", gin.H{
 		"User":  user,
 		"Video": video,
 		"Clips": clipList,

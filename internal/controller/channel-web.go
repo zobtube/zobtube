@@ -13,9 +13,8 @@ import (
 func (c *Controller) ChannelList(g *gin.Context) {
 	var channels []model.Channel
 	c.datastore.Find(&channels)
-	g.HTML(http.StatusOK, "channel/list.html", gin.H{
+	c.HTML(g, http.StatusOK, "channel/list.html", gin.H{
 		"Channels": channels,
-		"User":     g.MustGet("user").(*model.User),
 	})
 }
 
@@ -39,8 +38,7 @@ func (c *Controller) ChannelCreate(g *gin.Context) {
 			}
 		}
 	}
-	g.HTML(http.StatusOK, "channel/create.html", gin.H{
-		"User":  g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "channel/create.html", gin.H{
 		"Error": err,
 	})
 }
@@ -65,8 +63,7 @@ func (c *Controller) ChannelView(g *gin.Context) {
 	var videos []model.Video
 	c.datastore.Where("channel_id = ?", channel.ID).Find(&videos)
 
-	g.HTML(http.StatusOK, "channel/view.html", gin.H{
-		"User":    g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "channel/view.html", gin.H{
 		"Channel": channel,
 		"Videos":  videos,
 	})
@@ -149,8 +146,7 @@ func (c *Controller) ChannelEdit(g *gin.Context) {
 		}
 	}
 
-	g.HTML(http.StatusOK, "channel/edit.html", gin.H{
-		"User":    g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "channel/edit.html", gin.H{
 		"Channel": channel,
 	})
 }

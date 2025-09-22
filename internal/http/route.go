@@ -1,23 +1,10 @@
 package http
 
 import (
-	"io/fs"
-	"net/http"
-
 	"github.com/zobtube/zobtube/internal/controller"
 )
 
 func (s *Server) setupRoutes(c controller.AbtractController) {
-	// load templates
-	s.LoadHTMLFromEmbedFS("web/page/**/*")
-
-	// prepare subfs
-	staticFS, _ := fs.Sub(s.FS, "web/static")
-
-	// load static
-	s.Router.StaticFS("/static", http.FS(staticFS))
-	s.Router.GET("/ping", livenessProbe)
-
 	// authentication
 	auth := s.Router.Group("/auth")
 	auth.GET("", c.AuthPage)
@@ -140,6 +127,9 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	admGroup.GET("/adm/actors", c.AdmActorList)
 	admGroup.GET("/adm/categories", c.AdmCategory)
 	admGroup.GET("/adm/channels", c.AdmChannelList)
+	admGroup.GET("/adm/config/auth", c.AdmConfigAuth)
+	admGroup.GET("/adm/config/auth/:action", c.AdmConfigAuthUpdate)
+	admGroup.GET("/adm/task/home", c.AdmTaskHome)
 	admGroup.GET("/adm/tasks", c.AdmTaskList)
 	admGroup.GET("/adm/task/:id", c.AdmTaskView)
 	admGroup.GET("/adm/users", c.AdmUserList)

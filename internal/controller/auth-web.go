@@ -8,6 +8,11 @@ import (
 )
 
 func (c *Controller) AuthPage(g *gin.Context) {
+	if !c.config.Authentication {
+		g.Redirect(http.StatusFound, "/")
+		return
+	}
+
 	_, err := g.Cookie(cookieName)
 	if err != nil {
 		c.createSession(g)

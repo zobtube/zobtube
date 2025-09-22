@@ -39,8 +39,8 @@ func (a *Actor) BeforeCreate(tx *gorm.DB) error {
 }
 
 var sexTypesAsString = map[string]string{
-	"m": "male",
-	"f": "female",
+	"m":  "male",
+	"f":  "female",
 	"tw": "trans-women",
 }
 

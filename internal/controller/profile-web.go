@@ -74,8 +74,7 @@ func (c *Controller) ProfileView(g *gin.Context) {
 	}
 
 	// render page
-	g.HTML(http.StatusOK, "profile/view.html", gin.H{
-		"User":       user,
+	c.HTML(g, http.StatusOK, "profile/view.html", gin.H{
 		"VideoViews": videoViewsTop,
 		"ActorViews": actorViews,
 	})

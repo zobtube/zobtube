@@ -6,6 +6,13 @@
 <hr />
 
 <div class="row">
+  {{ if not .AuthenticationEnabled }}
+  <div class="col-md-12">
+    <div class="alert alert-warning" role="alert">
+      As user authentication is not enabled, no user except the default one will be usable.
+    </div>
+  </div>
+  {{ end }}
   <div class="col-md-12">
     <h2>User list <a href="/adm/user"><i class="fas fa-plus-circle"></i></a></h2>
     <table class="table table-striped table-hover" style="margin-top: 50px;">

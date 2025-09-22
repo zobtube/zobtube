@@ -14,6 +14,28 @@ const cookieName = "zt_auth"
 
 func UserIsAuthenticated(c controller.AbtractController) gin.HandlerFunc {
 	return func(g *gin.Context) {
+		if !c.AuthenticationEnabled() {
+			// get user
+			user := &model.User{}
+			result := c.GetFirstUser(user)
+			if result.RowsAffected < 1 {
+				// something bad happened
+				// most likely someone deleted the last user
+				// restart the application to re-create the default user
+				c.Restart()
+				g.Redirect(http.StatusFound, "/")
+				g.Abort()
+				return
+			}
+
+			// set meta in context
+			g.Set("user", user)
+
+			// all good, exiting middleware
+			g.Next()
+			return
+		}
+
 		cookie, err := g.Cookie(cookieName)
 		if err != nil {
 			// cookie not set

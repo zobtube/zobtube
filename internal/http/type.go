@@ -4,40 +4,54 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/zobtube/zobtube/internal/controller"
+	"github.com/rs/zerolog"
 )
 
 type Server struct {
-	Server *http.Server
-	Router *gin.Engine
-	FS     *embed.FS
+	Server         *http.Server
+	Router         *gin.Engine
+	FS             *embed.FS
+	Logger         *zerolog.Logger
+	authentication bool
 }
 
-// main http server setup
-func New(c *controller.AbtractController, fs *embed.FS) (*Server, error) {
-	server := &Server{
-		Router: gin.Default(),
-		FS:     fs,
+func New(embedfs *embed.FS, ginDebug bool, logger *zerolog.Logger) *Server {
+	// only show gin debugging if ginDebug is set to true
+	if ginDebug {
+		logger.Warn().Msg("gin debugging mode activated")
+	} else {
+		gin.SetMode(gin.ReleaseMode)
 	}
 
-	server.setupRoutes(*c)
-	// both next settings are needed for filepath used above
-	server.Router.UseRawPath = true
-	server.Router.UnescapePathValues = false
-	server.Router.RemoveExtraSlash = false
-
-	return server, nil
-}
-
-// failsafe http server setup - no valid config found
-func NewFailsafeConfig(c controller.AbtractController, embedfs *embed.FS) (*Server, error) {
+	// create common server
 	server := &Server{
-		Router: gin.Default(),
-		FS:     embedfs,
+		Router:         gin.New(),
+		FS:             embedfs,
+		Logger:         logger,
+		authentication: false,
 	}
+
+	// add recovery middleware
+	server.Router.Use(gin.Recovery())
+
+	// setup logger
+	server.Router.Use(func(c *gin.Context) {
+		start := time.Now()
+		c.Next()
+		end := time.Now()
+		latency := end.Sub(start)
+
+		logger.Info().
+			Str("method", c.Request.Method).
+			Str("path", c.Request.RequestURI).
+			Int("status", c.Writer.Status()).
+			Str("ip", c.ClientIP()).
+			Dur("latency", latency).
+			Msg("http request")
+	})
 
 	// load templates
 	server.LoadHTMLFromEmbedFS("web/page/**/*")
@@ -49,69 +63,5 @@ func NewFailsafeConfig(c controller.AbtractController, embedfs *embed.FS) (*Serv
 	server.Router.StaticFS("/static", http.FS(staticFS))
 	server.Router.GET("/ping", livenessProbe)
 
-	// failsafe configuration route
-	server.Router.GET("", c.FailsafeConfiguration)
-	server.Router.POST("", c.FailsafeConfiguration)
-
-	// add rerouting for other requests
-	server.Router.NoRoute(func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/")
-	})
-
-	return server, nil
-}
-
-// failsafe http server setup - unexpected error
-func NewUnexpectedError(c controller.AbtractController, embedfs *embed.FS, faultyError error) (*Server, error) {
-	server := &Server{
-		Router: gin.Default(),
-		FS:     embedfs,
-	}
-
-	// load templates
-	server.LoadHTMLFromEmbedFS("web/page/**/*")
-
-	// prepare subfs
-	staticFS, _ := fs.Sub(server.FS, "web/static")
-
-	// load static
-	server.Router.StaticFS("/static", http.FS(staticFS))
-	server.Router.GET("/ping", livenessProbe)
-
-	server.Router.GET("", func(g *gin.Context) {
-		g.HTML(http.StatusOK, "failsafe/error.html", gin.H{
-			"Error": faultyError,
-		})
-	})
-
-	return server, nil
-}
-
-// failsafe http server setup - no valid config found
-func NewFailsafeUser(c controller.AbtractController, embedfs *embed.FS) (*Server, error) {
-	server := &Server{
-		Router: gin.Default(),
-		FS:     embedfs,
-	}
-
-	// load templates
-	server.LoadHTMLFromEmbedFS("web/page/**/*")
-
-	// prepare subfs
-	staticFS, _ := fs.Sub(server.FS, "web/static")
-
-	// load static
-	server.Router.StaticFS("/static", http.FS(staticFS))
-	server.Router.GET("/ping", livenessProbe)
-
-	// failsafe configuration route
-	server.Router.GET("", c.FailsafeUser)
-	server.Router.POST("", c.FailsafeUser)
-
-	// add rerouting for other requests
-	server.Router.NoRoute(func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/")
-	})
-
-	return server, nil
+	return server
 }

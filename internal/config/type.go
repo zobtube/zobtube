@@ -2,67 +2,49 @@ package config
 
 import (
 	"errors"
-	"os"
 
-	"github.com/kelseyhightower/envconfig"
-	"gopkg.in/yaml.v3"
+	"github.com/rs/zerolog"
 )
-
-var ErrNoDbDriverSet = errors.New("ZT_DB_DRIVER is not set")
-var ErrNoDbConnStringSet = errors.New("ZT_DB_CONNSTRING is not set")
-var ErrNoMediaPathSet = errors.New("ZT_MEDIA_PATH is not set")
 
 type Config struct {
 	Server struct {
-		Bind string `yaml:"bind" envconfig:"ZT_SERVER_BIND"`
+		Bind string
 	}
 	DB struct {
-		Driver     string `yaml:"driver" envconfig:"ZT_DB_DRIVER"`
-		Connstring string `yaml:"connstring" envconfig:"ZT_DB_CONNSTRING"`
-	} `yaml:"db"`
+		Driver     string
+		Connstring string
+	}
 	Media struct {
-		Path string `yaml:"path" envconfig:"ZT_MEDIA_PATH"`
-	} `yaml:"media"`
+		Path string
+	}
+	Authentication bool
 }
 
-func New(configPath string) (*Config, error) {
+func New(logger *zerolog.Logger, serverBind, dbDriver, dbConnstring, mediaPath string) (*Config, error) {
 	cfg := &Config{}
-
-	if _, err := os.Stat(configPath); err == nil {
-		f, err := os.Open(configPath)
-		if err != nil {
-			return cfg, err
-		}
-		defer f.Close()
-
-		decoder := yaml.NewDecoder(f)
-		err = decoder.Decode(cfg)
-		if err != nil {
-			return cfg, err
-		}
-	}
-
-	err := envconfig.Process("zt", cfg)
-	if err != nil {
-		return cfg, err
-	}
+	cfg.Server.Bind = serverBind
+	cfg.DB.Driver = dbDriver
+	cfg.DB.Connstring = dbConnstring
+	cfg.Media.Path = mediaPath
 
 	// pre flight checks
 	if cfg.DB.Driver == "" {
-		return cfg, ErrNoDbDriverSet
+		return cfg, errors.New("ZT_DB_DRIVER is not set")
 	}
 
 	if cfg.DB.Connstring == "" {
-		return cfg, ErrNoDbConnStringSet
+		return cfg, errors.New("ZT_DB_CONNSTRING is not set")
 	}
 
 	if cfg.Media.Path == "" {
-		return cfg, ErrNoMediaPathSet
+		return cfg, errors.New("ZT_MEDIA_PATH is not set")
 	}
 
-	if cfg.Server.Bind == "" {
-		cfg.Server.Bind = "127.0.0.1:8069"
-	}
+	logger.Info().
+		Str("db-driver", cfg.DB.Driver).
+		Str("server-bind", cfg.Server.Bind).
+		Str("media-path", cfg.Media.Path).
+		Msg("valid configuration found")
 
 	return cfg, nil
 }

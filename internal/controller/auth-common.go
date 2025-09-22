@@ -34,3 +34,11 @@ func (c *Controller) GetSession(session *model.UserSession) *gorm.DB {
 func (c *Controller) GetUser(user *model.User) *gorm.DB {
 	return c.datastore.First(user)
 }
+
+func (c *Controller) GetFirstUser(user *model.User) *gorm.DB {
+	return c.datastore.Order("created_at").First(user)
+}
+
+func (c *Controller) AuthenticationEnabled() bool {
+	return c.config.Authentication
+}

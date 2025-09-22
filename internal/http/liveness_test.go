@@ -4,9 +4,14 @@ import (
 	"embed"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
+	"time"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/zobtube/zobtube/internal/controller"
 	httpServer "github.com/zobtube/zobtube/internal/http"
 )
@@ -15,35 +20,11 @@ import (
 var embedFS embed.FS
 
 func TestPingRoute(t *testing.T) {
+	var logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 	var c chan int
 	cont := controller.New(c)
-	server, _ := httpServer.New(&cont, &embedFS)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/ping", nil)
-	server.Router.ServeHTTP(w, req)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "alive", w.Body.String())
-}
-
-func TestFailsafeConfigPingRoute(t *testing.T) {
-	var c chan int
-	cont := controller.New(c)
-	server, _ := httpServer.NewFailsafeConfig(cont, &embedFS)
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/ping", nil)
-	server.Router.ServeHTTP(w, req)
-
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "alive", w.Body.String())
-}
-
-func TestFailsafeUserPingRoute(t *testing.T) {
-	var c chan int
-	cont := controller.New(c)
-	server, _ := httpServer.NewFailsafeUser(cont, &embedFS)
+	server := httpServer.New(&embedFS, false, &logger)
+	server.ControllerSetupDefault(&cont)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/ping", nil)
@@ -54,9 +35,11 @@ func TestFailsafeUserPingRoute(t *testing.T) {
 }
 
 func TestFailsafeUnexpectedErrorPingRoute(t *testing.T) {
+	var logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 	var c chan int
 	cont := controller.New(c)
-	server, _ := httpServer.NewUnexpectedError(cont, &embedFS, nil)
+	server := httpServer.New(&embedFS, false, &logger)
+	server.ControllerSetupFailsafeError(cont, nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/ping", nil)

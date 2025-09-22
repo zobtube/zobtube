@@ -14,9 +14,8 @@ import (
 func (c *Controller) ActorList(g *gin.Context) {
 	var actors []model.Actor
 	c.datastore.Find(&actors).Limit(30).Offset(0).Order("created_at")
-	g.HTML(http.StatusOK, "actor/list.html", gin.H{
+	c.HTML(g, http.StatusOK, "actor/list.html", gin.H{
 		"Actors": actors,
-		"User":   g.MustGet("user").(*model.User),
 	})
 }
 
@@ -42,8 +41,8 @@ func (c *Controller) ActorNew(g *gin.Context) {
 			}
 		}
 	}
-	g.HTML(http.StatusOK, "actor/create.html", gin.H{
-		"User":  g.MustGet("user").(*model.User),
+
+	c.HTML(g, http.StatusOK, "actor/create.html", gin.H{
 		"Error": err,
 	})
 }
@@ -65,8 +64,7 @@ func (c *Controller) ActorView(g *gin.Context) {
 		return
 	}
 
-	g.HTML(http.StatusOK, "actor/view.html", gin.H{
-		"User":  g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "actor/view.html", gin.H{
 		"Actor": actor,
 	})
 }
@@ -98,8 +96,7 @@ func (c *Controller) ActorEdit(g *gin.Context) {
 		return
 	}
 
-	g.HTML(http.StatusOK, "actor/edit.html", gin.H{
-		"User":       g.MustGet("user").(*model.User),
+	c.HTML(g, http.StatusOK, "actor/edit.html", gin.H{
 		"Actor":      actor,
 		"Providers":  c.providers,
 		"Categories": categories,

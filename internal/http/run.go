@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,6 +10,7 @@ import (
 )
 
 func (s *Server) Start(bindAddress string) {
+	s.Logger.Info().Str("kind", "system").Str("bind", bindAddress).Msg("http server binding")
 	s.Server = &http.Server{
 		Addr:    bindAddress,
 		Handler: s.Router.Handler(),
@@ -23,7 +23,7 @@ func (s *Server) Start(bindAddress string) {
 
 func (s *Server) WaitForStopSignal(c <-chan int) {
 	mode := <-c
-	fmt.Println("http server signal received!", mode)
+	s.Logger.Warn().Str("kind", "system").Int("signal", mode).Msg("http server signal received")
 
 	// shutdown http server
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
@@ -33,9 +33,9 @@ func (s *Server) WaitForStopSignal(c <-chan int) {
 	// mode: 1 - shutdown | 2 - restart
 	switch mode {
 	case 1:
-		fmt.Println("server shutdown")
+		s.Logger.Warn().Str("kind", "system").Msg("server shutdown requested")
 	case 2:
-		log.Println("server restart")
+		s.Logger.Warn().Str("kind", "system").Msg("server restart requested")
 		cmd := exec.Command(os.Args[0])
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout

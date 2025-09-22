@@ -1,5 +1,6 @@
 test_data
 zt.db
+zobtube.sqlite
 tmp/*
 dist/
 config.yml

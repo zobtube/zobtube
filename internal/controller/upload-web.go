@@ -9,9 +9,7 @@ import (
 )
 
 func (c *Controller) UploadTriage(g *gin.Context) {
-	g.HTML(http.StatusOK, "upload/home.html", gin.H{
-		"User": g.MustGet("user").(*model.User),
-	})
+	c.HTML(g, http.StatusOK, "upload/home.html", gin.H{})
 }
 
 type UploadImportForm struct {

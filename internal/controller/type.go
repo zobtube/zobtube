@@ -2,12 +2,13 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
+	"gorm.io/gorm"
+
 	"github.com/zobtube/zobtube/internal/config"
 	"github.com/zobtube/zobtube/internal/model"
 	"github.com/zobtube/zobtube/internal/provider"
 	"github.com/zobtube/zobtube/internal/runner"
-
-	"gorm.io/gorm"
 )
 
 type AbtractController interface {
@@ -17,6 +18,9 @@ type AbtractController interface {
 	AdmActorList(*gin.Context)
 	AdmChannelList(*gin.Context)
 	AdmCategory(*gin.Context)
+	AdmConfigAuth(*gin.Context)
+	AdmConfigAuthUpdate(*gin.Context)
+	AdmTaskHome(*gin.Context)
 	AdmTaskList(*gin.Context)
 	AdmTaskRetry(*gin.Context)
 	AdmTaskView(*gin.Context)
@@ -28,11 +32,13 @@ type AbtractController interface {
 	Home(*gin.Context)
 
 	// Auth
+	AuthenticationEnabled() bool
 	AuthPage(*gin.Context)
 	AuthLogin(*gin.Context)
 	AuthLogout(*gin.Context)
 	GetSession(*model.UserSession) *gorm.DB
 	GetUser(*model.User) *gorm.DB
+	GetFirstUser(*model.User) *gorm.DB
 
 	// Actors
 	ActorAjaxCategories(*gin.Context)
@@ -115,26 +121,26 @@ type AbtractController interface {
 	ProviderRegister(provider.Provider)
 	ProviderGet(string) (provider.Provider, error)
 
+	// Profile
+	ProfileView(*gin.Context)
+
 	// Error pages
 	ErrUnauthorized(*gin.Context)
 
 	// Init
+	LoggerRegister(*zerolog.Logger)
 	ConfigurationRegister(*config.Config)
 	DatabaseRegister(*gorm.DB)
 	RunnerRegister(*runner.Runner)
+	ConfigurationFromDBApply(*model.Configuration)
+	BuildDetailsRegister(string, string, string)
 
 	// Cleanup
 	CleanupRoutine()
 
-	// Profile
-	ProfileView(*gin.Context)
-
-	// Failsafe
-	FailsafeConfiguration(*gin.Context)
-	FailsafeUser(*gin.Context)
-
-	// Build
-	BuildDetailsRegister(string, string, string)
+	// Maintenance
+	Restart()
+	Shutdown()
 }
 
 type buildDetails struct {
@@ -150,6 +156,7 @@ type Controller struct {
 	shutdownChannel chan<- int
 	runner          *runner.Runner
 	build           *buildDetails
+	logger          *zerolog.Logger
 }
 
 func New(shutdownChannel chan int) AbtractController {
@@ -169,6 +176,14 @@ func (c *Controller) DatabaseRegister(db *gorm.DB) {
 
 func (c *Controller) RunnerRegister(r *runner.Runner) {
 	c.runner = r
+}
+
+func (c *Controller) ConfigurationFromDBApply(db *model.Configuration) {
+	c.logger.Info().Str("kind", "system").Bool("authentication", db.UserAuthentication).Send()
+	c.config.Authentication = db.UserAuthentication
+}
+func (c *Controller) LoggerRegister(logger *zerolog.Logger) {
+	c.logger = logger
 }
 
 func (c *Controller) BuildDetailsRegister(version, commit, buildDate string) {
