@@ -22,11 +22,11 @@ func (c *Controller) AdmHome(g *gin.Context) {
 		categoryCount int64
 	)
 
-	c.datastore.Table("videos").Count(&videoCount)
-	c.datastore.Table("actors").Count(&actorCount)
-	c.datastore.Table("channels").Count(&channelCount)
-	c.datastore.Table("users").Count(&userCount)
-	c.datastore.Table("categories").Count(&categoryCount)
+	c.datastore.Table("videos").Where("deleted_at is null").Count(&videoCount)
+	c.datastore.Table("actors").Where("deleted_at is null").Count(&actorCount)
+	c.datastore.Table("channels").Where("deleted_at is null").Count(&channelCount)
+	c.datastore.Table("users").Where("deleted_at is null").Count(&userCount)
+	c.datastore.Table("categories").Where("deleted_at is null").Count(&categoryCount)
 
 	c.HTML(g, http.StatusOK, "adm/home.html", gin.H{
 		"Build":         c.build,
