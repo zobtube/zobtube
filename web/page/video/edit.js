@@ -6,276 +6,11 @@
 const video_id = '{{ .Video.ID }}';
 const url_video_actor_edit = '/api/video/{{ .Video.ID }}/actor/00000000-0000-0000-0000-000000000000';
 const url_video_category_edit = '/api/video/{{ .Video.ID }}/category/00000000-0000-0000-0000-000000000000';
-
-/*
-    'aliases': [
-      {% for alias in actor.alias %}
-      '{% alias.name %}',
-      {% endfor %}
-    ],
-*/
-
-// store all actors at start
-var actors_all = {
-  {{ range $actor := .Actors }}
-  '{{ $actor.ID }}': {
-    'name': '{{ $actor.Name }}',
-    'aliases': [],
-  },
-  {{ end }}
-};
-
-// store all actors in the video at start
-var actors_in_video = {
-  {{ range $actor := .Video.Actors }}
-  '{{ $actor.ID }}': undefined,
-  {{ end }}
-};
-
-// store all categories at start
-var categories_all = {
-  {{ range $category := .Categories }}
-  {{ range $sub:= $category.Sub }}
-  '{{ $sub.ID }}': {
-    'name': '{{ $sub.Name }}',
-  },
-  {{ end }}
-  {{ end }}
-};
-
-// store all categories in the video at start
-var categories_in_video = {
-  {{ range $sub := .Video.Categories }}
-  '{{ $sub.ID }}': undefined,
-  {{ end }}
-};
-
-
 /* -- end globals set at boot -- */
 
 // globals
 var bootstrap = true;
 var actors_complete;
-
-/* videoAddActorInVideo - FilterPresentActors */
-function videoAddActorInVideoFilterPresentActors() {
-  console.log('update actors presents in video');
-  // actors presents in the video
-  var actors_chips = document.getElementsByClassName('video-actor-list');
-  for (const actor_chip of actors_chips) {
-    actor_id = actor_chip.getAttribute('actor-id');
-    if (actor_id in actors_in_video) {
-      actor_chip.style.display = '';
-    } else {
-      actor_chip.style.display = 'none';
-    }
-  }
-
-  // actors available for actor add/removal modal
-  var actors_chips = document.getElementsByClassName('add-actor-list');
-  for (const actor_chip of actors_chips) {
-    actor_id = actor_chip.getAttribute('actor-id');
-    if (actor_id in actors_in_video) {
-      actor_chip.querySelector('.btn-success').style.display = 'none';
-      actor_chip.querySelector('.btn-danger').style.display = '';
-    } else {
-      actor_chip.querySelector('.btn-success').style.display = '';
-      actor_chip.querySelector('.btn-danger').style.display = 'none';
-    }
-  }
-}
-
-/* videoAddActorInVideo - FilterPresentActors */
-function videoAddActorInVideoFilterActorsFromInput(filter = '') {
-  var re = new RegExp(filter, 'i');
-  var actors_chips = document.getElementsByClassName('add-actor-list');
-  found_count = 0;
-  found_count_max = 15;
-  for (const actor_chip of actors_chips) {
-    actor_id = actor_chip.getAttribute('actor-id');
-    found = re.test(actors_all[actor_id]['name']);
-    if (found) {
-      found_count++;
-    } else {
-      for (const a of actors_all[actor_id]['aliases']) {
-        if (re.test(a)) {
-          found = true;
-          found_count++;
-          break;
-        }
-      }
-    }
-    if (found && found_count < found_count_max) {
-      actor_chip.style.display = 'none';
-      actor_chip.style.display = '';
-    } else {
-      actor_chip.style.display = '';
-      actor_chip.style.display = 'none';
-    }
-  }
-}
-
-function videoUpdateCategoryStatus() {
-  console.log('update categories presents in video');
-  // categories presents in the video
-  var categoriess_chips = document.getElementsByClassName('video-category-list');
-  for (const category_chip of categoriess_chips) {
-    category_id = category_chip.getAttribute('category-id');
-    if (category_id in categories_in_video) {
-      category_chip.style.display = '';
-    } else {
-      category_chip.style.display = 'none';
-    }
-  }
-
-  // categories available for category add/removal modal
-  var categories_chips = document.getElementsByClassName('add-category-list');
-  for (const category_chip of categories_chips) {
-    category_id = category_chip.getAttribute('category-id');
-    if (category_id in categories_in_video) {
-      category_chip.querySelector('.btn-success').style.display = 'none';
-      category_chip.querySelector('.btn-danger').style.display = '';
-    } else {
-      category_chip.querySelector('.btn-success').style.display = '';
-      category_chip.querySelector('.btn-danger').style.display = 'none';
-    }
-  }
-}
-
-/* videoRemoveActor */
-function videoRemoveActor(actor_id) {
-  console.log('remove actor '+actor_id+' from video '+video_id);
-  url = url_video_actor_edit.replace('00000000-0000-0000-0000-000000000000', actor_id);
-  $.ajax(url, {
-    method: 'DELETE',
-
-    xhr: function () {
-      var xhr = new XMLHttpRequest();
-      return xhr;
-    },
-
-    success: function (res) {
-      console.debug('success, got', res);
-      sendToast('Actor removed', '', 'bg-success', actors_all[actor_id]['name']+' removed.');
-      delete actors_in_video[actor_id];
-      videoAddActorInVideoFilterPresentActors();
-    },
-
-    error: function () {
-      console.debug('failed');
-      sendToast('Actor not removed', '', 'bg-danger', actors_all[actor_id]['name']+' not removed, call failed.');
-    },
-
-    complete: function () {
-    },
-  });
-}
-
-function videoAddActor(actor_id) {
-  console.log('add actor '+actor_id+' in video '+video_id);
-  url = url_video_actor_edit.replace('00000000-0000-0000-0000-000000000000', actor_id);
-  $.ajax(url, {
-    method: 'PUT',
-
-    xhr: function () {
-      var xhr = new XMLHttpRequest();
-      return xhr;
-    },
-
-    success: function (res) {
-      console.debug('success, got', res);
-      sendToast('Actor added', '', 'bg-success', actors_all[actor_id]['name']+' added.');
-      actors_in_video[actor_id] = undefined;
-      videoAddActorInVideoFilterPresentActors();
-    },
-
-    error: function () {
-      console.debug('failed');
-      sendToast('Actor not added', '', 'bg-danger', actors_all[actor_id]['name']+' not added, call failed.');
-    },
-
-    complete: function () {
-    },
-  });
-}
-
-function videoAddCategory(category_id) {
-  console.log('add category'+category_id+' in video '+video_id);
-  url = url_video_category_edit.replace('00000000-0000-0000-0000-000000000000', category_id);
-  $.ajax(url, {
-    method: 'PUT',
-
-    xhr: function () {
-      var xhr = new XMLHttpRequest();
-      return xhr;
-    },
-
-    success: function (res) {
-      console.debug('success, got', res);
-      sendToast('Category added', '', 'bg-success', categories_all[category_id]['name']+' added.');
-      categories_in_video[category_id] = undefined;
-      videoUpdateCategoryStatus();
-    },
-
-    error: function () {
-      console.debug('failed');
-      sendToast('Category not added', '', 'bg-danger', categories_all[category_id]['name']+' not added, call failed.');
-    },
-  });
-}
-
-function videoRemoveCategory(category_id) {
-  console.log('remove category '+category_id+' from video '+video_id);
-  url = url_video_category_edit.replace('00000000-0000-0000-0000-000000000000', category_id);
-  $.ajax(url, {
-    method: 'DELETE',
-
-    xhr: function () {
-      var xhr = new XMLHttpRequest();
-      return xhr;
-    },
-
-    success: function (res) {
-      console.debug('success, got', res);
-      sendToast('Category removed', '', 'bg-success', categories_all[category_id]['name']+' removed.');
-      delete categories_in_video[category_id];
-      videoUpdateCategoryStatus();
-    },
-
-    error: function () {
-      console.debug('failed');
-      sendToast('Category not removed', '', 'bg-danger', categories_all[category_id]['name']+' not removed, call failed.');
-    },
-  });
-}
-
-/* filter actor modal */
-function actorInputUpdate(e) {
-  videoAddActorInVideoFilterActorsFromInput(e.target.value);
-}
-
-function updateActorEntries(filter = '') {
-  var content = '';
-  var re = new RegExp(filter, 'i');
-  var alreaySelectedEntries = $('#actors')[0].value.split(',');
-  for (actor in actors_complete['name']) {
-    if (!re.test(actor)) {
-      continue;
-    }
-
-    if (alreaySelectedEntries.includes(actors_complete['name'][actor])) {
-      continue;
-    }
-
-    content += '<div class="cs-entry" onClick="addEntry(\''+actor+'\')">'+actor+'</div>';
-  }
-  $(".cs-dataset").html(content)
-  if (filter == '') {
-    $(".cs-menu").hide();
-  } else {
-    $(".cs-menu").show();
-  }
-}
 
 function generateThumbnail(video_id) {
   url = "/api/video/00000000-0000-0000-0000-000000000000/generate-thumbnail/00:00:00";
@@ -462,16 +197,6 @@ function video_channel_send() {
 }
 
 window.onload = function() {
-  // toggle right button in modal
-  videoAddActorInVideoFilterPresentActors();
-
-  // toggle correct status for categories
-  videoUpdateCategoryStatus();
-
-  // add event on modal input
-  document.getElementById('addActorInput').addEventListener('input', actorInputUpdate);
-  videoAddActorInVideoFilterActorsFromInput('');
-
   // for thumbnail generation
   video = document.getElementById("video")
   video.addEventListener(
@@ -484,5 +209,120 @@ window.onload = function() {
   document.modalChannelEdit = document.getElementById("editChannelModal");
   document.modalChannelEditModal = new bootstrap.Modal(document.modalChannelEdit);
 }
+
+//
+// actor selection
+//
+{{ template "shards/actor-selection/main.js" . }}
+
+async function videoEditActorAdd(actor_id) {
+  console.log('add actor '+actor_id+' in video '+video_id);
+  url = url_video_actor_edit.replace('00000000-0000-0000-0000-000000000000', actor_id);
+  try {
+    var res = await ajax(url, 'PUT');
+    sendToast('Actor added', '', 'bg-success', this.actorSelectable[actor_id]['name']+' added.');
+  } catch(e) {
+    console.debug(e);
+    sendToast('Actor not added', '', 'bg-danger', this.actorSelectable[actor_id]['name']+' not added, call failed.');
+  }
+}
+
+async function videoEditActorRemove(actor_id) {
+  console.log('remove actor '+actor_id+' from video '+video_id);
+  url = url_video_actor_edit.replace('00000000-0000-0000-0000-000000000000', actor_id);
+  try {
+    var res = await ajax(url, 'DELETE');
+    sendToast('Actor removed', '', 'bg-success', this.actorSelectable[actor_id]['name']+' removed.');
+  } catch(e) {
+    console.debug(e);
+    sendToast('Actor not removed', '', 'bg-danger', this.actorSelectable[actor_id]['name']+' not removed, call failed.');
+  }
+}
+
+window.zt.onload.unshift(function videoEditActorSelectableConfiguration() {
+  // all actors
+  window.zt.actorSelection.actorSelectable = {
+    {{ range $actor := .Actors }}
+    '{{ $actor.ID }}': {
+      'name': '{{ $actor.Name }}',
+      'aliases': [],
+    },
+    {{ end }}
+  };
+
+  // add actors in video
+  window.zt.actorSelection.actorSelected = {
+    {{ range $actor := .Video.Actors }}
+    '{{ $actor.ID }}': undefined,
+    {{ end }}
+  };
+
+  // call api on actor add
+  window.zt.actorSelection.onActorSelectBefore = videoEditActorAdd;
+
+  // call api on actor removal
+  window.zt.actorSelection.onActorDeselectBefore = videoEditActorRemove;
+});
+//
+// actor selection end
+//
+
+//
+// category selection
+//
+{{ template "shards/category-selection/main.js" . }}
+
+async function videoEditCategoryAdd(category_id) {
+  console.log('add category'+category_id+' in video '+video_id);
+  url = url_video_category_edit.replace('00000000-0000-0000-0000-000000000000', category_id);
+  try {
+    var res = await ajax(url, 'PUT');
+    sendToast('Category added', '', 'bg-success', this.categorySelectable[category_id]['name']+' added.');
+  } catch(e) {
+    console.debug(e);
+    sendToast('Category not added', '', 'bg-danger', this.categorySelectable[category_id]['name']+' not added, call failed.');
+  }
+}
+
+async function videoEditCategoryRemove(category_id) {
+  console.log('remove category '+category_id+' from video '+video_id);
+  url = url_video_category_edit.replace('00000000-0000-0000-0000-000000000000', category_id);
+  try {
+    var res = await ajax(url, 'DELETE');
+    sendToast('Category removed', '', 'bg-success', this.categorySelectable[category_id]['name']+' removed.');
+  } catch(e) {
+    console.debug(e);
+    sendToast('Category not removed', '', 'bg-danger', this.cateogrySelectable[category_id]['name']+' not removed, call failed.');
+  }
+}
+
+window.zt.onload.unshift(function videoEditCategorySelectableConfiguration() {
+  // store all categories at start
+  window.zt.categorySelection.categorySelectable = {
+    {{ range $category := .Categories }}
+    {{ range $sub:= $category.Sub }}
+    '{{ $sub.ID }}': {
+      'name': '{{ $sub.Name }}',
+    },
+    {{ end }}
+    {{ end }}
+  };
+
+// store all categories in the video at start
+  window.zt.categorySelection.categorySelected = {
+    {{ range $sub := .Video.Categories }}
+    '{{ $sub.ID }}': undefined,
+    {{ end }}
+  };
+
+  // call api on actor add
+  window.zt.categorySelection.onCategorySelectBefore = videoEditCategoryAdd;
+
+  // call api on actor removal
+  window.zt.categorySelection.onCategoryDeselectBefore = videoEditCategoryRemove;
+});
+//
+// category selection end
+//
 
 {{ end }}

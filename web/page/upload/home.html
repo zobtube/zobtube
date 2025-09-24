@@ -26,6 +26,10 @@ code {
   color: #684900;
   background-color: #fffbda;
 }
+.checks {
+  color: grey;
+  cursor: pointer;
+}
 </style>
 
 <!-- header -->
@@ -33,7 +37,8 @@ code {
   <h4>Upload and triage folder</h4>
   <div>
     <button class="btn btn-outline-success" onclick="clickInputButton()">Upload file</button>
-    <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#newFolderModal">New folder</button>
+    <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#newFolderModal">New folder</button>
+    <button class="btn btn-outline-success disabled" id="button-mass-action" onclick="showMassActionModal();">Mass action</button>
   </div>
 </div>
 <hr />
@@ -48,11 +53,13 @@ code {
     <table class="table triage-listing-table">
       <colgroup>
         <col style="width:2%;">
-        <col style="width:73%;">
+        <col style="width:2%;">
+        <col style="width:71%;">
         <col style="width:15%;">
         <col style="width:10%;">
       </colgroup>
       <thead>
+        <th><i id="selectAllTick" class="far fa-square checks" onclick="multiSelectToggle();"></i></th>
         <th colspan="2">Name</th>
         <th>Last modified</th>
         <th>Size</th>
@@ -82,6 +89,87 @@ code {
     ...
   </div>
 </div>
+
+<!-- mass action modal -->
+<div class="modal modal-lg fade" tabindex="-1" id="mass-action-details">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Mass action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="mass-action-details-content">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Path</th>
+              <th scope="col">Type</th>
+            </tr>
+          </thead>
+          <tbody id="mass-action-item-list">
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <div style="justify-content: flex-end;">
+          <button type="button" class="btn btn-primary" onclick="showMassImportModal()">Import</button>
+          <button type="button" class="btn btn-danger" onclick="massDelete()">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- mass import modal -->
+<div class="modal modal-xl fade" tabindex="-1" id="mass-import-panel">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Mass import</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="mass-action-details-content">
+        <p class="mb-4">Select properties that will be applied on all selected videos</p>
+        <!-- channel -->
+        <div class="form-floating" style="margin-bottom: 20px;">
+          <select class="form-select" name="channel-list" id="channel-list">
+            <option selected>None</option>
+            {{ range $channel := .Channels }}
+            <option value="{{ $channel.ID }}">{{ $channel.Name }}</option>
+            {{ end }}
+          </select>
+          <label for="channel-list">Channel list</label>
+        </div>
+        <!-- actors -->
+        <div class="mb-4">
+          {{ template "shards/actor-selection/list.html" . }}
+        </div>
+
+        <!-- categories -->
+        <div class="mb-4">
+          {{ template "shards/category-selection/list.html" . }}
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <div class="input-group" style="justify-content: flex-end;">
+          <span class="input-group-text">Import as: </span>
+          <button type="button" class="btn btn-primary" onclick="massImportSend('v')">Video</button>
+          <button type="button" class="btn btn-primary" onclick="massImportSend('m')">Movie</button>
+          <button type="button" class="btn btn-primary" onclick="massImportSend('c')">Clip</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Actor Modal -->
+{{ template "shards/actor-selection/edit-modal.html" . }}
+<!-- End Add Actor Modal -->
+
+<!-- Add Category Modal -->
+{{ template "shards/category-selection/edit-modal.html" . }}
+<!-- End Add Category Modal -->
 
 <!-- import video modal -->
 <div class="modal fade modal-lg" id="video-import-modal" tabindex="-1">

@@ -1,0 +1,21 @@
+{{ define "shards/actor-selection/list.html" }}
+<div class="form-floating">
+	<div class="form-control chip-selector" id="actor_chip_selector" style="height: unset; display: flex;">
+		<div class="chips">
+			{{ range $actor := .Actors }}
+			<div class="chip video-actor-list" actor-id="{{ $actor.ID }}" style="display:none">
+				<img src="{{ $actor.URLThumb }}" width="50" height="50">
+				{{ $actor.Name }}
+				<button class="btn btn-danger" onclick="window.zt.actorSelection.actorDeselect('{{ $actor.ID }}');"><i class="fa fa-trash-alt"></i></button>
+			</div>
+			{{ end }}
+			<div class="chip">Add an actor
+				<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actorSelectionModal" onClick="return false;">
+					<i class="fa fa-plus-circle"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+	<label for="actors">Actors</label>
+</div>
+{{ end }}

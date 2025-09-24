@@ -9,7 +9,41 @@ import (
 )
 
 func (c *Controller) UploadTriage(g *gin.Context) {
-	c.HTML(g, http.StatusOK, "upload/home.html", gin.H{})
+	// get actors
+	var actors []model.Actor
+	err := c.datastore.Find(&actors).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// get categories
+	categories := []model.Category{}
+	err = c.datastore.Preload("Sub").Find(&categories).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// get channels
+	var channels []model.Channel
+	err = c.datastore.Find(&channels).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.HTML(g, http.StatusOK, "upload/home.html", gin.H{
+		"Actors":     actors,
+		"Categories": categories,
+		"Channels":   channels,
+	})
 }
 
 type UploadImportForm struct {

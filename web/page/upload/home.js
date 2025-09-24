@@ -104,6 +104,7 @@ function loadFiles() {
 
     success: function (data) {
       showFiles(data.files);
+      updateSelects();
     },
 
     error: function (data) {
@@ -121,6 +122,7 @@ function showFolders(folders) {
   folderEntries = '';
   Object.keys(folders).forEach(function(folder) {
     folderEntries += '<tr ondblclick="enterFolder(\''+folder+'\');">';
+    folderEntries += '<td></td>';
     folderEntries += '<td><i class="far fa-folder"></i></td>';
     folderEntries += '<td>'+folder+'</td>';
     folderEntries += '<td>—</td>';
@@ -158,7 +160,8 @@ function showFiles(files) {
     filePath = CURRENT_PATH == '/' ? filePath = '/'+file : CURRENT_PATH+'/'+file;
 
     // render files
-    fileEntries += '<tr onclick="showFileDetails(\''+file+'\', \''+filePath+'\', \''+fileType+'\', \''+fileSize+'\', \''+fileDate+'\')">';
+    fileEntries += '<tr data-type="file" data-filename="'+file+'" data-filepath="'+filePath+'" data-filetype="'+fileType+'" onclick="showFileDetails(event, this, \''+file+'\', \''+filePath+'\', \''+fileType+'\', \''+fileSize+'\', \''+fileDate+'\')">';
+    fileEntries += '<td onclick="singleSelectToggle(this);"><i class="far fa-square checks"></i></td>';
     fileEntries += '<td><i class="'+fileIcon+'"></i></td>';
     fileEntries += '<td>'+file+'</td>';
     fileEntries += '<td>'+fileDate+'</td>';
@@ -290,7 +293,15 @@ function importVideo(filename, filepath) {
   window.VideoImportModal.show();
 }
 
-function showFileDetails(fileName, filePath, fileType, fileSize, fileDate) {
+function showFileDetails(e, element, fileName, filePath, fileType, fileSize, fileDate) {
+  // prevent the tick from showing the off-canvas
+  e = e || event;
+  var target = e.target || e.srcElement;
+  if (element.childNodes[0].childNodes[0] == target)
+    return;
+  if (element.childNodes[0].childNodes[0] == target.childNodes[0])
+    return;
+
   // Nice file types
   const niceFileTypes = {
     'unknown': 'Unrecognized type',
@@ -353,6 +364,14 @@ window.onload = function() {
   window.DetailPanel = document.getElementById('item-details');
   window.DetailPanelOffCanvas = new bootstrap.Offcanvas(window.DetailPanel);
   window.DetailPanelContent = document.getElementById('item-details-content');
+
+  // initialize mass action panel
+  window.MassActionPanel = document.getElementById('mass-action-details');
+  window.MassActionPanelModal = new bootstrap.Modal(window.MassActionPanel);
+
+  // initialize mass import panel
+  window.MassImportPanel = document.getElementById('mass-import-panel');
+  window.MassImportPanelModal = new bootstrap.Modal(window.MassImportPanel);
 
   // pause video when hidden
   window.DetailPanel.addEventListener('hide.bs.offcanvas', event => {
@@ -534,6 +553,221 @@ function new_folder_send() {
   return false;
 }
 
+/**
+ * mass import related functions
+ */
+allEnabled = false;
+function multiSelectToggle() {
+  if (allEnabled) {
+    document.getElementById('triage-listing').childNodes.forEach(function(item){
+      if (item.childNodes[0] == undefined || item.childNodes[0].childNodes[0] == undefined)
+        return;
+      item.childNodes[0].childNodes[0].classList.add('fa-square');
+      item.childNodes[0].childNodes[0].classList.remove('fa-check-square');
+    });
+    allEnabled = false;
+  } else {
+    document.getElementById('triage-listing').childNodes.forEach(function(item){
+      if (item.childNodes[0] == undefined || item.childNodes[0].childNodes[0] == undefined)
+        return;
+      item.childNodes[0].childNodes[0].classList.remove('fa-square');
+      item.childNodes[0].childNodes[0].classList.add('fa-check-square');
+    });
+    allEnabled = true;
+  }
+  updateSelects();
+}
+
+function singleSelectToggle(caller) {
+  tick = caller.childNodes[0];
+  if (tick.classList.contains('fa-check-square')) {
+    tick.classList.remove('fa-check-square');
+    tick.classList.add('fa-square');
+  } else {
+    tick.classList.remove('fa-square');
+    tick.classList.add('fa-check-square');
+  }
+  updateSelects();
+}
+
+function updateSelects() {
+  selected = 0;
+  unselected = 0;
+  document.getElementById('triage-listing').childNodes.forEach(function(item){
+      if (item.childNodes[0] == undefined || item.childNodes[0].childNodes[0] == undefined)
+        return;
+    if (item.childNodes[0].childNodes[0].classList.contains('fa-square'))
+      unselected++;
+    if (item.childNodes[0].childNodes[0].classList.contains('fa-check-square'))
+      selected++;
+  });
+
+  selectAllTick = document.getElementById('selectAllTick');
+  if (unselected == 0 && selected > 0) {
+    selectAllTick.classList.remove('fa-square');
+    selectAllTick.classList.add('fa-check-square');
+  } else {
+    selectAllTick.classList.remove('fa-check-square');
+    selectAllTick.classList.add('fa-square');
+  }
+
+  massImportButton = document.getElementById('button-mass-action');
+  if (selected == 0) {
+    massImportButton.classList.add('disabled');
+  } else {
+    massImportButton.classList.remove('disabled');
+  }
+}
+
+function massActionGetFileList() {
+  fileList = [];
+
+  document.getElementById('triage-listing').childNodes.forEach(function(item){
+    // skip folders
+    if (item.childNodes[0] == undefined || item.childNodes[0].childNodes[0] == undefined)
+      return;
+
+    // skip all unchecked items
+    if (item.childNodes[0].childNodes[0].classList.contains('fa-square')) {
+      return;
+    }
+
+    fileList.push(item);
+  });
+
+  return fileList;
+}
+
+function showMassActionModal() {
+  fileList = massActionGetFileList();
+
+  massActionItemListTable = '';
+  fileList.forEach(function(item){
+    massActionItemListTable += '<tr>';
+    massActionItemListTable += '<td>'+item.dataset.filepath+'</td>';
+    massActionItemListTable += '<td>'+item.dataset.filetype+'</td>';
+    massActionItemListTable += '</tr>';
+  });
+
+  document.getElementById('mass-action-item-list').innerHTML = massActionItemListTable;
+
+  window.MassActionPanelModal.show();
+
+  window.zt.actorSelection.onModalHide = function() {
+    window.MassImportPanelModal.show();
+  };
+
+  window.zt.categorySelection.onModalHide = function() {
+    window.MassImportPanelModal.show();
+  };
+}
+
+function showMassImportModal() {
+  window.MassActionPanelModal.hide();
+  window.MassImportPanelModal.show();
+}
+
+function massDelete() {
+  fileList = massActionGetFileList();
+  curatedFileList = [];
+  fileList.forEach(function(item){
+    curatedFileList.push(item.dataset.filepath);
+  });
+
+  $.ajax('/api/upload/triage/mass-action', {
+    method: 'DELETE',
+    contentType: 'application/json; charset=utf-8',
+    dataType: 'json',
+    data: JSON.stringify({
+      'files': curatedFileList,
+    }),
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (data) {
+      window.MassActionPanelModal.hide();
+      sendToast(
+        'Deletion successful',
+        '',
+        'bg-success',
+        'This folder should feel lighter now',
+      );
+      updatePath();
+    },
+
+    error: function (data) {
+      sendToast(
+        'Unable to delete selected files',
+        '',
+        'bg-warning',
+        data.responseJSON.error,
+      );
+    },
+  });
+}
+
+function massImportSend(videoType) {
+  fileList = massActionGetFileList();
+  curatedFileList = [];
+  fileList.forEach(function(item){
+    curatedFileList.push(item.dataset.filepath);
+  });
+
+  actorList = [];
+  for (const actor_id of Object.keys(window.zt.actorSelection.actorSelected)) {
+    actorList.push(actor_id);
+  }
+  categoryList = [];
+  for (const category_id of Object.keys(window.zt.categorySelection.categorySelected)) {
+    categoryList.push(category_id);
+  }
+
+  channel = document.getElementById('channel-list').value;
+  if (channel == 'None')
+    channel = undefined;
+
+  $.ajax('/api/upload/triage/mass-action', {
+    method: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    dataType: 'json',
+    data: JSON.stringify({
+      'files': curatedFileList,
+      'actors': actorList,
+      'categories': categoryList,
+      'type': videoType,
+      'channel': channel,
+    }),
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (data) {
+      updatePath();
+      window.MassImportPanelModal.hide();
+      sendToast(
+        'Import successful',
+        '',
+        'bg-success',
+        'Import tasks will run in background',
+      );
+    },
+
+    error: function (data) {
+      updatePath();
+      window.MassImportPanelModal.hide();
+      sendToast(
+        'Unable to import selected files',
+        '',
+        'bg-warning',
+        data.responseJSON.error,
+      );
+    },
+  });
+
+}
 
 // From: https://stackoverflow.com/a/14919494
 
@@ -568,5 +802,47 @@ function new_folder_send() {
 
   return bytes.toFixed(dp) + ' ' + units[u];
 }
+
+//
+// actor selection
+//
+{{ template "shards/actor-selection/main.js" . }}
+
+window.zt.onload.unshift(function UploadHomeActorSelectableConfiguration() {
+  // all actors
+  window.zt.actorSelection.actorSelectable = {
+    {{ range $actor := .Actors }}
+    '{{ $actor.ID }}': {
+      'name': '{{ $actor.Name }}',
+      'aliases': [],
+    },
+    {{ end }}
+  };
+});
+//
+// actor selection end
+//
+
+//
+// category selection
+//
+{{ template "shards/category-selection/main.js" . }}
+
+window.zt.onload.unshift(function UploadHomeCategorySelectableConfiguration() {
+  // store all categories at start
+  window.zt.categorySelection.categorySelectable = {
+    {{ range $category := .Categories }}
+    {{ range $sub:= $category.Sub }}
+    '{{ $sub.ID }}': {
+      'name': '{{ $sub.Name }}',
+    },
+    {{ end }}
+    {{ end }}
+  };
+});
+//
+// category selection end
+//
+
 
 {{ end }}

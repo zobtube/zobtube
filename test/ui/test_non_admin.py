@@ -79,6 +79,7 @@ def test_access(page: Page):
                 "/api/video/d8045d56-1dc4-11f0-9970-305a3a05e04d/actor/:actor_id",
                 "/api/video/d8045d56-1dc4-11f0-9970-305a3a05e04d/category/:category_id",
                 "/api/upload/file",
+                "/api/upload/triage/mass-action",
             ],
             'PUT': [
                 "/api/actor/045e1b0e-1dc4-11f0-a04a-305a3a05e04d/category/:category_id",
@@ -106,6 +107,7 @@ def test_access(page: Page):
                 "/upload/import",
                 "/api/upload/triage/folder",
                 "/api/upload/triage/file",
+                "/api/upload/triage/mass-action",
                 "/api/upload/file",
                 "/api/upload/folder",
                 "/adm/user",
