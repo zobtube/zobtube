@@ -1,5 +1,28 @@
 # Changelog
 
+## Version 0.3.1
+### Features
+* [4a467de](https://github.com/zobtube/zobtube/commit/4a467de5c2d9212bcb2c918a4fba6833876b4d0d) feat: add tool to generate changelog
+* [a77aa88](https://github.com/zobtube/zobtube/commit/a77aa88686edbd43296e8685734675e23f577a27) feat(triage): add mass deletion
+* [a77aa88](https://github.com/zobtube/zobtube/commit/a77aa88686edbd43296e8685734675e23f577a27) feat(triage): add mass import (fix #80)
+* [a77aa88](https://github.com/zobtube/zobtube/commit/a77aa88686edbd43296e8685734675e23f577a27) feat(ui): add custom onload element
+* [a77aa88](https://github.com/zobtube/zobtube/commit/a77aa88686edbd43296e8685734675e23f577a27) feat(ui): create common async function ajax wrapping jquery ajax method
+* [a77aa88](https://github.com/zobtube/zobtube/commit/a77aa88686edbd43296e8685734675e23f577a27) feat(ui): split actor selection into a dedicated shard
+* [a77aa88](https://github.com/zobtube/zobtube/commit/a77aa88686edbd43296e8685734675e23f577a27) feat(ui): split category selection into a dedicated shard
+### Chores
+* [4a467de](https://github.com/zobtube/zobtube/commit/4a467de5c2d9212bcb2c918a4fba6833876b4d0d) chore(goreleaser): change compilation more consistent naming
+* [4a467de](https://github.com/zobtube/zobtube/commit/4a467de5c2d9212bcb2c918a4fba6833876b4d0d) chore(goreleaser): change compilation target to binary
+* [a77aa88](https://github.com/zobtube/zobtube/commit/a77aa88686edbd43296e8685734675e23f577a27) chore(task): increase queue size to 1000
+* [a77aa88](https://github.com/zobtube/zobtube/commit/a77aa88686edbd43296e8685734675e23f577a27) chore(ui): move sendToast to common 'main.js'
+### Fixes
+* [a77aa88](https://github.com/zobtube/zobtube/commit/a77aa88686edbd43296e8685734675e23f577a27) fix(session-cleaner): switch to new logger
+* [a77aa88](https://github.com/zobtube/zobtube/commit/a77aa88686edbd43296e8685734675e23f577a27) fix(task): retry tasks stuck in 'todo' during boot (fix #62)
+* [fbe685f](https://github.com/zobtube/zobtube/commit/fbe685fc4ba169c94e2c477f78b8314744ae7974) fix(adm): remove delete rows from the counting
+### Documentation
+* [4a467de](https://github.com/zobtube/zobtube/commit/4a467de5c2d9212bcb2c918a4fba6833876b4d0d) doc: add changelog on existing versions
+* [d30d908](https://github.com/zobtube/zobtube/commit/d30d90889ec04ccc342c0890da636bb44c351d82) doc(readme): add stash postgres support
+* [dd82526](https://github.com/zobtube/zobtube/commit/dd8252677f27348009823e9247c2eae549c0666d) doc(readme): fix typo
+
 ## Version 0.3.0
 ### Features
 * [dde5d7f](https://github.com/zobtube/zobtube/commit/dde5d7f70a71368401a7eae4ffed864c4a49eb3c) feat: add configuration to disable authentication
