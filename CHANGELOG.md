@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.3.2
+### Fixes
+* [7903d70](https://github.com/zobtube/zobtube/commit/7903d70d1711a54416d7093b3b42bd2631127fb1) fix(goreleaser): bring back windows and darwin
+
 ## Version 0.3.1
 ### Features
 * [4a467de](https://github.com/zobtube/zobtube/commit/4a467de5c2d9212bcb2c918a4fba6833876b4d0d) feat: add tool to generate changelog
@@ -22,6 +26,7 @@
 * [4a467de](https://github.com/zobtube/zobtube/commit/4a467de5c2d9212bcb2c918a4fba6833876b4d0d) doc: add changelog on existing versions
 * [d30d908](https://github.com/zobtube/zobtube/commit/d30d90889ec04ccc342c0890da636bb44c351d82) doc(readme): add stash postgres support
 * [dd82526](https://github.com/zobtube/zobtube/commit/dd8252677f27348009823e9247c2eae549c0666d) doc(readme): fix typo
+* [f2a153d](https://github.com/zobtube/zobtube/commit/f2a153df8ea17c06989cc1ec4877aeed9d6c502e) doc: prepare change for release 0.3.1
 
 ## Version 0.3.0
 ### Features
