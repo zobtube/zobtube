@@ -1,3 +1,4 @@
+---
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
 version: 2
@@ -7,20 +8,16 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
-      - windows
-      - darwin
     goarch:
       - amd64
 
 archives:
-  - formats: tar.gz
+  - formats: [binary]
     name_template: >-
-      {{ .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
+      {{ .ProjectName }}_v
+      {{- .Major }}.{{ .Minor }}.{{ .Patch }}_
+      {{- tolower .Os }}_
+      {{- tolower .Arch }}
     format_overrides:
       - goos: windows
         formats: zip
@@ -37,6 +34,3 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.source=https://github.com/zobtube/zobtube"
     use: buildx
-
-changelog:
-  sort: asc
