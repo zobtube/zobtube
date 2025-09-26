@@ -53,6 +53,16 @@ func New(embedfs *embed.FS, ginDebug bool, logger *zerolog.Logger) *Server {
 			Msg("http request")
 	})
 
+	// template error handling
+	server.Router.Use(func(c *gin.Context) {
+		c.Next()
+		err := c.Errors.Last()
+
+		if err != nil {
+			logger.Error().Err(err).Msg("html template rendering failed")
+		}
+	})
+
 	// load templates
 	server.LoadHTMLFromEmbedFS("web/page/**/*")
 

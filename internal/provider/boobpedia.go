@@ -22,7 +22,19 @@ func (p *Boobpedia) NiceName() string {
 	return "Boobpedia"
 }
 
-func (p *Boobpedia) ActorSearch(actorName string) (url string, err error) {
+func (p *Boobpedia) CapabilitySearchActor() bool {
+	return true
+}
+
+func (p *Boobpedia) CapabilityScrapePicture() bool {
+	return true
+}
+
+func (p *Boobpedia) ActorSearch(offlineMode bool, actorName string) (url string, err error) {
+	if offlineMode {
+		return url, ErrOfflineMode
+	}
+
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -49,7 +61,11 @@ func (p *Boobpedia) ActorSearch(actorName string) (url string, err error) {
 	return url, errors.New("provider did not find actor")
 }
 
-func (p *Boobpedia) ActorGetThumb(actorName, url string) (thumb []byte, err error) {
+func (p *Boobpedia) ActorGetThumb(offlineMode bool, actorName, url string) (thumb []byte, err error) {
+	if offlineMode {
+		return thumb, ErrOfflineMode
+	}
+
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}

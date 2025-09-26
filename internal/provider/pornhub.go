@@ -19,7 +19,19 @@ func (p *Pornhub) NiceName() string {
 	return "PornHub"
 }
 
-func (p *Pornhub) ActorSearch(actorName string) (url string, err error) {
+func (p *Pornhub) CapabilitySearchActor() bool {
+	return true
+}
+
+func (p *Pornhub) CapabilityScrapePicture() bool {
+	return true
+}
+
+func (p *Pornhub) ActorSearch(offlineMode bool, actorName string) (url string, err error) {
+	if offlineMode {
+		return url, ErrOfflineMode
+	}
+
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -61,7 +73,11 @@ func (p *Pornhub) ActorSearch(actorName string) (url string, err error) {
 	return url, errors.New("provider did not find actor")
 }
 
-func (p *Pornhub) ActorGetThumb(actor_name, url string) (thumb []byte, err error) {
+func (p *Pornhub) ActorGetThumb(offlineMode bool, actor_name, url string) (thumb []byte, err error) {
+	if offlineMode {
+		return thumb, ErrOfflineMode
+	}
+
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}

@@ -316,7 +316,7 @@ func (c *Controller) UploadAjaxMassImport(g *gin.Context) {
 	// pre-check: ensure categories exists
 	var categories []*model.CategorySub
 	for _, subCategoryID := range form.Categories {
-		subCategory := &model.CategorySub {
+		subCategory := &model.CategorySub{
 			ID: subCategoryID,
 		}
 		result := c.datastore.First(subCategory)

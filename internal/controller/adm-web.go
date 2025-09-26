@@ -284,3 +284,109 @@ func (c *Controller) AdmConfigAuthUpdate(g *gin.Context) {
 	c.ConfigurationFromDBApply(dbconfig)
 	g.Redirect(http.StatusFound, "/adm/config/auth")
 }
+
+func (c *Controller) AdmConfigProvider(g *gin.Context) {
+	// find providers
+	var providers []model.Provider
+	c.datastore.Find(&providers)
+
+	// loading configuration from database
+	dbconfig := &model.Configuration{}
+	result := c.datastore.First(dbconfig)
+
+	// check result
+	if result.RowsAffected < 1 {
+		c.HTML(g, 500, "err/fatal.html", gin.H{
+			"error": "configuration not found, restarting the appliaction should fix the issue",
+		})
+		return
+	}
+
+	c.HTML(g, http.StatusOK, "adm/config-provider.html", gin.H{
+		"Providers":      providers,
+		"ProviderLoaded": c.providers,
+		"OfflineMode":    dbconfig.OfflineMode,
+	})
+}
+
+func (c *Controller) AdmConfigProviderSwitch(g *gin.Context) {
+	providerID := g.Param("id")
+
+	// find providers
+	provider := model.Provider{
+		ID: providerID,
+	}
+
+	result := c.datastore.First(&provider)
+
+	// check result
+	if result.RowsAffected < 1 {
+		c.HTML(g, 404, "err/fatal.html", gin.H{
+			"error": "provider not found",
+		})
+		return
+	}
+
+	provider.Enabled = !provider.Enabled
+	err := c.datastore.Save(&provider).Error
+
+	// check result
+	if err != nil {
+		c.HTML(g, 500, "err/fatal.html", gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.Redirect(http.StatusFound, "/adm/config/provider")
+}
+
+func (c *Controller) AdmConfigOfflineMode(g *gin.Context) {
+	// loading configuration from database
+	dbconfig := &model.Configuration{}
+	result := c.datastore.First(dbconfig)
+
+	// check result
+	if result.RowsAffected < 1 {
+		c.HTML(g, 500, "err/fatal.html", gin.H{
+			"error": "configuration not found, restarting the appliaction should fix the issue",
+		})
+		return
+	}
+
+	c.HTML(g, http.StatusOK, "adm/config-offline.html", gin.H{
+		"OfflineMode": dbconfig.OfflineMode,
+	})
+}
+
+func (c *Controller) AdmConfigOfflineModeUpdate(g *gin.Context) {
+	action := g.Param("action")
+	if action != "enable" && action != "disable" {
+		g.Redirect(http.StatusFound, "/adm/config/offline")
+		return
+	}
+
+	// loading configuration from database
+	dbconfig := &model.Configuration{}
+	result := c.datastore.First(dbconfig)
+
+	// check result
+	if result.RowsAffected < 1 {
+		c.HTML(g, 500, "err/fatal.html", gin.H{
+			"error": "configuration not found, restarting the appliaction should fix the issue",
+		})
+		return
+	}
+
+	dbconfig.OfflineMode = action == "enable"
+	err := c.datastore.Save(&dbconfig).Error
+	if result.RowsAffected < 1 {
+		c.HTML(g, http.StatusOK, "adm/config-offline.html", gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	c.ConfigurationFromDBApply(dbconfig)
+	g.Redirect(http.StatusFound, "/adm/config/offline")
+}

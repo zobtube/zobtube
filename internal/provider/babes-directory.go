@@ -19,7 +19,19 @@ func (p *BabesDirectory) NiceName() string {
 	return "Babes Directory"
 }
 
-func (p *BabesDirectory) ActorSearch(actorName string) (url string, err error) {
+func (p *BabesDirectory) CapabilitySearchActor() bool {
+	return true
+}
+
+func (p *BabesDirectory) CapabilityScrapePicture() bool {
+	return true
+}
+
+func (p *BabesDirectory) ActorSearch(offlineMode bool, actorName string) (url string, err error) {
+	if offlineMode {
+		return url, ErrOfflineMode
+	}
+
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -61,7 +73,11 @@ func (p *BabesDirectory) ActorSearch(actorName string) (url string, err error) {
 	return url, errors.New("provider did not find actor")
 }
 
-func (p *BabesDirectory) ActorGetThumb(actorName, url string) (thumb []byte, err error) {
+func (p *BabesDirectory) ActorGetThumb(offlineMode bool, actorName, url string) (thumb []byte, err error) {
+	if offlineMode {
+		return thumb, ErrOfflineMode
+	}
+
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}

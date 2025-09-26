@@ -17,6 +17,32 @@ var categories_in_actor = {
   '{{ $sub.ID }}': undefined,
   {{ end }}
 };
+
+const G_OfflineMode = {{ .OfflineMode }};
+
+// list all known links
+G_links = {
+{{ range $link := .Actor.Links }}
+  '{{ $link.Provider }}': {
+    'link_url': '{{ $link.URL }}',
+    'link_id': '{{ $link.ID }}',
+  },
+{{ end }}
+};
+
+// list all providers
+G_providers = {
+  {{ range $provider := .Providers }}
+  '{{ $provider.ID }}': {
+    'NiceName': '{{ $provider.NiceName }}',
+    'Enabled': {{ $provider.Enabled }},
+  },
+{{ end }}
+};
+
+G_first_time = {{ if eq ( len .Actor.Links ) 0 }}true{{ else }}false{{ end }};
+
+G_actor_id = "{{ .Actor.ID }}";
 /* -- end globals set at boot -- */
 
 /* -- start of categories scripts -- */
@@ -142,27 +168,6 @@ function actorLinkAutomaticSearch(actorName, providerName, providerSlug, url) {
 
 }
 
-// list all known links
-G_links = {
-{{ range $link := .Actor.Links }}
-  '{{ $link.Provider }}': {
-    'link_url': '{{ $link.URL }}',
-    'link_id': '{{ $link.ID }}',
-  },
-{{ end }}
-};
-
-// list all providers
-G_providers = {
-  {{ range $provider := .Providers }}
-  '{{ $provider.SlugGet }}': '{{ $provider.NiceName }}',
-{{ end }}
-};
-
-G_first_time = {{ if eq ( len .Actor.Links ) 0 }}true{{ else }}false{{ end }};
-
-G_actor_id = "{{ .Actor.ID }}";
-
 function updateProviders() {
   for (const provider_slug in G_providers) {
     if (provider_slug in G_links) {
@@ -252,6 +257,9 @@ function firstTimeSearch() {
 
   for (const provider_slug in G_providers) {
     if (!(provider_slug in G_links) || G_links[provider_slug].link_url == undefined) {
+      if (!G_providers[provider_slug]['Enabled']) {
+        continue;
+      }
       document.getElementById('provider-action-'+provider_slug+'-search').click();
     }
   }
@@ -286,11 +294,21 @@ window.onload = function() {
 });
 
   // calls
-  firstTimeSearch();
-  suggestProfilePicture();
+  if (!G_OfflineMode) {
+    firstTimeSearch();
+    suggestProfilePicture();
+  }
 
   // update categories
   actorUpdateCategoryStatus();
+}
+
+function handlePictureError(event) {
+  if (G_OfflineMode) {
+    event.target.src = '/static/images/actor-picture-error-offline-mode.svg';
+  } else {
+    event.target.src = '/static/images/actor-picture-error-not-found.svg';
+  }
 }
 
 function showActorPictures() {
@@ -300,6 +318,9 @@ function showActorPictures() {
   document.getElementById('profile-picture-propositions-row').style.display = '';
 
   for (const provider_slug in G_links) {
+    if (!G_providers[provider_slug]['Enabled']) {
+      continue;
+    }
     link_id = G_links[provider_slug].link_id;
 
     document.getElementById('profile-picture-suggestion-welcome').style.display = 'none';
@@ -310,8 +331,9 @@ function showActorPictures() {
     newPicture = template.cloneNode(true);
     newPicture.style.display = '';
     newPicture.id = 'profile-picture-provider-'+provider_slug;
+    newPicture.querySelector('img').addEventListener('error', handlePictureError);
     newPicture.querySelector('img').src = url;
-    newPicture.querySelector('.card-footer').innerText = G_providers[provider_slug];
+    newPicture.querySelector('.card-footer').innerText = G_providers[provider_slug]['NiceName'];
     newPicture.onclick = function() {
       const providerSlug = provider_slug;
       console.log('picture from '+provider_slug);

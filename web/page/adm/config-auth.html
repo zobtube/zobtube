@@ -5,19 +5,7 @@
 <hr />
 
 <div class="row">
-  <div class="col-md-12 mb-4">
-    <ul class="nav nav-tabs">
-      <li class="nav-item">
-        <a class="nav-link" href="/adm">Statistics</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active">Authentication</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/adm/task/home">Tasks</a>
-      </li>
-    </ul>
-  </div>
+  {{ template "shards/adm-tabs.html" "authentication" }}
 
   <div class="col-md-12 mb-4">
     <h4 class="mb-4">Authentication settings</h4>

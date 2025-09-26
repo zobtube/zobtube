@@ -119,40 +119,40 @@ const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-00
         <th style="text-align: right"></th>
       </thead>
       <tbody>
-        {{ range $provider_slug, $provider := .Providers }}
-        <tr id="provider-{{ $provider_slug }}">
+        {{ range $provider := .Providers }}
+        <tr id="provider-{{ $provider.ID }}">
           <td style="vertical-align: middle">
-            {{ $provider.NiceName }}
+            {{ $provider.NiceName }}{{ if not $provider.Enabled }} <span class="badge text-bg-warning">Disabled</span>{{ end }}
           </td>
           <td style="text-align: right; vertical-align: middle">
             <button
-              id="provider-action-{{ $provider_slug }}-search"
-              class="btn btn-primary"
+              id="provider-action-{{ $provider.ID }}-search"
+              class="btn btn-primary{{ if not $provider.Enabled }} disabled{{ end }}"
               onClick="actorLinkAutomaticSearch(
                 '{{ $.Actor.Name }}',
                 '{{ $provider.NiceName }}',
-                '{{ $provider_slug }}',
-                '/api/actor/{{ $.Actor.ID }}/provider/{{ $provider_slug }}'
+                '{{ $provider.ID}}',
+                '/api/actor/{{ $.Actor.ID }}/provider/{{ $provider.ID }}'
               )">
               <i class="fas fa-search"></i> Automatic search
             </button>
             <button
-              id="provider-action-{{ $provider_slug }}-add"
+              id="provider-action-{{ $provider.ID }}-add"
               class="btn btn-primary"
               onclick="addNewLinkModal(
                 '{{ $.Actor.ID }}',
-                '{{ $provider_slug }}',
+                '{{ $provider.ID }}',
               )"
               >
               <i class="fas fa-plus"></i> Manual add
             </button>
-            <a class="btn btn-success" href="" id="provider-action-{{ $provider_slug }}-view" target="_blank" rel="noopener noreferrer">
+            <a class="btn btn-success" href="" id="provider-action-{{ $provider.ID }}-view" target="_blank" rel="noopener noreferrer">
               <i class="fas fa-globe"></i> View page
             </a>
-            <button class="btn btn-danger" id="provider-action-{{ $provider_slug }}-delete">
+            <button class="btn btn-danger" id="provider-action-{{ $provider.ID }}-delete">
               <i class="fas fa-trash"></i> Remove link
             </button>
-            <div id="provider-text-{{ $provider_slug }}-first-time" style="display: none"><i>Automatic reseach will begin shortly...</i></div>
+            <div id="provider-text-{{ $provider.ID }}-first-time" style="display: none"><i>Automatic reseach will begin shortly...</i></div>
           </td>
         </tr>
         {{ end }}
@@ -161,7 +161,7 @@ const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-00
   </div>
 </div>
 
-<div class="row" id="profile-picture-propositions-row" {{ if or (.Actor.Thumbnail) (eq (len .Actor.Links) 0) }}style="display: none"{{ end }}>
+<div class="row" id="profile-picture-propositions-row" {{ if or (.Actor.Thumbnail) (eq (len .Actor.Links) 0) (.OfflineMode) }}style="display: none"{{ end }}>
   <div class="col-12">
     <h4 style="margin-top: 65px;">Actor pictures from external links</h4>
     <hr/>

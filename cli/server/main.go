@@ -160,10 +160,22 @@ func Start(params *Parameters) error {
 
 	// external providers
 	params.Logger.Debug().Str("kind", "system").Msg("register external providers")
-	c.ProviderRegister(&provider.BabesDirectory{})
-	c.ProviderRegister(&provider.Babepedia{})
-	c.ProviderRegister(&provider.Boobpedia{})
-	c.ProviderRegister(&provider.Pornhub{})
+	err = c.ProviderRegister(&provider.BabesDirectory{})
+	if err != nil {
+		params.Logger.Warn().Str("kind", "provider").Err(err).Msg("unable to register provider")
+	}
+	err = c.ProviderRegister(&provider.Babepedia{})
+	if err != nil {
+		params.Logger.Warn().Str("kind", "provider").Err(err).Msg("unable to register provider")
+	}
+	err = c.ProviderRegister(&provider.Boobpedia{})
+	if err != nil {
+		params.Logger.Warn().Str("kind", "provider").Err(err).Msg("unable to register provider")
+	}
+	err = c.ProviderRegister(&provider.Pornhub{})
+	if err != nil {
+		params.Logger.Warn().Str("kind", "provider").Err(err).Msg("unable to register provider")
+	}
 
 	go c.CleanupRoutine()
 

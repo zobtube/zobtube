@@ -96,10 +96,27 @@ func (c *Controller) ActorEdit(g *gin.Context) {
 		return
 	}
 
+	// loading configuration from database
+	dbconfig := &model.Configuration{}
+	result = c.datastore.First(dbconfig)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(500, gin.H{
+			"error": "configuration not found, restarting the appliaction should fix the issue",
+		})
+		return
+	}
+
+	// get all providers
+	var providers []model.Provider
+	c.datastore.Find(&providers)
+
 	c.HTML(g, http.StatusOK, "actor/edit.html", gin.H{
-		"Actor":      actor,
-		"Providers":  c.providers,
-		"Categories": categories,
+		"Actor":       actor,
+		"Providers":   providers,
+		"Categories":  categories,
+		"OfflineMode": dbconfig.OfflineMode,
 	})
 }
 

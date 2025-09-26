@@ -20,6 +20,10 @@ type AbtractController interface {
 	AdmCategory(*gin.Context)
 	AdmConfigAuth(*gin.Context)
 	AdmConfigAuthUpdate(*gin.Context)
+	AdmConfigProvider(*gin.Context)
+	AdmConfigProviderSwitch(*gin.Context)
+	AdmConfigOfflineMode(*gin.Context)
+	AdmConfigOfflineModeUpdate(*gin.Context)
 	AdmTaskHome(*gin.Context)
 	AdmTaskList(*gin.Context)
 	AdmTaskRetry(*gin.Context)
@@ -120,7 +124,7 @@ type AbtractController interface {
 	UploadAjaxMassImport(*gin.Context)
 
 	// Providers
-	ProviderRegister(provider.Provider)
+	ProviderRegister(provider.Provider) error
 	ProviderGet(string) (provider.Provider, error)
 
 	// Profile

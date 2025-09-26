@@ -68,7 +68,19 @@ func (c *Controller) ActorAjaxProviderSearch(g *gin.Context) {
 		return
 	}
 
-	url, err := provider.ActorSearch(actor.Name)
+	// loading configuration from database
+	dbconfig := &model.Configuration{}
+	result = c.datastore.First(dbconfig)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(500, gin.H{
+			"error": "configuration not found, restarting the appliaction should fix the issue",
+		})
+		return
+	}
+
+	url, err := provider.ActorSearch(dbconfig.OfflineMode, actor.Name)
 	if err != nil {
 		g.JSON(404, gin.H{
 			"error":       err.Error(),
@@ -124,7 +136,19 @@ func (c *Controller) ActorAjaxLinkThumbGet(g *gin.Context) {
 		return
 	}
 
-	thumb, err := provider.ActorGetThumb(link.Actor.Name, link.URL)
+	// loading configuration from database
+	dbconfig := &model.Configuration{}
+	result = c.datastore.First(dbconfig)
+
+	// check result
+	if result.RowsAffected < 1 {
+		g.JSON(500, gin.H{
+			"error": "configuration not found, restarting the appliaction should fix the issue",
+		})
+		return
+	}
+
+	thumb, err := provider.ActorGetThumb(dbconfig.OfflineMode, link.Actor.Name, link.URL)
 	if err != nil {
 		g.JSON(404, gin.H{
 			"error":       err.Error(),

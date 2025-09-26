@@ -1,0 +1,81 @@
+{{ define "adm/config-provider.html" }}
+{{ template "top" .}}
+<style>
+.center {
+  text-align: center;
+}
+</style>
+<h1>Admin Area</h1>
+
+<hr />
+
+<div class="row">
+  {{ template "shards/adm-tabs.html" "providers" }}
+
+  <div class="col-md-12 mb-4">
+    <h4 class="mb-4">Provider settings</h4>
+    <p>Providers are used to retrieve information and pictures of actors</p>
+  </div>
+
+  <div class="col-md-12 mb-4">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Provider</th>
+          <th class="center" scope="col">Status</th>
+          <th class="center" scope="col">Loaded</th>
+          <th class="center" scope="col">Able to search actor</th>
+          <th class="center" scope="col">Able to scrape actor's picture</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range $provider := .Providers }}
+        <tr>
+          <td>{{ $provider.ID }}</td>
+          <td class="center">
+            {{ if $provider.Enabled }}
+            <span class="badge text-bg-success">Enabled</span>
+            {{ else }}
+            <span class="badge text-bg-warning">Disabled</span>
+            {{ end }}
+            <a href="/adm/config/provider/{{ $provider.ID }}/switch"><i class="fas fa-sync"></i></a>
+          </td>
+          <td>
+            {{ if index $.ProviderLoaded $provider.ID }}
+            <span class="badge text-bg-success">
+              {{ with (index $.ProviderLoaded $provider.ID )}}{{.NiceName}}{{end}} loaded
+            </span>
+            {{ else }}
+            <span class="badge text-bg-danger">Not loaded</span>
+            {{ end }}
+          </td>
+          <td class="center">
+            {{ if $provider.AbleToSearchActor }}
+            {{ if $.OfflineMode}}
+            <span class="badge text-bg-danger">Yes but disabled by Offline Mode</span>
+            {{ else }}
+            <span class="badge text-bg-success">Yes</span>
+            {{ end }}
+            {{ else }}
+            <span class="badge text-bg-warning">No</span>
+            {{ end }}
+          </td>
+          <td class="center">
+            {{ if $provider.AbleToScrapePicture }}
+            {{ if $.OfflineMode}}
+            <span class="badge text-bg-danger">Yes but disabled by Offline Mode</span>
+            {{ else }}
+            <span class="badge text-bg-success">Yes</span>
+            {{ end }}
+            {{ else }}
+            <span class="badge text-bg-warning">No</span>
+            {{ end }}
+          </td>
+        {{ end }}
+    </table>
+  </div>
+
+
+</div>
+{{ template "bottom" .}}
+{{ end }}

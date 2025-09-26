@@ -30,20 +30,7 @@ h2 {
 <hr />
 
 <div class="row">
-  <div class="col-md-12 mb-4">
-    <ul class="nav nav-tabs">
-      <li class="nav-item">
-        <a class="nav-link active">Statistics</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/adm/config/auth">Authentication</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/adm/task/home">Tasks</a>
-      </li>
-    </ul>
-  </div>
-
+  {{ template "shards/adm-tabs.html" "overview" }}
   <div class="col-md-12">
     <div class="card">
       <div class="card-body">

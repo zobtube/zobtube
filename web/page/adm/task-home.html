@@ -5,19 +5,7 @@
 <hr />
 
 <div class="row">
-  <div class="col-md-12 mb-4">
-    <ul class="nav nav-tabs">
-      <li class="nav-item">
-        <a class="nav-link" href="/adm">Statistics</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/adm/config/auth">Authentication</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link active">Tasks</a>
-      </li>
-    </ul>
-  </div>
+  {{ template "shards/adm-tabs.html" "tasks" }}
 
   <div class="col-md-12">
     <h2 style="display: inline-block;">
