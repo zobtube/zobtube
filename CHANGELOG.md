@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.3.3
+### Fixes
+* [df9b4c8](https://github.com/zobtube/zobtube/commit/df9b4c864e39120ebd918fddf3e84cd3f03accb8) fix(adm/categories): remove max-height
+
 ## Version 0.3.2
 ### Fixes
 * [7903d70](https://github.com/zobtube/zobtube/commit/7903d70d1711a54416d7093b3b42bd2631127fb1) fix(goreleaser): bring back windows and darwin
