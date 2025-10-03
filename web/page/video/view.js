@@ -12,12 +12,11 @@ function countView() {
       return xhr;
     },
     success: function(data) {
-      $('#video-view-count').animate({'opacity': 0}, 400, function(){
+      $('#video-view-count span').animate({'opacity': 0}, 400, function(){
         viewCount = data['view-count'];
-        newViewCount = '<h3>'+viewCount+' view';
+        newViewCount = viewCount+' view';
         newViewCount += viewCount > 1 ? 's' : '';
-        newViewCount += '</h3>';
-        $(this).html(newViewCount).animate({'opacity': 1}, 400);
+        $(this).text(newViewCount).animate({'opacity': 1}, 400);
       });
       viewCounted = true;
     },

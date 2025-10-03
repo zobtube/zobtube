@@ -106,6 +106,26 @@ func (v *Video) NiceDuration() string {
 	}
 }
 
+func (v *Video) NiceDurationShort() string {
+	d := v.Duration
+	d = d.Round(time.Second)
+
+	h := d / time.Hour
+	d -= h * time.Hour
+
+	m := d / time.Minute
+	d -= m * time.Minute
+
+	s := d / time.Second
+	if h > 0 {
+		return fmt.Sprintf("%2dh%02d", h, m)
+	} else if m > 0 {
+		return fmt.Sprintf("%2d min", m)
+	} else {
+		return fmt.Sprintf("%2d sec", s)
+	}
+}
+
 func (v *Video) String() string {
 	return v.Name
 }

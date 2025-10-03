@@ -4,7 +4,42 @@
   <div class="col-lg-12 col-md-12">
     <!-- Start Video Post -->
     <div class="video-post-wrapper">
+      <div><!-- title div -->
+        <h3 id="page_view_video_title" class="post-title mt-3 d-inline-block">{{ .Video }}</h3>
+        <span class="badge text-bg-secondary" style="height: fit-content; vertical-align: super; font-size: 0.85rem; margin-left: 8px;">{{ .Video.NiceDurationShort }}</span>
+      </div>
+      <div>
+        <!-- channel -->
+        {{ if .Video.Channel }}
+        <a class="btn btn-sm btn-dark" href="{{ .Video.Channel.URLView }}">
+          <i class="fas fa-tv"></i>
+          {{ .Video.Channel.Name }}
+        </a>
+        {{ end }}
+        <!-- actors -->
+        {{ range $actor := .Video.Actors }}
+        <a class="btn btn-sm btn-danger" href="{{ $actor.URLView }}">
+          <span class="badge text-bg-light">
+            {{ if eq $actor.Sex "f" }}
+            <i class="fa fa-venus"></i>
+            {{ else if eq $actor.Sex "m" }}
+            <i class="fa fa-mars"></i>
+            {{ else if eq $actor.Sex "tw" }}
+            <i class="fa fa-mars-and-venus"></i>
+            {{ else }}
+            <i class="fa fa-person-circle-question"></i>
+            {{ end }}
+          </span>
+          {{ $actor.Name }}
+        </a>
+        {{ end }}
+        <!-- categories -->
+        {{ range $category_id, $category_name := .Categories }}
+        <a class="btn btn-sm btn-secondary" href="/category/{{ $category_id }}">{{ $category_name }}</a>
+        {{ end }}
+      </div>
       <div class="video-posts-video">
+        <hr />
         <div class="embed-responsive embed-responsive-16by9 ratio ratio-16x9">
           <video
             style="width: 100%"
@@ -15,84 +50,36 @@
             onplay="countView()"
             ></video>
         </div>
-        <h3 id="page_view_video_title" class="post-title mt-3">{{ .Video }}
-        {{ if .User.Admin }}
-        <a href="{{ .Video.URLAdmEdit }}"> <i class="fa fa-edit"></i></a>
-        {{ end }}
-        </h3>
       </div>
       <div class="video-posts-data">
+        <!-- left side -->
         <div class="video-post-title">
-          {{ if .Video.Channel }}
-          <span class="video-icons">
-            <img src="{{ .Video.Channel.URLThumb }}" />
-          </span>
-          {{ else }}
-          <span class="video-icons" style="background-color:#f44336;"><i class="fa fa-info-circle"></i></span>
-          {{ end }}
           <div class="video-post-info">
-            {{ if .Video.ChannelID }}
-            <h4><a id="page_view_video_channel" href="{{ .Video.Channel.URLView }}">{{ .Video.Channel.Name }}</a></h4>
-            {{ else }}
-            <h4><a id="page_view_video_channel" href="#">No channel</a></h4>
-            {{ end }}
-            <div class="video-post-date">
-              <span><i class="fa fa-calendar"></i></span>
-              <p>{{ .Video.CreatedAt.Format "2006 Jan 01" }}</p>
-              {{ range $actor := .Video.Actors }}
-              <span class="video-posts-author">
-                {{ if eq $actor.Sex "f" }}
-                <i class="fa fa-venus"></i>
-                {{ else if eq $actor.Sex "m" }}
-                <i class="fa fa-mars"></i>
-                {{ else if eq $actor.Sex "tw" }}
-                <i class="fa fa-mars-and-venus"></i>
-                {{ else }}
-                <i class="fa fa-person-circle-question"></i>
-                {{ end }}
-                <a href="{{ $actor.URLView }}">{{ $actor.Name }}</a>
-              </span>
+            <h5 id="video-view-count">
+              <i class="far fa-eye text-secondary"></i>
+              <span>
+              {{ if .ViewCount }}
+              {{ if gt .ViewCount 1 }}
+              {{ .ViewCount }} views
+              {{ else }}
+              {{ .ViewCount }} view
               {{ end }}
-            </div>
+              {{ else }}
+              Not viewed yet!
+              {{ end }}
+              <span>
+            </h5>
           </div>
         </div>
+        <!-- right side -->
         <div class="video-post-counter">
-          <div class="video-post-viewers" id="video-view-count">
-            {{ if .ViewCount }}
-            {{ if gt .ViewCount 1 }}
-            <h3>{{ .ViewCount }} views</h3>
-            {{ else }}
-            <h3>{{ .ViewCount }} view</h3>
-            {{ end }}
-            {{ else }}
-            <h3>Not viewed yet!</h3>
-            {{ end }}
-          </div>
-          <div class="video-like">
-            <span><i class="far fa-thumbs-up"></i></span>
-            <p>421825</p>
-          </div>
-          <div class="video-dislike">
-            <span><i class="far fa-thumbs-down"></i></span>
-            <p>9694</p>
-          </div>
+          <a download="{{ .Video.ID}}.mp4" href="{{ .Video.URLStream }}" class="btn btn-sm btn-outline-dark"><i class="fas fa-download text-secondary"></i> Download</a>
+          {{ if .User.Admin }}
+          <a class="btn btn-sm btn-outline-dark" href="{{ .Video.URLAdmEdit }}"><i class="fa fa-edit text-secondary"></i> Edit</a>
+          {{ end }}
+
         </div>
       </div>
-      <!-- Start Tags And Share Options -->
-      <div class="tags-and-share">
-        <div class="post-tags widget">
-          <ul class="tagcloud">
-            {{ if .Categories }}
-            {{ range $category_id, $category_name := .Categories }}
-            <li><a href="/category/{{ $category_id }}">{{ $category_name }}</a></li>
-            {{ end }}
-            {{ else }}
-            <li><a href="#">No tags</a></li>
-            {{ end }}
-          </ul>
-        </div>
-      </div>
-      <!-- End Tags And Share Options -->
     </div>
     <!-- End Video Post -->
   </div>
