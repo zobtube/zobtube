@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.3.4
+### Fixes
+* [4f5b47b](https://github.com/zobtube/zobtube/commit/4f5b47b9da1154220b5932a4fd44db14a24a3fe4) fix(actor/edit): picture correct size (fix #107)
+* [70d6bfb](https://github.com/zobtube/zobtube/commit/70d6bfb9c9c24f2f6490c209424b3207b995f4a6) fix(deps): update module github.com/urfave/cli-altsrc/v3 to v3.1.0
+* [ce92998](https://github.com/zobtube/zobtube/commit/ce929983d4c3d92a1bf7659d06a2375a2c1da4b0) fix(goreleaser): extract relevant changelog part
+
 ## Version 0.3.3
 ### Fixes
 * [df9b4c8](https://github.com/zobtube/zobtube/commit/df9b4c864e39120ebd918fddf3e84cd3f03accb8) fix(adm/categories): remove max-height
