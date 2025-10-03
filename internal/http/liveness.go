@@ -1,11 +1,13 @@
 package http
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
-func livenessProbe(c *gin.Context) {
-	c.String(http.StatusOK, "alive")
+func (s *Server) livenessProbe(c *gin.Context) {
+	if s.healthy {
+		c.String(200, "alive")
+	} else {
+		c.String(500, "ko")
+	}
 }

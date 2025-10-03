@@ -45,6 +45,6 @@ func TestFailsafeUnexpectedErrorPingRoute(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/ping", nil)
 	server.Router.ServeHTTP(w, req)
 
-	assert.Equal(t, 200, w.Code)
-	assert.Equal(t, "alive", w.Body.String())
+	assert.Equal(t, 500, w.Code)
+	assert.Equal(t, "ko", w.Body.String())
 }

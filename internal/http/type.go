@@ -16,6 +16,7 @@ type Server struct {
 	FS             *embed.FS
 	Logger         *zerolog.Logger
 	authentication bool
+	healthy        bool
 }
 
 func New(embedfs *embed.FS, ginDebug bool, logger *zerolog.Logger) *Server {
@@ -32,6 +33,7 @@ func New(embedfs *embed.FS, ginDebug bool, logger *zerolog.Logger) *Server {
 		FS:             embedfs,
 		Logger:         logger,
 		authentication: false,
+		healthy:        true,
 	}
 
 	// add recovery middleware
@@ -71,7 +73,7 @@ func New(embedfs *embed.FS, ginDebug bool, logger *zerolog.Logger) *Server {
 
 	// load static
 	server.Router.StaticFS("/static", http.FS(staticFS))
-	server.Router.GET("/ping", livenessProbe)
+	server.Router.GET("/ping", server.livenessProbe)
 
 	return server
 }

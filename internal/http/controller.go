@@ -19,6 +19,9 @@ func (server *Server) ControllerSetupDefault(c *controller.AbtractController) {
 
 // failsafe http server setup - unexpected error
 func (server *Server) ControllerSetupFailsafeError(c controller.AbtractController, faultyError error) {
+	// server is not healthy
+	server.healthy = false
+
 	// redirect everything on '/'
 	server.Router.NoRoute(func(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/")
