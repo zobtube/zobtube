@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 0.3.5
+### Features
+* [554b386](https://github.com/zobtube/zobtube/commit/554b3861bf0b0168c47c1c5b1f5bd973773e12b3) feat: add configuration to disable providers
+* [554b386](https://github.com/zobtube/zobtube/commit/554b3861bf0b0168c47c1c5b1f5bd973773e12b3) feat: add configuration to set offline mode
+* [554b386](https://github.com/zobtube/zobtube/commit/554b3861bf0b0168c47c1c5b1f5bd973773e12b3) feat(http/router): add template error handling
+* [554b386](https://github.com/zobtube/zobtube/commit/554b3861bf0b0168c47c1c5b1f5bd973773e12b3) feat: store providers in database
+### Chores
+* [554b386](https://github.com/zobtube/zobtube/commit/554b3861bf0b0168c47c1c5b1f5bd973773e12b3) chore(adm): mutualize tabs shards
+### Fixes
+* [554b386](https://github.com/zobtube/zobtube/commit/554b3861bf0b0168c47c1c5b1f5bd973773e12b3) fix(actor/edit): handle properly provider failure
+
 ## Version 0.3.4
 ### Fixes
 * [4f5b47b](https://github.com/zobtube/zobtube/commit/4f5b47b9da1154220b5932a4fd44db14a24a3fe4) fix(actor/edit): picture correct size (fix #107)
