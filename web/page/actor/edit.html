@@ -197,8 +197,9 @@ const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-00
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="profilePictureModalBody">
+        <h5 id="cropper-status"></h5>
         <div id="image_drop_area">
-          <img id="image" src=""></img>
+          <img id="image" src="" style="height: 100%; width: auto; display: none;"></img>
         </div>
       </div>
       <div class="modal-footer">

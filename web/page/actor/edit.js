@@ -267,6 +267,17 @@ window.onload = function() {
   document.modalNewAlias = document.getElementById("addActorAliasModal");
   document.modalNewAliasModal = new bootstrap.Modal(document.modalNewAlias);
 
+  const previewModal = document.getElementById('profilePictureModal');
+  previewModal.addEventListener('shown.bs.modal', previewModalShown);
+  previewModal.addEventListener('hide.bs.modal', event => {
+    cropper.destroy();
+  });
+
+  // register image onload
+  document.getElementById('image').onload = function() {
+    gen_new_crop();
+  }
+
   // register calls on modals
   $("#addActorAliasInput").on('keyup', function (e) {
       if (e.key === 'Enter' || e.keyCode === 13) {
@@ -332,35 +343,35 @@ function suggestProfilePicture() {
 }
 
 // set profile picture modal logic
-const previewModal = document.getElementById('profilePictureModal')
-previewModal.addEventListener('show.bs.modal', event => {
-  const caller = event.relatedTarget;
-  console.log(caller);
-  const profilePicturePreview = document.getElementById('image');
-  profilePicturePreview.src = caller.src;
-  setTimeout(gen_new_crop, "1000");
-})
-
-previewModal.addEventListener('hide.bs.modal', event => {
-  cropper.destroy();
-})
+function previewModalShown(event) {
+  // update status
+  document.getElementById('cropper-status').innerText = 'Cropper library loading...';
+  // set image src to caller one
+  document.getElementById('image').src = event.relatedTarget.src;
+}
 
 var cropper;
 function gen_new_crop() {
-  console.debug('halo');
   var image = document.querySelector('#image');
   var minAspectRatio = 1;
   var maxAspectRatio = 1;
   cropper = new Cropper(image, {
+    viewMode: 2,
+    initialAspectRatio: 1,
     ready: function () {
       var cropper = this.cropper;
       var containerData = cropper.getContainerData();
       var cropBoxData = cropper.getCropBoxData();
-      var aspectRatio = cropBoxData.width / cropBoxData.height;
-      var newCropBoxWidth;
+      var size = Math.min(image.width, image.height);
 
-      cropper.setCropBoxData(cropper.getImageData());
+      cropper.setCropBoxData({
+        top: 0,
+        left: 0,
+        width: size,
+        height: size,
+      });
       cropper.moveTo(0);
+      document.getElementById('cropper-status').innerText = 'Cropper library ready';
     },
 
     cropmove: function () {
