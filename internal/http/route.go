@@ -18,6 +18,9 @@ func (s *Server) setupRoutes(c controller.AbtractController) {
 	admGroup.Use(UserIsAuthenticated(c))
 	admGroup.Use(UserIsAdmin(c))
 
+	// not found
+	s.Router.NoRoute(c.ErrNotFound)
+
 	// home
 	authGroup.GET("", c.Home)
 

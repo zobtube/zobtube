@@ -55,8 +55,7 @@ func (c *Controller) ChannelView(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		//TODO: return to homepage
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 
@@ -81,7 +80,7 @@ func (c *Controller) ChannelThumb(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 
@@ -110,8 +109,7 @@ func (c *Controller) ChannelEdit(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		//TODO: return to homepage
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 
@@ -121,27 +119,21 @@ func (c *Controller) ChannelEdit(g *gin.Context) {
 	if g.Request.Method == "POST" {
 		file, err := g.FormFile("profile")
 		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
+			c.ErrFatal(g, err.Error())
 			return
 		}
 
 		//save thumb on disk
 		err = g.SaveUploadedFile(file, targetPath)
 		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
+			c.ErrFatal(g, err.Error())
 			return
 		}
 
 		channel.Thumbnail = true
 		err = c.datastore.Save(channel).Error
 		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
+			c.ErrFatal(g, err.Error())
 			return
 		}
 	}

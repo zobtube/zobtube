@@ -24,9 +24,7 @@ func (c *Controller) AuthPage(g *gin.Context) {
 func (c *Controller) AuthLogout(g *gin.Context) {
 	cookie, err := g.Cookie(cookieName)
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		c.ErrFatal(g, err.Error())
 	}
 
 	// get session

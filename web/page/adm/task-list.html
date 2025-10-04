@@ -7,8 +7,12 @@
 
 <div class="row">
     <div class="col-md-12">
+        {{ if .Tasks }}
         <h2>Task list</h2>
         {{ template "shards/adm-task-list.html" .Tasks }}
+        {{ else }}
+        <div class="alert alert-success">No tasks run so far</div>
+        {{ end }}
     </div>
 </div>
 {{ template "bottom" .}}

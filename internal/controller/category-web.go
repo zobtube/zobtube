@@ -28,8 +28,7 @@ func (c *Controller) CategorySubView(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		//TODO: return to homepage
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 

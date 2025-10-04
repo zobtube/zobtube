@@ -61,8 +61,10 @@ window.zt = Object(zt);
                               </div>
                               {{ end }}
                               <div class="user-info">
+                                {{ if .User.Username }}
                                 <i class="fa fa-user"></i>
                                 <a href="/profile">{{ .User.Username }}</a>
+                                {{ end }}
                                 {{ if .AuthenticationEnabled }}
                                 <span class="sepator">|</span>
                                 {{ end }}

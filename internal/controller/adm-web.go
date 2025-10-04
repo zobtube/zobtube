@@ -42,17 +42,16 @@ func (c *Controller) AdmHome(g *gin.Context) {
 		workingDirectory = ""
 	}
 
-
 	c.HTML(g, http.StatusOK, "adm/home.html", gin.H{
-		"Build":         c.build,
-		"VideoCount":    videoCount,
-		"ActorCount":    actorCount,
-		"ChannelCount":  channelCount,
-		"UserCount":     userCount,
-		"CategoryCount": categoryCount,
-		"GolangVersion": runtime.Version(),
-		"DBDriver":      c.config.DB.Driver,
-		"BinaryPath":    binaryPath,
+		"Build":            c.build,
+		"VideoCount":       videoCount,
+		"ActorCount":       actorCount,
+		"ChannelCount":     channelCount,
+		"UserCount":        userCount,
+		"CategoryCount":    categoryCount,
+		"GolangVersion":    runtime.Version(),
+		"DBDriver":         c.config.DB.Driver,
+		"BinaryPath":       binaryPath,
 		"StartupDirectory": workingDirectory,
 	})
 }
@@ -102,7 +101,7 @@ func (c *Controller) AdmTaskView(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 
@@ -113,13 +112,7 @@ func (c *Controller) AdmTaskView(g *gin.Context) {
 
 func (c *Controller) AdmTaskList(g *gin.Context) {
 	tasks := []model.Task{}
-	result := c.datastore.Find(&tasks)
-
-	// check result
-	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
-		return
-	}
+	c.datastore.Find(&tasks)
 
 	c.HTML(g, http.StatusOK, "adm/task-list.html", gin.H{
 		"Tasks": tasks,
@@ -138,7 +131,7 @@ func (c *Controller) AdmTaskRetry(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 
@@ -146,9 +139,7 @@ func (c *Controller) AdmTaskRetry(g *gin.Context) {
 
 	err := c.datastore.Save(task).Error
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		c.ErrFatal(g, err.Error())
 		return
 	}
 
@@ -229,15 +220,13 @@ func (c *Controller) AdmUserDelete(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 
 	err = c.datastore.Delete(&user).Error
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		c.ErrFatal(g, err.Error())
 		return
 	}
 
@@ -246,11 +235,9 @@ func (c *Controller) AdmUserDelete(g *gin.Context) {
 
 func (c *Controller) AdmCategory(g *gin.Context) {
 	categories := []model.Category{}
-	err := c.datastore.Preload("Sub").Find(&categories).Error
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+	result := c.datastore.Preload("Sub").Find(&categories)
+	if result.RowsAffected < 1 {
+		c.ErrNotFound(g)
 		return
 	}
 

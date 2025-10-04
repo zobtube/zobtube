@@ -59,8 +59,7 @@ func (c *Controller) ActorView(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		//TODO: return to homepage
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 
@@ -81,8 +80,7 @@ func (c *Controller) ActorEdit(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		//TODO: return to homepage
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 
@@ -90,9 +88,7 @@ func (c *Controller) ActorEdit(g *gin.Context) {
 	categories := []model.Category{}
 	err := c.datastore.Preload("Sub").Find(&categories).Error
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		c.ErrFatal(g, err.Error())
 		return
 	}
 
@@ -102,9 +98,7 @@ func (c *Controller) ActorEdit(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		g.JSON(500, gin.H{
-			"error": "configuration not found, restarting the appliaction should fix the issue",
-		})
+		c.ErrFatal(g, ErrConfigAbsent)
 		return
 	}
 
@@ -161,7 +155,7 @@ func (c *Controller) ActorDelete(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 
@@ -169,18 +163,14 @@ func (c *Controller) ActorDelete(g *gin.Context) {
 	thumbPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id, "thumb.jpg")
 	_, err := os.Stat(thumbPath)
 	if err != nil && !os.IsNotExist(err) {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		c.ErrFatal(g, err.Error())
 		return
 	}
 	if !os.IsNotExist(err) {
 		// exist, deleting it
 		err = os.Remove(thumbPath)
 		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
+			c.ErrFatal(g, err.Error())
 			return
 		}
 	}
@@ -189,18 +179,14 @@ func (c *Controller) ActorDelete(g *gin.Context) {
 	folderPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id)
 	_, err = os.Stat(folderPath)
 	if err != nil && !os.IsNotExist(err) {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		c.ErrFatal(g, err.Error())
 		return
 	}
 	if !os.IsNotExist(err) {
 		// exist, deleting it
 		err = os.Remove(folderPath)
 		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
+			c.ErrFatal(g, err.Error())
 			return
 		}
 	}
@@ -208,9 +194,7 @@ func (c *Controller) ActorDelete(g *gin.Context) {
 	// delete object
 	err = c.datastore.Delete(actor).Error
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		c.ErrFatal(g, err.Error())
 		return
 	}
 

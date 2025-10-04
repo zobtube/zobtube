@@ -131,6 +131,7 @@ type AbtractController interface {
 	ProfileView(*gin.Context)
 
 	// Error pages
+	ErrNotFound(*gin.Context)
 	ErrUnauthorized(*gin.Context)
 
 	// Init

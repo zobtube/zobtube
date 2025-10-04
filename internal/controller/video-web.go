@@ -21,24 +21,18 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 	}
 	result := c.datastore.Preload("Actors").Preload("Channel").Preload("Categories").First(video)
 
+	// check result
+	if result.RowsAffected < 1 {
+		c.ErrNotFound(g)
+		return
+	}
+
 	var actors []model.Actor
 	c.datastore.Find(&actors)
 
 	// get categories
 	categories := []model.Category{}
-	err := c.datastore.Preload("Sub").Find(&categories).Error
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	// check result
-	if result.RowsAffected < 1 {
-		g.JSON(404, gin.H{})
-		return
-	}
+	c.datastore.Preload("Sub").Find(&categories)
 
 	c.HTML(g, http.StatusOK, "video/edit.html", gin.H{
 		"Actors":     actors,
@@ -90,8 +84,7 @@ func (c *Controller) VideoView(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		//TODO: return to homepage
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
 
@@ -143,12 +136,9 @@ func (c *Controller) ClipView(g *gin.Context) {
 
 	// check result
 	if result.RowsAffected < 1 {
-		//TODO: return to homepage
-		g.JSON(404, gin.H{})
+		c.ErrNotFound(g)
 		return
 	}
-
-	user := g.MustGet("user").(*model.User)
 
 	// create clip random list
 	type ClipID struct {
@@ -156,13 +146,7 @@ func (c *Controller) ClipView(g *gin.Context) {
 	}
 
 	var clipIDs []ClipID
-	err := c.datastore.Model(&model.Video{}).Where("type = ?", "c").Find(&clipIDs).Error
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
+	c.datastore.Model(&model.Video{}).Where("type = ?", "c").Find(&clipIDs)
 
 	var clipList []string
 
@@ -184,7 +168,6 @@ func (c *Controller) ClipView(g *gin.Context) {
 
 	// render
 	c.HTML(g, http.StatusOK, "clip/view.html", gin.H{
-		"User":  user,
 		"Video": video,
 		"Clips": clipList,
 	})

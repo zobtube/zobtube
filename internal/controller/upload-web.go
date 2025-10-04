@@ -13,9 +13,7 @@ func (c *Controller) UploadTriage(g *gin.Context) {
 	var actors []model.Actor
 	err := c.datastore.Find(&actors).Error
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		c.ErrFatal(g, err.Error())
 		return
 	}
 
@@ -23,9 +21,7 @@ func (c *Controller) UploadTriage(g *gin.Context) {
 	categories := []model.Category{}
 	err = c.datastore.Preload("Sub").Find(&categories).Error
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		c.ErrFatal(g, err.Error())
 		return
 	}
 
@@ -33,9 +29,7 @@ func (c *Controller) UploadTriage(g *gin.Context) {
 	var channels []model.Channel
 	err = c.datastore.Find(&channels).Error
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		c.ErrFatal(g, err.Error())
 		return
 	}
 
@@ -67,7 +61,11 @@ func (c *Controller) UploadImport(g *gin.Context) {
 		Type:          form.ImportAs,
 	}
 
-	c.datastore.Create(video)
-	//TODO: check result
+	err = c.datastore.Create(video).Error
+	if err != nil {
+		c.ErrFatal(g, err.Error())
+		return
+	}
+
 	g.Redirect(http.StatusFound, "/video/"+video.ID)
 }
