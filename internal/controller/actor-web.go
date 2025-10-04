@@ -144,12 +144,9 @@ func (c *Controller) ActorThumb(g *gin.Context) {
 }
 
 func (c *Controller) ActorDelete(g *gin.Context) {
-	// get id from path
-	id := g.Param("id")
-
 	// get item from ID
 	actor := &model.Actor{
-		ID: id,
+		ID: g.Param("id"),
 	}
 	result := c.datastore.First(actor)
 
@@ -160,7 +157,7 @@ func (c *Controller) ActorDelete(g *gin.Context) {
 	}
 
 	// delete thumb
-	thumbPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id, "thumb.jpg")
+	thumbPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, actor.ID, "thumb.jpg")
 	_, err := os.Stat(thumbPath)
 	if err != nil && !os.IsNotExist(err) {
 		c.ErrFatal(g, err.Error())
@@ -176,7 +173,7 @@ func (c *Controller) ActorDelete(g *gin.Context) {
 	}
 
 	// delete folder
-	folderPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id)
+	folderPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, actor.ID)
 	_, err = os.Stat(folderPath)
 	if err != nil && !os.IsNotExist(err) {
 		c.ErrFatal(g, err.Error())

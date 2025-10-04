@@ -38,12 +38,9 @@ func (c *Controller) CategorySubAjaxAdd(g *gin.Context) {
 }
 
 func (c *Controller) CategorySubAjaxThumbSet(g *gin.Context) {
-	// get id from path
-	id := g.Param("id")
-
 	// get item from ID
 	category := &model.CategorySub{
-		ID: id,
+		ID: g.Param("id"),
 	}
 	result := c.datastore.First(category)
 
@@ -63,7 +60,7 @@ func (c *Controller) CategorySubAjaxThumbSet(g *gin.Context) {
 	}
 
 	// construct file path
-	filename := fmt.Sprintf("%s.jpg", id)
+	filename := fmt.Sprintf("%s.jpg", category.ID)
 	targetPath := filepath.Join(c.config.Media.Path, CATEGORY_FILEPATH, filename)
 
 	//save thumb on disk
@@ -93,12 +90,9 @@ func (c *Controller) CategorySubAjaxThumbSet(g *gin.Context) {
 }
 
 func (c *Controller) CategorySubAjaxThumbRemove(g *gin.Context) {
-	// get id from path
-	id := g.Param("id")
-
 	// get item from ID
 	category := &model.CategorySub{
-		ID: id,
+		ID: g.Param("id"),
 	}
 	result := c.datastore.First(category)
 
@@ -109,7 +103,7 @@ func (c *Controller) CategorySubAjaxThumbRemove(g *gin.Context) {
 	}
 
 	// construct file path
-	filename := fmt.Sprintf("%s.jpg", id)
+	filename := fmt.Sprintf("%s.jpg", category.ID)
 	targetPath := filepath.Join(c.config.Media.Path, CATEGORY_FILEPATH, filename)
 
 	_, err := os.Stat(targetPath)
