@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"runtime"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,6 +30,19 @@ func (c *Controller) AdmHome(g *gin.Context) {
 	c.datastore.Table("users").Where("deleted_at is null").Count(&userCount)
 	c.datastore.Table("categories").Where("deleted_at is null").Count(&categoryCount)
 
+	binaryPath, err := os.Executable()
+	if err != nil {
+		c.logger.Warn().Err(err).Msg("unable to get binary path")
+		binaryPath = ""
+	}
+
+	workingDirectory, err := os.Getwd()
+	if err != nil {
+		c.logger.Warn().Err(err).Msg("unable to get binary working directory")
+		workingDirectory = ""
+	}
+
+
 	c.HTML(g, http.StatusOK, "adm/home.html", gin.H{
 		"Build":         c.build,
 		"VideoCount":    videoCount,
@@ -35,6 +50,10 @@ func (c *Controller) AdmHome(g *gin.Context) {
 		"ChannelCount":  channelCount,
 		"UserCount":     userCount,
 		"CategoryCount": categoryCount,
+		"GolangVersion": runtime.Version(),
+		"DBDriver":      c.config.DB.Driver,
+		"BinaryPath":    binaryPath,
+		"StartupDirectory": workingDirectory,
 	})
 }
 
