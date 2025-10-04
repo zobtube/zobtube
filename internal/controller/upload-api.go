@@ -380,7 +380,7 @@ func (c *Controller) UploadAjaxMassImport(g *gin.Context) {
 		}
 
 		// save object in db
-		err = tx.Debug().Create(&video).Error
+		err = tx.Create(&video).Error
 		if err != nil {
 			tx.Rollback()
 			g.JSON(500, gin.H{
@@ -389,7 +389,7 @@ func (c *Controller) UploadAjaxMassImport(g *gin.Context) {
 			return
 		}
 
-		err = tx.Model(video).Debug().Association("Actors").Append(actors)
+		err = tx.Model(video).Association("Actors").Append(actors)
 		if err != nil {
 			tx.Rollback()
 			g.JSON(500, gin.H{
@@ -398,7 +398,7 @@ func (c *Controller) UploadAjaxMassImport(g *gin.Context) {
 			return
 		}
 
-		err = tx.Model(video).Debug().Association("Categories").Append(categories)
+		err = tx.Model(video).Association("Categories").Append(categories)
 		if err != nil {
 			tx.Rollback()
 			g.JSON(500, gin.H{
