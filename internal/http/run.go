@@ -11,6 +11,7 @@ import (
 
 func (s *Server) Start(bindAddress string) {
 	s.Logger.Info().Str("kind", "system").Str("bind", bindAddress).Msg("http server binding")
+	// #nosec G112
 	s.Server = &http.Server{
 		Addr:    bindAddress,
 		Handler: s.Router.Handler(),
@@ -36,6 +37,7 @@ func (s *Server) WaitForStopSignal(c <-chan int) {
 		s.Logger.Warn().Str("kind", "system").Msg("server shutdown requested")
 	case 2:
 		s.Logger.Warn().Str("kind", "system").Msg("server restart requested")
+		// #nosec G204
 		cmd := exec.Command(os.Args[0])
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout

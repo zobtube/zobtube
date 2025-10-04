@@ -27,9 +27,11 @@ func generateHorizontalMiniThumnail(ctx *common.Context, video *model.Video) (st
 	}
 
 	// open files
+	// #nosec G304
 	input, _ := os.Open(thumbPath)
 	defer input.Close()
 
+	// #nosec G304
 	output, _ := os.Create(thumbXSPath)
 	defer output.Close()
 
@@ -91,9 +93,11 @@ func generateSameRatioMiniThumnail(ctx *common.Context, video *model.Video) (str
 	}
 
 	// open files
+	// #nosec G304
 	input, _ := os.Open(thumbPath)
 	defer input.Close()
 
+	// #nosec G304
 	output, _ := os.Create(thumbXSPath)
 	defer output.Close()
 

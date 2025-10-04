@@ -19,7 +19,7 @@ func (cfg *Config) EnsureTreePresent() error {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		// do not exists, create it
-		err = os.Mkdir(path, os.ModePerm)
+		err = os.Mkdir(path, 0o750)
 		if err != nil {
 			return err
 		}
@@ -34,7 +34,7 @@ func (cfg *Config) EnsureTreePresent() error {
 		_, err := os.Stat(path)
 		if os.IsNotExist(err) {
 			// do not exists, create it
-			err = os.Mkdir(path, os.ModePerm)
+			err = os.Mkdir(path, 0o750)
 			if err != nil {
 				return err
 			}

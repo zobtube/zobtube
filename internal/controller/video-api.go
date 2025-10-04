@@ -127,15 +127,12 @@ func (c *Controller) VideoAjaxStreamInfo(g *gin.Context) {
 	_, err := os.Stat(path)
 	if err == nil {
 		g.JSON(200, gin.H{})
-		return
 	} else if errors.Is(err, os.ErrNotExist) {
 		g.JSON(404, gin.H{})
-		return
 	} else {
 		g.JSON(500, gin.H{
 			"error": err.Error(),
 		})
-		return
 	}
 }
 
@@ -176,7 +173,7 @@ func (c *Controller) VideoAjaxRename(g *gin.Context) {
 	video.Name = form.Name
 
 	c.datastore.Save(video)
-	//TODO: check result
+	// TODO: check result
 	g.JSON(200, gin.H{})
 }
 
@@ -276,7 +273,7 @@ func (c *Controller) VideoAjaxUploadThumb(g *gin.Context) {
 	_, err := os.Stat(videoFolder)
 	if os.IsNotExist(err) {
 		// do not exists, create it
-		err = os.Mkdir(videoFolder, os.ModePerm)
+		err = os.Mkdir(videoFolder, 0o750)
 		if err != nil {
 			g.JSON(500, gin.H{
 				"error": err.Error(),
@@ -347,7 +344,7 @@ func (c *Controller) VideoAjaxUpload(g *gin.Context) {
 	_, err := os.Stat(videoFolder)
 	if os.IsNotExist(err) {
 		// do not exists, create it
-		err = os.Mkdir(videoFolder, os.ModePerm)
+		err = os.Mkdir(videoFolder, 0o750)
 		if err != nil {
 			g.JSON(500, gin.H{
 				"error": err.Error(),

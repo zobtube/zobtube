@@ -101,9 +101,8 @@ func (v *Video) NiceDuration() string {
 	s := d / time.Second
 	if h > 0 {
 		return fmt.Sprintf("%02d:%02d:%02d", h, m, s)
-	} else {
-		return fmt.Sprintf("%02d:%02d", m, s)
 	}
+	return fmt.Sprintf("%02d:%02d", m, s)
 }
 
 func (v *Video) NiceDurationShort() string {
@@ -119,11 +118,11 @@ func (v *Video) NiceDurationShort() string {
 	s := d / time.Second
 	if h > 0 {
 		return fmt.Sprintf("%2dh%02d", h, m)
-	} else if m > 0 {
-		return fmt.Sprintf("%2d min", m)
-	} else {
-		return fmt.Sprintf("%2d sec", s)
 	}
+	if m > 0 {
+		return fmt.Sprintf("%2d min", m)
+	}
+	return fmt.Sprintf("%2d sec", s)
 }
 
 func (v *Video) String() string {

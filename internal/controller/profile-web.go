@@ -17,7 +17,7 @@ func (c *Controller) ProfileView(g *gin.Context) {
 	c.datastore.Where("user_id = ?", user.ID).Order("count desc").Limit(8).Preload("Video").Find(&videoViewsTop)
 
 	// count actors
-	var countPerActor = make(map[string]int)
+	countPerActor := make(map[string]int)
 	var videoViewsAll []model.VideoView
 	c.datastore.Where("user_id = ?", user.ID).Find(&videoViewsAll) // get all views for user
 
@@ -31,7 +31,7 @@ func (c *Controller) ProfileView(g *gin.Context) {
 		for _, actor := range actors {
 			_, ok := countPerActor[actor.ActorID]
 			if ok {
-				countPerActor[actor.ActorID] = countPerActor[actor.ActorID] + videoView.Count
+				countPerActor[actor.ActorID] += videoView.Count
 			} else {
 				countPerActor[actor.ActorID] = videoView.Count
 			}

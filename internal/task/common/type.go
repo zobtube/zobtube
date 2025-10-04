@@ -52,7 +52,6 @@ func (t *Task) runTask(ctx *Context, task *model.Task) {
 	stepNB := findStepNB(t.Steps, task.Step)
 
 	errMsg, err := t.Steps[stepNB].Func(ctx, task.Parameters)
-
 	if err != nil {
 		log.Println("task failed:", errMsg, err.Error())
 		task.Status = model.TaskStatusError

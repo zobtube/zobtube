@@ -1,0 +1,58 @@
+errorCode = 1
+enableAllRules = true
+severity = "error"
+
+# warning
+[rule.line-length-limit]
+arguments = [ 120 ]
+severity = "warning"
+
+[rule.flag-parameter]
+severity = "warning"
+
+[rule.import-shadowing]
+severity = "warning"
+
+[rule.defer]
+severity = "warning"
+
+[rule.unchecked-type-assertion]
+severity = "warning"
+
+[rule.deep-exit]
+severity = "warning"
+
+[rule.enforce-switch-style]
+severity = "warning"
+
+# disabled for now
+[rule.exported]
+Disabled = true
+
+[rule.add-constant]
+Disabled = true
+
+[rule.var-naming]
+Disabled = true
+
+[rule.unused-parameter]
+Disabled = true
+
+[rule.cognitive-complexity]
+Disabled = true
+
+[rule.cyclomatic]
+Disabled = true
+
+[rule.function-length]
+Disabled = true
+
+[rule.unused-receiver]
+Disabled = true
+
+[rule.package-comments]
+Disabled = true
+
+# disabled
+[rule.nested-structs]
+Disabled = true

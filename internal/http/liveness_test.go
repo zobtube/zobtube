@@ -13,17 +13,17 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/zobtube/zobtube/internal/controller"
-	httpServer "github.com/zobtube/zobtube/internal/http"
+	httpserver "github.com/zobtube/zobtube/internal/http"
 )
 
 //go:embed liveness_test.go
 var embedFS embed.FS
 
 func TestPingRoute(t *testing.T) {
-	var logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
+	logger := log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 	var c chan int
 	cont := controller.New(c)
-	server := httpServer.New(&embedFS, false, &logger)
+	server := httpserver.New(&embedFS, false, &logger)
 	server.ControllerSetupDefault(&cont)
 
 	w := httptest.NewRecorder()
@@ -35,10 +35,10 @@ func TestPingRoute(t *testing.T) {
 }
 
 func TestFailsafeUnexpectedErrorPingRoute(t *testing.T) {
-	var logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
+	logger := log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 	var c chan int
 	cont := controller.New(c)
-	server := httpServer.New(&embedFS, false, &logger)
+	server := httpserver.New(&embedFS, false, &logger)
 	server.ControllerSetupFailsafeError(cont, nil)
 
 	w := httptest.NewRecorder()

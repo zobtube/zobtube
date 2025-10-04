@@ -28,11 +28,14 @@ type Parameters struct {
 }
 
 // channel for http server shutdown
-var wg sync.WaitGroup
-var shutdownChannel chan int
+var (
+	wg              sync.WaitGroup
+	shutdownChannel chan int
+)
 
 func Start(params *Parameters) error {
 	// setup log level
+	// #nosec G115
 	zerolog.SetGlobalLevel(zerolog.Level(params.Cmd.Int("log-level")))
 
 	// initialize logger
@@ -130,7 +133,9 @@ func Start(params *Parameters) error {
 
 		// check result
 		if result.RowsAffected < 1 {
-			params.Logger.Warn().Str("kind", "system").Msg("configuration unset with existing users, enabling authentication")
+			params.Logger.Warn().
+				Str("kind", "system").
+				Msg("configuration unset with existing users, enabling authentication")
 			// register the instance to be authentication-less
 			config := &model.Configuration{
 				ID:                 1,

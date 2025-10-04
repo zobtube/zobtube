@@ -9,11 +9,13 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
-const cookieName = "zt_auth"
-const cookieSecure = false
-const cookieHttpOnly = false
-const sessionTimePending = 10 * time.Minute
-const sessionTimeValidated = 24 * time.Hour
+const (
+	cookieName           = "zt_auth"
+	cookieSecure         = false
+	cookieHttpOnly       = false
+	sessionTimePending   = 10 * time.Minute
+	sessionTimeValidated = 24 * time.Hour
+)
 
 func (c *Controller) createSession(g *gin.Context) {
 	// create a short session

@@ -123,7 +123,7 @@ func (c *Controller) ChannelEdit(g *gin.Context) {
 			return
 		}
 
-		//save thumb on disk
+		// save thumb on disk
 		err = g.SaveUploadedFile(file, targetPath)
 		if err != nil {
 			c.ErrFatal(g, err.Error())

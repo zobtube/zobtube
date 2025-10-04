@@ -159,6 +159,7 @@ func (c *Controller) ClipView(g *gin.Context) {
 
 	// randomize it
 	for i := range clipList {
+		// #nosec G404
 		j := rand.Intn(i + 1)
 		clipList[i], clipList[j] = clipList[j], clipList[i]
 	}

@@ -41,6 +41,7 @@ func generateThumbnail(ctx *common.Context, params common.Parameters) (string, e
 		return "Unable to get absolute path of the new thumbnail", err
 	}
 
+	// #nosec G204
 	_, err = exec.Command(
 		"ffmpeg",
 		"-y",

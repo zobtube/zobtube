@@ -1,0 +1,26 @@
+---
+
+version: '3'
+
+tasks:
+  dev:install:
+    cmds:
+      - go install -v github.com/mgechev/revive@latest
+      - go install -v github.com/securego/gosec/v2/cmd/gosec@latest
+      - go install -v mvdan.cc/gofumpt@latest
+      - go install -v github.com/go-critic/go-critic/cmd/gocritic@latest
+      - go install -v honnef.co/go/tools/cmd/staticcheck@latest
+  dev:lint:
+    cmds:
+      - gofumpt -l -w .
+  dev:pre-commit:
+    cmds:
+      - go mod tidy -diff
+      - go test ./...
+      - go vet ./...
+      - revive -formatter=stylish ./...
+      - gosec -quiet ./...
+      - gofumpt -d -l .
+      - gocritic check -disable=ifElseChain check ./...
+      - golangci-lint run
+      - staticcheck ./...

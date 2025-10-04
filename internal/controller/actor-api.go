@@ -215,7 +215,7 @@ func (c *Controller) ActorAjaxThumb(g *gin.Context) {
 	// construct file path
 	targetPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id, "thumb.jpg")
 
-	//save thumb on disk
+	// save thumb on disk
 	err = g.SaveUploadedFile(file, targetPath)
 	if err != nil {
 		g.JSON(500, gin.H{

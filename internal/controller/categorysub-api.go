@@ -63,7 +63,7 @@ func (c *Controller) CategorySubAjaxThumbSet(g *gin.Context) {
 	filename := fmt.Sprintf("%s.jpg", category.ID)
 	targetPath := filepath.Join(c.config.Media.Path, CATEGORY_FILEPATH, filename)
 
-	//save thumb on disk
+	// save thumb on disk
 	err = g.SaveUploadedFile(file, targetPath)
 	if err != nil {
 		g.JSON(500, gin.H{

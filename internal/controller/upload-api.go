@@ -66,6 +66,7 @@ func (c *Controller) UploadAjaxTriageFolder(g *gin.Context) {
 			continue
 		}
 
+		// #nosec G304
 		dir, err := os.Open(entryPath)
 		if err != nil {
 			g.JSON(500, gin.H{
@@ -90,7 +91,6 @@ func (c *Controller) UploadAjaxTriageFolder(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{
 		"folders": items,
 	})
-
 }
 
 type FileInfo struct {
@@ -143,7 +143,6 @@ func (c *Controller) UploadAjaxTriageFile(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{
 		"files": items,
 	})
-
 }
 
 func (c *Controller) UploadAjaxUploadFile(g *gin.Context) {
@@ -445,7 +444,7 @@ func (c *Controller) UploadAjaxFolderCreate(g *gin.Context) {
 	}
 
 	// do not exists, create it
-	err = os.Mkdir(path, os.ModePerm)
+	err = os.Mkdir(path, 0o750)
 	if err != nil {
 		g.JSON(500, gin.H{
 			"error": err.Error(),

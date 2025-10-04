@@ -335,7 +335,6 @@ func (c *Controller) AdmConfigProviderSwitch(g *gin.Context) {
 
 	provider.Enabled = !provider.Enabled
 	err := c.datastore.Save(&provider).Error
-
 	// check result
 	if err != nil {
 		c.HTML(g, 500, "err/fatal.html", gin.H{

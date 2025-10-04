@@ -101,7 +101,7 @@ func (p *Boobpedia) ActorGetThumb(offlineMode bool, actorName, url string) (thum
 	// set found url
 	url = thumbURLMatches[1]
 
-	//TODO: add secondary search with new profiles
+	// TODO: add secondary search with new profiles
 	// for reference, regex is: <div class="thumbImage">\n\s*<img src="([^"]*)
 	// note: regex is most likely multilined
 

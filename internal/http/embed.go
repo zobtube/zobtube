@@ -8,7 +8,12 @@ import (
 	"strings"
 )
 
-func loadAndAddToRoot(funcMap template.FuncMap, rootTemplate *template.Template, embedFS embed.FS, pattern string) error {
+func loadAndAddToRoot(
+	funcMap template.FuncMap,
+	rootTemplate *template.Template,
+	embedFS embed.FS,
+	pattern string,
+) error {
 	pattern = strings.ReplaceAll(pattern, ".", "\\.")
 	pattern = strings.ReplaceAll(pattern, "*", ".*")
 

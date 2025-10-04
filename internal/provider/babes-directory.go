@@ -54,7 +54,7 @@ func (p *BabesDirectory) ActorSearch(offlineMode bool, actorName string) (url st
 		return url, nil
 	}
 
-	url = url + "-pornstar"
+	url += "-pornstar"
 	req, err = http.NewRequest("GET", url, nil)
 	if err != nil {
 		return url, err

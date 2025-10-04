@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	altsrc "github.com/urfave/cli-altsrc/v3"
-	yaml "github.com/urfave/cli-altsrc/v3/yaml"
+	"github.com/urfave/cli-altsrc/v3/yaml"
 	"github.com/urfave/cli/v3"
 
 	"github.com/zobtube/zobtube/cli/passwordreset"
@@ -113,12 +113,12 @@ func main() {
 		},
 		Action: startServer,
 		Commands: []*cli.Command{
-			&cli.Command{
+			{
 				Name:   "server",
 				Action: startServer,
 				Usage:  "start zobtube server, default action if no command passed",
 			},
-			&cli.Command{
+			{
 				Name:     "password-reset",
 				Category: "user",
 				Usage:    "reset password of a user interactively",

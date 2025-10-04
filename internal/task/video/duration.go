@@ -26,6 +26,7 @@ func computeDuration(ctx *common.Context, params common.Parameters) (string, err
 	}
 
 	filePath := filepath.Join(ctx.Config.Media.Path, video.RelativePath())
+	// #nosec G204
 	out, err := exec.Command(
 		"ffprobe",
 		"-v",
@@ -36,7 +37,6 @@ func computeDuration(ctx *common.Context, params common.Parameters) (string, err
 		"default=noprint_wrappers=1:nokey=1",
 		filePath,
 	).Output()
-
 	if err != nil {
 		return "unable to retrieve video length", err
 	}

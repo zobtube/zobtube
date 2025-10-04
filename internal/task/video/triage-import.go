@@ -33,7 +33,7 @@ func importFromTriage(ctx *common.Context, params common.Parameters) (string, er
 	_, err := os.Stat(newFolderPath)
 	if os.IsNotExist(err) {
 		// do not exists, create it
-		err = os.Mkdir(newFolderPath, os.ModePerm)
+		err = os.Mkdir(newFolderPath, 0o750)
 		if err != nil {
 			return "unable to create new video folder", err
 		}

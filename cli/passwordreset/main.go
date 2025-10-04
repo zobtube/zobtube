@@ -1,11 +1,10 @@
 package passwordreset
 
 import (
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
@@ -14,8 +13,7 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
-type Parameters struct {
-}
+type Parameters struct{}
 
 func Run(cmd *cli.Command, logger *zerolog.Logger) error {
 	// setup configuration
@@ -89,12 +87,5 @@ func Run(cmd *cli.Command, logger *zerolog.Logger) error {
 }
 
 func generatePassword() string {
-	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	chars := []rune("abcdefghijklmnopqrstuvwxyz" + "0123456789")
-	length := 32
-	s := make([]rune, length)
-	for j := 0; j < length; j++ {
-		s[j] = chars[rnd.Intn(len(chars))]
-	}
-	return string(s)
+	return rand.Text()
 }

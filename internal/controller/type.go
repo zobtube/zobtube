@@ -189,6 +189,7 @@ func (c *Controller) ConfigurationFromDBApply(db *model.Configuration) {
 	c.logger.Info().Str("kind", "system").Bool("authentication", db.UserAuthentication).Send()
 	c.config.Authentication = db.UserAuthentication
 }
+
 func (c *Controller) LoggerRegister(logger *zerolog.Logger) {
 	c.logger = logger
 }
