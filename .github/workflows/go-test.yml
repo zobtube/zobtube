@@ -17,11 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
       - uses: actions/setup-go@v6
         with:
           go-version: stable
       - name: Test with Go CLI
-        run: go test ./... 
+        run: go test ./...  -coverprofile=coverage.out
       - name: Update coverage report
         uses: ncruces/go-coverage-report@v0
         with:
@@ -31,3 +33,7 @@ jobs:
         if: |
           github.event_name == 'push'
         continue-on-error: true
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
