@@ -5,7 +5,7 @@ import (
 	"github.com/zobtube/zobtube/internal/http"
 )
 
-func startFailsafeWebServer(httpServer *http.Server, err error, c controller.AbtractController) {
+func startFailsafeWebServer(httpServer *http.Server, err error, c controller.AbstractController) {
 	httpServer.Logger.Warn().
 		Str("mode", "failsafe").
 		Str("reason", "error during boot").

@@ -7,7 +7,7 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
-func UserIsAdmin(c controller.AbtractController) gin.HandlerFunc {
+func UserIsAdmin(c controller.AbstractController) gin.HandlerFunc {
 	return func(g *gin.Context) {
 		// get user
 		user := g.MustGet("user").(*model.User)

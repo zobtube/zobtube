@@ -9,7 +9,7 @@ import (
 )
 
 // main http server setup
-func (server *Server) ControllerSetupDefault(c *controller.AbtractController) {
+func (server *Server) ControllerSetupDefault(c *controller.AbstractController) {
 	server.setupRoutes(*c)
 	// both next settings are needed for filepath used above
 	server.Router.UseRawPath = true
@@ -18,7 +18,7 @@ func (server *Server) ControllerSetupDefault(c *controller.AbtractController) {
 }
 
 // failsafe http server setup - unexpected error
-func (server *Server) ControllerSetupFailsafeError(c controller.AbtractController, faultyError error) {
+func (server *Server) ControllerSetupFailsafeError(c controller.AbstractController, faultyError error) {
 	// server is not healthy
 	server.healthy = false
 

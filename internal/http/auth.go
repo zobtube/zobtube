@@ -12,7 +12,7 @@ import (
 
 const cookieName = "zt_auth"
 
-func UserIsAuthenticated(c controller.AbtractController) gin.HandlerFunc {
+func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 	return func(g *gin.Context) {
 		if !c.AuthenticationEnabled() {
 			// get user

@@ -11,7 +11,7 @@ import (
 	"github.com/zobtube/zobtube/internal/runner"
 )
 
-type AbtractController interface {
+type AbstractController interface {
 	// Back office
 	AdmHome(*gin.Context)
 	AdmVideoList(*gin.Context)
@@ -166,7 +166,7 @@ type Controller struct {
 	logger          *zerolog.Logger
 }
 
-func New(shutdownChannel chan int) AbtractController {
+func New(shutdownChannel chan int) AbstractController {
 	return &Controller{
 		providers:       make(map[string]provider.Provider),
 		shutdownChannel: shutdownChannel,

@@ -4,7 +4,7 @@ import (
 	"github.com/zobtube/zobtube/internal/controller"
 )
 
-func (s *Server) setupRoutes(c controller.AbtractController) {
+func (s *Server) setupRoutes(c controller.AbstractController) {
 	// authentication
 	auth := s.Router.Group("/auth")
 	auth.GET("", c.AuthPage)
