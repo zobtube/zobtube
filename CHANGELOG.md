@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 0.3.6
+### Features
+* [190f90c](https://github.com/zobtube/zobtube/commit/190f90cd13a114e26fc7abeaf186dd7c4eb2dd13) feat(adm/home): rework ui
+* [3f68e9b](https://github.com/zobtube/zobtube/commit/3f68e9b54f5e47e154ee42181b8c90e033055518) feat(video/view): improve interface
+* [3f68e9b](https://github.com/zobtube/zobtube/commit/3f68e9b54f5e47e154ee42181b8c90e033055518) feat(view/view): add download link (fix #56)
+* [436174a](https://github.com/zobtube/zobtube/commit/436174a3616f4cc30e8d9bc896ee9c2b56905c0f) feat(healthcheck): report status after error
+* [e73d01f](https://github.com/zobtube/zobtube/commit/e73d01fd96d63d8b44fe3d1c3944b1fcf26a2618) feat: add sonarqube static analyzer (fix #57)
+### Fixes
+* [5929dcd](https://github.com/zobtube/zobtube/commit/5929dcd55101dcc55b25a88e012ac7d4521be429) fix(upload): remove forgottent sql debug statements
+* [b7f9f09](https://github.com/zobtube/zobtube/commit/b7f9f09c3efaf38a654ae4ce59c9afcd870ebc2d) fix(ci): switch tests to pull_request_target
+* [cf33ba1](https://github.com/zobtube/zobtube/commit/cf33ba101ccc3ce93856528e351a5a6eed167e7c) fix(category/list): remove max-height (fix #109)
+* [eee1967](https://github.com/zobtube/zobtube/commit/eee1967886998acb99985c4409e54761b1966776) fix: use id from objects instead of user ones
+* [f1948b2](https://github.com/zobtube/zobtube/commit/f1948b26f3069723e4083bb9fd69c760e3475627) fix(router): handle 404 through dedicated page
+
 ## Version 0.3.5
 ### Features
 * [554b386](https://github.com/zobtube/zobtube/commit/554b3861bf0b0168c47c1c5b1f5bd973773e12b3) feat: add configuration to disable providers
