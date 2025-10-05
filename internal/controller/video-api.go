@@ -172,8 +172,14 @@ func (c *Controller) VideoAjaxRename(g *gin.Context) {
 
 	video.Name = form.Name
 
-	c.datastore.Save(video)
-	// TODO: check result
+	err = c.datastore.Save(video).Error
+	if err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	g.JSON(200, gin.H{})
 }
 
