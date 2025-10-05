@@ -165,21 +165,25 @@ func Start(params *Parameters) error {
 
 	// external providers
 	params.Logger.Debug().Str("kind", "system").Msg("register external providers")
-	err = c.ProviderRegister(&provider.BabesDirectory{})
-	if err != nil {
-		params.Logger.Warn().Str("kind", "provider").Err(err).Msg("unable to register provider")
+	providers := []provider.Provider{
+		&provider.BabesDirectory{},
+		&provider.Babepedia{},
+		&provider.Boobpedia{},
+		&provider.Pornhub{},
 	}
-	err = c.ProviderRegister(&provider.Babepedia{})
-	if err != nil {
-		params.Logger.Warn().Str("kind", "provider").Err(err).Msg("unable to register provider")
+
+	for _, provider := range providers {
+		providerRegister(c, params, provider)
 	}
-	err = c.ProviderRegister(&provider.Boobpedia{})
-	if err != nil {
-		params.Logger.Warn().Str("kind", "provider").Err(err).Msg("unable to register provider")
+
+	// check dependencies
+	params.Logger.Debug().Str("kind", "system").Msg("check dependencies")
+	dependencies := []string{
+		"ffmpeg",
+		"ffprobe",
 	}
-	err = c.ProviderRegister(&provider.Pornhub{})
-	if err != nil {
-		params.Logger.Warn().Str("kind", "provider").Err(err).Msg("unable to register provider")
+	for _, dep := range dependencies {
+		dependencyRegister(c, params, dep)
 	}
 
 	go c.CleanupRoutine()

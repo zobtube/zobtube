@@ -141,6 +141,7 @@ type AbstractController interface {
 	RunnerRegister(*runner.Runner)
 	ConfigurationFromDBApply(*model.Configuration)
 	BuildDetailsRegister(string, string, string)
+	RegisterError(string)
 
 	// Cleanup
 	CleanupRoutine()
@@ -164,6 +165,7 @@ type Controller struct {
 	runner          *runner.Runner
 	build           *buildDetails
 	logger          *zerolog.Logger
+	healthError     []string
 }
 
 func New(shutdownChannel chan int) AbstractController {
@@ -200,4 +202,8 @@ func (c *Controller) BuildDetailsRegister(version, commit, buildDate string) {
 		Commit:    commit,
 		BuildDate: buildDate,
 	}
+}
+
+func (c *Controller) RegisterError(err string) {
+	c.healthError = append(c.healthError, err)
 }

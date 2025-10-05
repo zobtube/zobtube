@@ -53,6 +53,7 @@ func (c *Controller) AdmHome(g *gin.Context) {
 		"DBDriver":         c.config.DB.Driver,
 		"BinaryPath":       binaryPath,
 		"StartupDirectory": workingDirectory,
+		"HealthErrors":     c.healthError,
 	})
 }
 

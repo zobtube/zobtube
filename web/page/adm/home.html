@@ -134,7 +134,16 @@ dd {
   <div class="col-md-12">
     <h4>Health</h4>
     <hr />
-    No issues found in your configuration.
+    {{ if not .HealthErrors }}
+    <div class="alert alert-success">No issues found in your configuration.</div>
+    {{ else }}
+    <div class="alert alert-warning">
+      Some errors were detected:
+      <ul style="list-style: disc; margin-left: 18px;">
+        {{ range $error := .HealthErrors }}<li>{{ $error }}</li>{{ end }}
+      </ul>
+    </div>
+    {{ end }}
   </div>
 
   <div class="col-md-12">
