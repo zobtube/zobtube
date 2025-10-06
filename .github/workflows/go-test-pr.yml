@@ -2,10 +2,7 @@
 
 name: go-test
 on:
-  push:
-    branches:
-      - main
-  pull_request_target:
+  pull_request:
 
 permissions:
   contents: write
@@ -37,3 +34,8 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
+            -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
+            -Dsonar.pullrequest.key=${{github.event.pull_request.number}}
