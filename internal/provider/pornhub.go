@@ -109,7 +109,7 @@ func (p *Pornhub) ActorGetThumb(offlineMode bool, actor_name, url string) (thumb
 	if len(thumbURLMatches) != 2 || thumbURLMatches[1] == "" {
 		// second attempt on new page format
 
-		rNew := regexp.MustCompile("<div class=\"thumbImage\">\\n\\s*<img src=\"([^\"]*)")
+		rNew := regexp.MustCompile("<div class=\"thumbImage\">\\n*\\s*<img src=\"([^\"]*)")
 		thumbURLMatches = rNew.FindStringSubmatch(string(pageData))
 
 		// check result

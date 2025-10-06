@@ -87,7 +87,7 @@ func (p *Babepedia) ActorGetThumb(offlineMode bool, actorName, url string) (thum
 	}
 
 	if resp.StatusCode != 200 {
-		return thumb, err
+		return thumb, errors.New("thumb not found at given url")
 	}
 
 	// process thumb
