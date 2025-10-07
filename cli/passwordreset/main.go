@@ -13,6 +13,8 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
+const userIdFromCmd = "user-id"
+
 type Parameters struct{}
 
 func Run(cmd *cli.Command, logger *zerolog.Logger) error {
@@ -37,7 +39,7 @@ func Run(cmd *cli.Command, logger *zerolog.Logger) error {
 	}
 
 	// get user id from prompt
-	userID := cmd.String("user-id")
+	userID := cmd.String(userIdFromCmd)
 
 	// if user id is empty, display the full list of user with their ids
 	if userID == "" {
@@ -57,7 +59,7 @@ func Run(cmd *cli.Command, logger *zerolog.Logger) error {
 		return nil
 	}
 
-	logger.Log().Str("user-id", userID).Msg("get selected user")
+	logger.Log().Str(userIdFromCmd, userID).Msg("get selected user")
 	user := &model.User{
 		ID: userID,
 	}
@@ -68,7 +70,7 @@ func Run(cmd *cli.Command, logger *zerolog.Logger) error {
 	}
 
 	newPassword := generatePassword()
-	logger.Log().Str("user-id", userID).Msg(fmt.Sprintf("new password for user %s will be %s", user.Username, newPassword))
+	logger.Log().Str(userIdFromCmd, userID).Msg(fmt.Sprintf("new password for user %s will be %s", user.Username, newPassword))
 
 	passwordHex := sha256.Sum256([]byte(newPassword))
 	password := hex.EncodeToString(passwordHex[:])
@@ -81,7 +83,7 @@ func Run(cmd *cli.Command, logger *zerolog.Logger) error {
 		return err
 	}
 
-	logger.Info().Str("user-id", userID).Msg("new password set successfully")
+	logger.Info().Str(userIdFromCmd, userID).Msg("new password set successfully")
 
 	return nil
 }

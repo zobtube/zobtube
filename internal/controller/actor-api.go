@@ -8,6 +8,8 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
+const errHumanProviderNotFound = "Unable to retrieve provider"
+
 func (c *Controller) ActorAjaxNew(g *gin.Context) {
 	var err error
 	form := struct {
@@ -63,7 +65,7 @@ func (c *Controller) ActorAjaxProviderSearch(g *gin.Context) {
 	if err != nil {
 		g.JSON(404, gin.H{
 			"error":       err.Error(),
-			"error_human": "Unable to retrieve provider",
+			"error_human": errHumanProviderNotFound,
 		})
 		return
 	}
@@ -131,7 +133,7 @@ func (c *Controller) ActorAjaxLinkThumbGet(g *gin.Context) {
 	if err != nil {
 		g.JSON(404, gin.H{
 			"error":       err.Error(),
-			"error_human": "Unable to retrieve provider",
+			"error_human": errHumanProviderNotFound,
 		})
 		return
 	}
@@ -275,7 +277,7 @@ func (c *Controller) ActorAjaxLinkCreate(g *gin.Context) {
 	if err != nil {
 		g.JSON(404, gin.H{
 			"error":       err.Error(),
-			"error_human": "Unable to retrieve provider",
+			"error_human": errHumanProviderNotFound,
 		})
 		return
 	}

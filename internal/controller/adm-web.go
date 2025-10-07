@@ -14,6 +14,8 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
+const errConfigurationMissing = "configuration not found, restarting the application should fix the issue"
+
 func (c *Controller) AdmHome(g *gin.Context) {
 	// get counts
 	var (
@@ -24,11 +26,11 @@ func (c *Controller) AdmHome(g *gin.Context) {
 		categoryCount int64
 	)
 
-	c.datastore.Table("videos").Where("deleted_at is null").Count(&videoCount)
-	c.datastore.Table("actors").Where("deleted_at is null").Count(&actorCount)
-	c.datastore.Table("channels").Where("deleted_at is null").Count(&channelCount)
-	c.datastore.Table("users").Where("deleted_at is null").Count(&userCount)
-	c.datastore.Table("categories").Where("deleted_at is null").Count(&categoryCount)
+	c.datastore.Table("videos").Where(NOT_DELETED).Count(&videoCount)
+	c.datastore.Table("actors").Where(NOT_DELETED).Count(&actorCount)
+	c.datastore.Table("channels").Where(NOT_DELETED).Count(&channelCount)
+	c.datastore.Table("users").Where(NOT_DELETED).Count(&userCount)
+	c.datastore.Table("categories").Where(NOT_DELETED).Count(&categoryCount)
 
 	binaryPath, err := os.Executable()
 	if err != nil {
@@ -304,7 +306,7 @@ func (c *Controller) AdmConfigProvider(g *gin.Context) {
 	// check result
 	if result.RowsAffected < 1 {
 		c.HTML(g, 500, "err/fatal.html", gin.H{
-			"error": "configuration not found, restarting the appliaction should fix the issue",
+			"error": errConfigurationMissing,
 		})
 		return
 	}
@@ -355,7 +357,7 @@ func (c *Controller) AdmConfigOfflineMode(g *gin.Context) {
 	// check result
 	if result.RowsAffected < 1 {
 		c.HTML(g, 500, "err/fatal.html", gin.H{
-			"error": "configuration not found, restarting the appliaction should fix the issue",
+			"error": errConfigurationMissing,
 		})
 		return
 	}
@@ -379,7 +381,7 @@ func (c *Controller) AdmConfigOfflineModeUpdate(g *gin.Context) {
 	// check result
 	if result.RowsAffected < 1 {
 		c.HTML(g, 500, "err/fatal.html", gin.H{
-			"error": "configuration not found, restarting the appliaction should fix the issue",
+			"error": errConfigurationMissing,
 		})
 		return
 	}

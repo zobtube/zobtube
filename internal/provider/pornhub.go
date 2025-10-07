@@ -27,6 +27,15 @@ func (p *Pornhub) CapabilityScrapePicture() bool {
 	return true
 }
 
+func pornhubGet(client *http.Client, url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Cookie", "accessAgeDisclaimerPH=1")
+	return client.Do(req)
+}
+
 func (p *Pornhub) ActorSearch(offlineMode bool, actorName string) (url string, err error) {
 	if offlineMode {
 		return url, ErrOfflineMode
@@ -39,13 +48,7 @@ func (p *Pornhub) ActorSearch(offlineMode bool, actorName string) (url string, e
 		},
 	}
 	url = "https://www.pornhub.com/pornstar/" + strings.ReplaceAll(strings.ToLower(actorName), " ", "-")
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return url, err
-	}
-
-	req.Header.Add("Cookie", "accessAgeDisclaimerPH=1")
-	resp, err := client.Do(req)
+	resp, err := pornhubGet(client, url)
 	if err != nil {
 		return url, err
 	}
@@ -55,13 +58,7 @@ func (p *Pornhub) ActorSearch(offlineMode bool, actorName string) (url string, e
 	}
 
 	url = "https://www.pornhub.com/model/" + strings.ReplaceAll(strings.ToLower(actorName), " ", "-")
-	req, err = http.NewRequest("GET", url, nil)
-	if err != nil {
-		return url, err
-	}
-
-	req.Header.Add("Cookie", "accessAgeDisclaimerPH=1")
-	resp, err = client.Do(req)
+	resp, err = pornhubGet(client, url)
 	if err != nil {
 		return url, err
 	}
@@ -81,13 +78,8 @@ func (p *Pornhub) ActorGetThumb(offlineMode bool, actor_name, url string) (thumb
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return thumb, err
-	}
 
-	req.Header.Add("Cookie", "accessAgeDisclaimerPH=1")
-	resp, err := client.Do(req)
+	resp, err := pornhubGet(client, url)
 	if err != nil {
 		return thumb, err
 	}
@@ -123,13 +115,7 @@ func (p *Pornhub) ActorGetThumb(offlineMode bool, actor_name, url string) (thumb
 	url = thumbURLMatches[1]
 
 	// retrieve thumb
-	req, err = http.NewRequest("GET", url, nil)
-	if err != nil {
-		return thumb, err
-	}
-
-	req.Header.Add("Cookie", "accessAgeDisclaimerPH=1")
-	resp, err = client.Do(req)
+	resp, err = pornhubGet(client, url)
 	if err != nil {
 		return thumb, err
 	}

@@ -8,4 +8,5 @@ const (
 	TRIAGE_FILEPATH                  = "/triage"
 	CATEGORY_FILEPATH                = "/categories"
 	CATEGORY_PROFILE_PICTURE_MISSING = "/static/images/category-thumb-not-set.png"
+	NOT_DELETED                      = "deleted_at is null"
 )

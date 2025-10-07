@@ -13,6 +13,8 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
+const errFileEmpty = "file name cannot be empty"
+
 func (c *Controller) UploadPreview(g *gin.Context) {
 	filePathEncoded := g.Param("filepath")
 	filePath, err := url.QueryUnescape(filePathEncoded)
@@ -190,7 +192,7 @@ func (c *Controller) UploadAjaxDeleteFile(g *gin.Context) {
 	file := form.File
 	if file == "" {
 		g.JSON(400, gin.H{
-			"error": "file name cannot be empty",
+			"error": errFileEmpty,
 		})
 		return
 	}
@@ -237,7 +239,7 @@ func (c *Controller) UploadAjaxMassDelete(g *gin.Context) {
 		c.logger.Debug().Str("file", file).Send()
 		if file == "" {
 			g.JSON(400, gin.H{
-				"error": "file name cannot be empty",
+				"error": errFileEmpty,
 			})
 			return
 		}
@@ -354,7 +356,7 @@ func (c *Controller) UploadAjaxMassImport(g *gin.Context) {
 		c.logger.Debug().Str("file", file).Send()
 		if file == "" {
 			g.JSON(400, gin.H{
-				"error": "file name cannot be empty",
+				"error": errFileEmpty,
 			})
 			return
 		}

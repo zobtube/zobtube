@@ -30,6 +30,15 @@ func (p *Boobpedia) CapabilityScrapePicture() bool {
 	return true
 }
 
+func boobpediaGet(client *http.Client, url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0")
+	return client.Do(req)
+}
+
 func (p *Boobpedia) ActorSearch(offlineMode bool, actorName string) (url string, err error) {
 	if offlineMode {
 		return url, ErrOfflineMode
@@ -43,13 +52,7 @@ func (p *Boobpedia) ActorSearch(offlineMode bool, actorName string) (url string,
 	}
 	caser := cases.Title(language.English)
 	url = "https://www.boobpedia.com/boobs/" + strings.ReplaceAll(caser.String(actorName), " ", "_")
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return url, err
-	}
-
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0")
-	resp, err := client.Do(req)
+	resp, err := boobpediaGet(client, url)
 	if err != nil {
 		return url, err
 	}
@@ -69,13 +72,8 @@ func (p *Boobpedia) ActorGetThumb(offlineMode bool, actorName, url string) (thum
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return thumb, err
-	}
 
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0")
-	resp, err := client.Do(req)
+	resp, err := boobpediaGet(client, url)
 	if err != nil {
 		return thumb, err
 	}
@@ -101,18 +99,9 @@ func (p *Boobpedia) ActorGetThumb(offlineMode bool, actorName, url string) (thum
 	// set found url
 	url = thumbURLMatches[1]
 
-	// TODO: add secondary search with new profiles
-	// for reference, regex is: <div class="thumbImage">\n\s*<img src="([^"]*)
-	// note: regex is most likely multilined
-
 	// retrieve thumb
-	req, err = http.NewRequest("GET", "https://www.boobpedia.com/"+url, nil)
-	if err != nil {
-		return thumb, err
-	}
-
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0")
-	resp, err = client.Do(req)
+	url = "https://www.boobpedia.com/" + url
+	resp, err = boobpediaGet(client, url)
 	if err != nil {
 		return thumb, err
 	}

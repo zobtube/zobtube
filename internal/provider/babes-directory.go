@@ -27,6 +27,16 @@ func (p *BabesDirectory) CapabilityScrapePicture() bool {
 	return true
 }
 
+func babesDirectoryGet(client *http.Client, url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0")
+	return client.Do(req)
+}
+
 func (p *BabesDirectory) ActorSearch(offlineMode bool, actorName string) (url string, err error) {
 	if offlineMode {
 		return url, ErrOfflineMode
@@ -39,13 +49,8 @@ func (p *BabesDirectory) ActorSearch(offlineMode bool, actorName string) (url st
 		},
 	}
 	url = "https://babesdirectory.online/profile/" + strings.ReplaceAll(strings.ToLower(actorName), " ", "-")
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return url, err
-	}
 
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0")
-	resp, err := client.Do(req)
+	resp, err := babesDirectoryGet(client, url)
 	if err != nil {
 		return url, err
 	}
@@ -55,13 +60,7 @@ func (p *BabesDirectory) ActorSearch(offlineMode bool, actorName string) (url st
 	}
 
 	url += "-pornstar"
-	req, err = http.NewRequest("GET", url, nil)
-	if err != nil {
-		return url, err
-	}
-
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0")
-	resp, err = client.Do(req)
+	resp, err = babesDirectoryGet(client, url)
 	if err != nil {
 		return url, err
 	}
@@ -81,13 +80,7 @@ func (p *BabesDirectory) ActorGetThumb(offlineMode bool, actorName, url string) 
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 	}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return thumb, err
-	}
-
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0")
-	resp, err := client.Do(req)
+	resp, err := babesDirectoryGet(client, url)
 	if err != nil {
 		return thumb, err
 	}
@@ -114,13 +107,7 @@ func (p *BabesDirectory) ActorGetThumb(offlineMode bool, actorName, url string) 
 	url = thumbURLMatches[1]
 
 	// retrieve thumb
-	req, err = http.NewRequest("GET", url, nil)
-	if err != nil {
-		return thumb, err
-	}
-
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0")
-	resp, err = client.Do(req)
+	resp, err = babesDirectoryGet(client, url)
 	if err != nil {
 		return thumb, err
 	}
