@@ -14,7 +14,7 @@ def login(page):
 def test_login(page: Page):
     return login(page)
 
-def upload_common(page: Page, videoImportButton, videoEditButton):
+def upload_common(page: Page, video_import_button, video_edit_button):
     # login
     login(page)
 
@@ -34,7 +34,7 @@ def upload_common(page: Page, videoImportButton, videoEditButton):
     page.get_by_role("link", name="uploads").click()
     page.get_by_role("cell", name="Big_Buck_Bunny_360_10s_1MB.mp4").click()
     page.get_by_role("button", name=" Import").click()
-    page.get_by_role("button", name=videoImportButton).click()
+    page.get_by_role("button", name=video_import_button).click()
 
     # open edit window
     with page.expect_popup() as page1_info:
@@ -45,7 +45,7 @@ def upload_common(page: Page, videoImportButton, videoEditButton):
     expect(page1.get_by_text("Imported")).to_be_visible()
 
     # check if the video have the correct type
-    expect(page1.get_by_role("button").filter(has_text=videoEditButton)).to_be_disabled()
+    expect(page1.get_by_role("button").filter(has_text=video_edit_button)).to_be_disabled()
 
 
 def test_upload_clip(page: Page):
