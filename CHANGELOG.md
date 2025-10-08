@@ -1,5 +1,41 @@
 # Changelog
 
+## Version 0.3.7
+### Features
+* [9000c13](https://github.com/zobtube/zobtube/commit/9000c1370f2d8d92488422d48f60f61a38246616) feat(adm/home): report errors on adm home
+* [9000c13](https://github.com/zobtube/zobtube/commit/9000c1370f2d8d92488422d48f60f61a38246616) feat(main): ensure ffmpeg and ffprobe are available
+* [9000c13](https://github.com/zobtube/zobtube/commit/9000c1370f2d8d92488422d48f60f61a38246616) feat(main): load providers softly and register errors
+* [9de87c2](https://github.com/zobtube/zobtube/commit/9de87c2690fe297b526a984dd69a7e0e95f8453e) feat(test): add units on actor-api
+* [9de87c2](https://github.com/zobtube/zobtube/commit/9de87c2690fe297b526a984dd69a7e0e95f8453e) feat(test): add units on auth-common
+* [9de87c2](https://github.com/zobtube/zobtube/commit/9de87c2690fe297b526a984dd69a7e0e95f8453e) feat(test): add units on cleanup
+* [9de87c2](https://github.com/zobtube/zobtube/commit/9de87c2690fe297b526a984dd69a7e0e95f8453e) feat(test): add units on providers
+* [9de87c2](https://github.com/zobtube/zobtube/commit/9de87c2690fe297b526a984dd69a7e0e95f8453e) feat(test): add units on shutdown
+* [a0a3dee](https://github.com/zobtube/zobtube/commit/a0a3dee27e051306f2a39306a599dee7f10bc387) feat(provider): add iafd (fix #89)
+* [ac0a566](https://github.com/zobtube/zobtube/commit/ac0a56651bd278788e0f797eb4ca75d574a82ad9) feat: add unit tests on providers and config
+* [e512031](https://github.com/zobtube/zobtube/commit/e512031c9a2b1fc9bd78b70a27f6afe7f6fda17e) feat(e2e): ensure video type is correct
+### Chores
+* [22babeb](https://github.com/zobtube/zobtube/commit/22babeb140d5c130b7da27068eba9d925636b85a) chore: add taskfile to check quality
+* [22babeb](https://github.com/zobtube/zobtube/commit/22babeb140d5c130b7da27068eba9d925636b85a) chore: check code with gocritic
+* [22babeb](https://github.com/zobtube/zobtube/commit/22babeb140d5c130b7da27068eba9d925636b85a) chore: ensure mod is up-to-date
+* [22babeb](https://github.com/zobtube/zobtube/commit/22babeb140d5c130b7da27068eba9d925636b85a) chore: fix security recommendation of gosec
+* [22babeb](https://github.com/zobtube/zobtube/commit/22babeb140d5c130b7da27068eba9d925636b85a) chore: increase code quality
+* [22babeb](https://github.com/zobtube/zobtube/commit/22babeb140d5c130b7da27068eba9d925636b85a) chore: lint with gofumpt
+* [22babeb](https://github.com/zobtube/zobtube/commit/22babeb140d5c130b7da27068eba9d925636b85a) chore: perform static check analysis
+* [22babeb](https://github.com/zobtube/zobtube/commit/22babeb140d5c130b7da27068eba9d925636b85a) chore: prepare go revive
+* [2bd9ebc](https://github.com/zobtube/zobtube/commit/2bd9ebc1a2e504b4a114cffc4e94783eb2f6fde0) chore(ci): disable sonarqube on pr
+* [332b1a8](https://github.com/zobtube/zobtube/commit/332b1a868ea93a414a257b58920264b351c62c75) chore(test/e2e): rename variables
+* [4dfaa7a](https://github.com/zobtube/zobtube/commit/4dfaa7acad0c6521fba05045166523490dcd4f21) chore(ci/playwright): remove python installation
+* [a340236](https://github.com/zobtube/zobtube/commit/a340236281733a469a120e52338b4d0f95ad8659) chore(actor/edit): remove card on profile picture
+* [b12141f](https://github.com/zobtube/zobtube/commit/b12141f6ac9410010506dcb525ce82b46932e30f) chore(ci): split tests between pr and main
+### Fixes
+* [4dfaa7a](https://github.com/zobtube/zobtube/commit/4dfaa7acad0c6521fba05045166523490dcd4f21) fix(ci/playwright): move playwright to self-hosted runner to avoid flakies
+* [8596257](https://github.com/zobtube/zobtube/commit/8596257d16af952a22d5c9a04e4e54914e15dd4b) fix: remove sonar code smells
+* [8efbd4c](https://github.com/zobtube/zobtube/commit/8efbd4c344ce9b675122199caf698dc527ead3ec) fix(provider/iafd): add logo
+* [a0a3dee](https://github.com/zobtube/zobtube/commit/a0a3dee27e051306f2a39306a599dee7f10bc387) fix(actor/edit): bring back link deletion
+* [ac0a566](https://github.com/zobtube/zobtube/commit/ac0a56651bd278788e0f797eb4ca75d574a82ad9) fix(provider/babepedia): return error properly
+* [b842d5d](https://github.com/zobtube/zobtube/commit/b842d5dcfb92f018ed59df8f065143a64154358c) fix(controller): remove abstract controller typo
+* [d4b905d](https://github.com/zobtube/zobtube/commit/d4b905d4db71c78289c345cfa4b9aa9f4221e0f8) fix(video/rename): check database return
+
 ## Version 0.3.6
 ### Features
 * [190f90c](https://github.com/zobtube/zobtube/commit/190f90cd13a114e26fc7abeaf186dd7c4eb2dd13) feat(adm/home): rework ui
