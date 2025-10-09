@@ -96,8 +96,9 @@ ZobTube is aiming to include progressively those features.
 Also, here is a short list of what ZobTube provides which is absent from Stash:
 
 - A dedicated interface for short videos (a TikTok-like view, see the [screenshots page](docs/screenshots.md#short-video-viewer-tiktok-like))
-- More third-party to retrieve information from about actors (like Pornhub, Boobpedia, Babepedia and Babes Directory)
+- Some missing third-party to retrieve information from about actors (like Babes Directory)
 - PostgreSQL support (but Stash support is [on its way](https://github.com/stashapp/stash/issues/3892))
+- Multi-user support (with Admin and non-admin roles)
 
 ### Whisparr
 
