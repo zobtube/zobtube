@@ -5,10 +5,25 @@ function videoStartStop() {
 
   if (video.paused) {
     video.play();
+    document.getElementById('play-button').style.opacity = 0;
   } else {
     video.pause();
+    document.getElementById('play-button').style.opacity = 0.8;
   }
 }
+function videoStartStopDebounced() {
+    debouncer(function() {videoStartStop();});
+}
+
+document.getElementById('video-clip').addEventListener('click', videoStartStopDebounced);
+document.getElementById('video-clip').addEventListener(
+  "timeupdate",
+  function(event){
+    onTrackedVideoFrame(this.currentTime);
+  }
+);
+
+
 
 viewCounted = false;
 function countView() {
@@ -100,6 +115,9 @@ function setVideoByID(id) {
     video.play();
   }
 
+  // reset progress bar
+  document.getElementsByClassName('ProgressBar_ProgressBar')[0].style.width='0%';
+
   // get info async
   $.ajax('/api/video/'+id, {
     method: 'GET',
@@ -144,6 +162,7 @@ function redirectToClipEdition() {
   window.location = '/video/'+currentID+'/edit';
 }
 
+// wheel detection
 document.body.addEventListener('wheel', checkScrollDirection);
 
 function checkScrollDirection(event) {
@@ -166,10 +185,75 @@ function debouncer(func, timeout) {
   var timeout = timeout || 200;
   var scope = this , args = arguments;
   clearTimeout( timeoutID );
-  console.log("set timeout");
   timeoutID = setTimeout( function () {
     func.apply( scope , Array.prototype.slice.call( args ) );
   } , timeout );
 }
+
+// keyboard down / up detection
+document.addEventListener("keyup", event => {
+  if (event.keyCode === 40) {
+    nextVideo();
+    return;
+  }
+
+  if (event.keyCode === 38) {
+    previousVideo();
+    return;
+  }
+});
+
+// finger swipe detection
+// from: https://stackoverflow.com/a/23230280
+var yDown = null;
+
+function handleTouchStart(evt) {
+  yDown = evt.changedTouches[0].screenY;
+};
+
+function handleTouchMove(evt) {
+  var yUp = evt.changedTouches[0].screenY;
+  var yDiff = yDown - yUp;
+
+  if ( Math.abs(yDiff) < 100 ) {
+    // small mouvement: pause
+    videoStartStopDebounced();
+  } else {
+    if ( yDiff > 0 ) {
+      /* up swipe */
+      nextVideo();
+    } else {
+      /* down swipe */
+      previousVideo();
+    }
+  }
+  /* reset values */
+  yDown = null;
+};
+
+document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchend', handleTouchMove, false);
+
+// progression update
+function onTrackedVideoFrame(currentTime){
+  duration = document.getElementById('video-clip').duration;
+  if (duration === NaN) {
+    duration = 0;
+  }
+  progression = currentTime * 100 / duration;
+  document.getElementsByClassName('ProgressBar_ProgressBar')[0].style.width=progression+'%';
+}
+
+// progression click
+document.getElementsByClassName('ProgressBar_ClickWrapper')[0].addEventListener('click', function (e) {
+  var x = e.pageX - this.offsetLeft;
+  if ( x <= 0 ) {
+    x = 0
+  }
+
+  progress = x/this.clientWidth;
+  videoClip = document.getElementById('video-clip');
+  videoClip.currentTime = videoClip.duration * progress;
+});
 
 {{ end }}

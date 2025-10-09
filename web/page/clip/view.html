@@ -29,6 +29,94 @@
 .clip-change-disabled {
   color: #7e7e7e;
 }
+
+/* progress bar */
+.ProgressBar_Container:hover .ProgressBar_SeekBar .ProgressBar_ProgressBar:after {
+  transform:translateY(-2px);
+  width:20px;
+  height:20px
+}
+.ProgressBar_Container {
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:5px;
+  width:100%;
+  height:5px;
+  margin-top:0;
+  pointer-events:auto;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  user-select:none;
+  padding:5px 0;
+  box-sizing:content-box
+}
+.ProgressBar_Container:hover .ProgressBar_SeekBar {
+  transform:translateY(-3px);
+  height:10px
+}
+.ProgressBar_Container:hover .ProgressBar_SeekBar .ProgressBar_ProgressBar:after {
+  transform:translateY(-2px);
+  width:20px;
+  height:20px
+}
+.ProgressBar_SeekBar {
+  position:relative;
+  width:100%;
+  height:4px;
+  background:hsla(0,0%,100%,.2);
+  border-radius:4px;
+  transition:all .1s;
+  box-shadow:0 0 8px rgba(0,0,0,.4)
+}
+.ProgressBar_SeekBar .ProgressBar_ProgressBar {
+  position:relative;
+  height:100%;
+  background:hsla(0,0%,100%,.6);
+  border-radius:4px;
+  transition:all .5s
+}
+.ProgressBar_SeekBar .ProgressBar_ProgressBar:after {
+  content:"";
+  position:absolute;
+  right:-6px;
+  bottom:-6px;
+  width:16px;
+  height:16px;
+  background:#fefefe;
+  border-radius:20px;
+  transition:all .1s
+}
+.ProgressBar_ClickWrapper {
+  position:relative;
+  cursor:pointer;
+  z-index:100;
+  max-width: 720px;
+  margin: auto;
+}
+/* play button */
+.PlayIcon {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  opacity: .8;
+  transition: all .1s ease-out;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,.8));
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+.PlayIcon_Container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  background-color: #1a1a1a;
+  padding: 20px;
+  border-radius: 50%;
+}
 </style>
 
 <div class="main-view" style="width: 100%; height: 100vh;">
@@ -40,8 +128,6 @@
       poster="{{ .Video.URLThumb }}"
       onplay="countView()"
       loop
-      controls
-      onclick="videoStartStop()"
       id="video-clip"
       clip-id="{{ .Video.ID }}"
       ></video>
@@ -56,6 +142,13 @@
       </div>
     </div>
   </div>
+  <!-- play button -->
+  <div id="play-button" class="PlayIcon">
+    <div class="PlayIcon_Container">
+      <svg style="transform: translate(5px, 3px);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="50" height="50"><path fill="none" d="M0 0h50v50H0z"></path><path d="m9 4.07 31.98 20.81c.02.07.02.19 0 .26L9 45.95V4.06M9.04 0C6.98 0 5 1.75 5 4.05v41.9C5 48.25 6.98 50 9.04 50c.68 0 1.36-.19 1.98-.61l32.2-20.95c2.36-1.53 2.36-5.35 0-6.88L11.02.61C10.4.19 9.71 0 9.04 0Z" fill="#fff"></path></svg>
+    </div>
+  </div>
+  <!-- clip description -->
   <div style="position: absolute; bottom: 56px; right: 0px; width: 100%;">
     <div style="position: relative; margin: 0 auto; max-width: 720px;">
       <div id="clip-details" style="margin-left: 5px;">
@@ -64,6 +157,15 @@
           {{ range $actor := .Video.Actors }}<b>@{{ $actor.Name }}</b> {{ end }}
           {{ range $actor := .Video.Actors }}{{ range $category := $actor.Categories }}<b>#{{ $category.Name }}</b> {{end}}{{end}}
           {{ range $category := .Video.Categories }}<b>#{{ $category.Name }}</b> {{end}}
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- video progression -->
+  <div class="ProgressBar_Container">
+    <div class="ProgressBar_ClickWrapper">
+      <div class="ProgressBar_SeekBar">
+        <div class="ProgressBar_ProgressBar" style="width: 0%">
         </div>
       </div>
     </div>
