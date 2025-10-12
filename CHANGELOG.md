@@ -1,5 +1,21 @@
 # Changelog
 
+## Version 0.3.8
+### Features
+* [00d6039](https://github.com/zobtube/zobtube/commit/00d603982f00cdb8a6fcd3e8094d51f12a8a034e) feat(clip/view): add mobile support
+* [00d6039](https://github.com/zobtube/zobtube/commit/00d603982f00cdb8a6fcd3e8094d51f12a8a034e) feat(clip/view): allow scolling with arrow up and down
+* [00d6039](https://github.com/zobtube/zobtube/commit/00d603982f00cdb8a6fcd3e8094d51f12a8a034e) feat(clip/view): allow scrolling with thumbs
+### Chores
+* [031a84a](https://github.com/zobtube/zobtube/commit/031a84ae317091f955c94434bd0025a9282c4f95) chore(e2e): remove test on main
+* [4ba3d67](https://github.com/zobtube/zobtube/commit/4ba3d67e595bf23cbce343276084079857502243) chore(deps): update alpine docker tag to v3.22.2
+* [c5b408b](https://github.com/zobtube/zobtube/commit/c5b408b46b70c297f65d46d443a9010051bd4e52) chore(go): cleanup dependencies
+### Fixes
+* [1da145c](https://github.com/zobtube/zobtube/commit/1da145cc6c257798a2eb7168148050cf80d37938) fix(deps): update module golang.org/x/image to v0.32.0
+* [3a74450](https://github.com/zobtube/zobtube/commit/3a7445088634fc5ba85ba441a7a836c76f2a26ae) fix(deps): upgrade quic to fix CVE-2025-59530
+* [e979c22](https://github.com/zobtube/zobtube/commit/e979c2239514338cb7c1090026ae1fc7aa56e5fe) fix(deps): update module golang.org/x/text to v0.30.0
+### Documentation
+* [46d7310](https://github.com/zobtube/zobtube/commit/46d73109b3329697ff3cd761d5aea4e68dc4a92a) doc: update stash differences
+
 ## Version 0.3.7
 ### Features
 * [9000c13](https://github.com/zobtube/zobtube/commit/9000c1370f2d8d92488422d48f60f61a38246616) feat(adm/home): report errors on adm home
