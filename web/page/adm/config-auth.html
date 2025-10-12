@@ -1,9 +1,5 @@
 {{ define "adm/config-auth.html" }}
 {{ template "top" .}}
-<h1>Admin Area</h1>
-
-<hr />
-
 <div class="row">
   {{ template "shards/adm-tabs.html" "authentication" }}
 
@@ -40,8 +36,6 @@
     <a class="btn btn-xl btn-danger" href="/adm/config/auth/enable">Enable authentication</a>
     {{ end }}
   </div>
-
-
 </div>
 {{ template "bottom" .}}
 {{ end }}

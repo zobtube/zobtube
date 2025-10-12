@@ -1,14 +1,14 @@
 {{ define "adm/object-list.html" }}
 {{ template "top" .}}
 
-<h1>Admin Area</h1>
-
-<hr />
-
 <div class="row">
   <div class="col-md-12">
-    <h2>{{ .ObjectName }} list</h2>
-    <table class="table table-striped table-hover" style="margin-top: 50px;">
+    <div class="themeix-section-h">
+      <span class="heading-icon"><i class="fas fa-list-ul"></i></span>
+      <h3>Administration - {{ .ObjectName }} list</h3>
+      <hr />
+    </div>
+    <table class="table table-striped table-hover">
       <thead>
         <th>ID</th>
         <th>Name</th>

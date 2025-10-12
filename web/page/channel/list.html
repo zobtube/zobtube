@@ -1,7 +1,10 @@
 {{ define "channel/list.html" }}
 {{ template "top" .}}
-<h2>Channels {{ if .User.Admin }} <a href="/channel/new"><i class="fas fa-plus-circle"></i></a>{{ end }}</h2>
-<br />
+<div class="themeix-section-h">
+  <span class="heading-icon"><i class="fa fa-podcast"></i></span>
+  <h3>Channels{{ if .User.Admin }} <a href="/channel/new"><i class="fas fa-plus-circle"></i></a>{{ end }}</h3>
+  <hr />
+</div>
 
 <div class="row">
   {{ range $channel := .Channels }}

@@ -1,11 +1,15 @@
 {{ define "profile/view.html" }}
 {{ template "top" .}}
+
+<div class="themeix-section-h">
+  <span class="heading-icon"><i class="fa fa-user"></i></span>
+  <h3>Your account</h3>
+  <hr />
+</div>
+
 <div class="row">
   <div class="col-md-12">
-    <h1>Your account</h1>
-  </div>
-  <div class="col-md-12">
-    <h3 style="padding-top:50px;">Most viewed videos</h3>
+    <h3>Most viewed videos</h3>
     <div class="row">
       {{ if not .VideoViews }}
         <div class="col-md-12">

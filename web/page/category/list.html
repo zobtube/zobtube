@@ -71,8 +71,11 @@
 }
 </style>
 
-<h2>Categories {{ if .User.Admin }} <a href="/adm/categories"><i class="fas fa-plus-circle"></i></a>{{ end }}</h2>
-<hr />
+<div class="themeix-section-h">
+  <span class="heading-icon"><i class="fa fa-certificate"></i></span>
+  <h3>Categories{{ if .User.Admin }} <a href="/adm/categories"><i class="fas fa-plus-circle"></i></a>{{ end }}</h3>
+  <hr />
+</div>
 
 <div class="row">
 	<div id="categories-container">
