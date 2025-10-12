@@ -1,13 +1,30 @@
 {{ define "actor/list.html" }}
 {{ template "top" .}}
+<style>
+.card-text {
+  display: flex;
+  align-content: center;
+  justify-content: space-between;
+  color: #606060;
+}
+</style>
+
 <div class="themeix-section-h">
   <span class="heading-icon"><i class="far fa-user"></i></span>
   <h3>Actors{{ if .User.Admin }} <a href="/actor/new"><i class="fas fa-plus-circle"></i></a>{{ end }}</h3>
   <hr />
 </div>
 
-<div class="row row-cols-1 row-cols-md-4 g-4">
+<div class="row">
+  <div class="col-md-12">
+    <div class="form-floating mb-3">
+      <input id="actor-filter" class="form-control">
+      <label for="actor-filter">Looking for someone?</label>
+    </div>
+  </div>
+</div>
 
+<div class="row row-cols-1 row-cols-md-4 g-4">
   {{ range $actor := .Actors }}
   <div class="col">
     <div class="card">
@@ -15,23 +32,30 @@
       <div class="card-body">
         <h5 class="card-title">
           <a class="stretched-link" href="{{ $actor.URLView }}">{{ $actor.Name }}</a>
-              <span style="position: absolute; right: 15px;">
-                {{ if eq $actor.Sex "f" }}
-                <i class="fa fa-venus"></i>
-                {{ else if eq $actor.Sex "m" }}
-                <i class="fa fa-mars"></i>
-                {{ else if eq $actor.Sex "s" }}
-                <i class="fa fa-mars-and-venus"></i>
-                {{ else }}
-                <i class="fa fa-person-circle-question"></i>
-                {{ end }}
-              </span>
-
+          <span style="position: absolute; right: 15px;">
+            {{ if eq $actor.Sex "f" }}
+            <i class="fa fa-venus"></i>
+            {{ else if eq $actor.Sex "m" }}
+            <i class="fa fa-mars"></i>
+            {{ else if eq $actor.Sex "s" }}
+            <i class="fa fa-mars-and-venus"></i>
+            {{ else }}
+            <i class="fa fa-person-circle-question"></i>
+            {{ end }}
+          </span>
         </h5>
+        <div class="card-text">
+          <a><i class="fas fa-film"></i> {{ len $actor.Videos }}</a>
+          <a><i class="fas fa-link"></i> {{ len $actor.Links }}</a>
+        </div>
       </div>
     </div>
   </div>
   {{ end }}
 </div>
+
+<script>
+{{ template "actor/list.js" .}}
+</script>
 {{ template "bottom" .}}
 {{ end }}

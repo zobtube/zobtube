@@ -79,6 +79,7 @@ func setupActorController(t *testing.T) *Controller {
 		ctrl.logger.Error().Str("kind", "system").Err(err).Msg("unable to create initial user")
 		t.Fatalf("failed to create configuration: %v", err)
 	}
+	ctrl.ConfigurationFromDBApply(config)
 
 	return ctrl
 }

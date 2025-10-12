@@ -13,7 +13,7 @@ import (
 
 func (c *Controller) ActorList(g *gin.Context) {
 	var actors []model.Actor
-	c.datastore.Find(&actors).Limit(30).Offset(0).Order("created_at")
+	c.datastore.Preload("Videos").Preload("Links").Order("name").Find(&actors)
 	c.HTML(g, http.StatusOK, "actor/list.html", gin.H{
 		"Actors": actors,
 	})
