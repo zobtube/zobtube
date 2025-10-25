@@ -35,7 +35,7 @@ jobs:
         run: |
           source work-dir/bin/activate
           pytest
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: ${{ !cancelled() }}
         with:
           name: playwright-traces
