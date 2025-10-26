@@ -450,12 +450,12 @@ func (c *Controller) VideoAjaxMigrate(g *gin.Context) {
 
 	newType := g.PostForm("new_type")
 
-	previousPath := filepath.Join(c.config.Media.Path, video.RelativePath())
+	previousPath := filepath.Join(c.config.Media.Path, video.FolderRelativePath())
 
 	// change object in db
 	video.Type = newType
 
-	newPath := filepath.Join(c.config.Media.Path, video.RelativePath())
+	newPath := filepath.Join(c.config.Media.Path, video.FolderRelativePath())
 
 	// move
 	err := os.Rename(previousPath, newPath)
