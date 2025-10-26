@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 0.3.9
+### Features
+* [245f316](https://github.com/zobtube/zobtube/commit/245f31673b7234d9b079f0b655308c89475a628e) feat(actor/list): allow filtering by name
+### Chores
+* [137247e](https://github.com/zobtube/zobtube/commit/137247e0b51ea494699276dc96aecde82d34bcf5) chore(adm): remove dead code on adm/edit
+* [137247e](https://github.com/zobtube/zobtube/commit/137247e0b51ea494699276dc96aecde82d34bcf5) chore(ui): rationalize headers
+* [245f316](https://github.com/zobtube/zobtube/commit/245f31673b7234d9b079f0b655308c89475a628e) chore(actor/list): display video and link count
+* [94fd399](https://github.com/zobtube/zobtube/commit/94fd3991b00f07b27f650dd9245bfdc81102bf25) chore(deps): update actions/upload-artifact action to v5
+### Fixes
+* [23303fd](https://github.com/zobtube/zobtube/commit/23303fd79303bb488b1ae4d34da35676113cdb09) fix(video/edit): move folder instead of video (fix #153)
+* [6c153c9](https://github.com/zobtube/zobtube/commit/6c153c9846bd9b32fcf4b54443379d6064642343) fix(deps): update module github.com/urfave/cli/v3 to v3.5.0
+
 ## Version 0.3.8
 ### Features
 * [00d6039](https://github.com/zobtube/zobtube/commit/00d603982f00cdb8a6fcd3e8094d51f12a8a034e) feat(clip/view): add mobile support
