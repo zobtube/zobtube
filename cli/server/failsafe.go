@@ -16,7 +16,11 @@ func startFailsafeWebServer(httpServer *http.Server, err error, c controller.Abs
 	// handle shutdown
 	go httpServer.WaitForStopSignal(shutdownChannel)
 
-	httpServer.Start("0.0.0.0:8069")
+	_err := httpServer.Start("0.0.0.0:8069")
+	if _err != nil {
+		httpServer.Logger.Error().Err(err).Msg("unable to start failsafe server")
+		return
+	}
 
 	// Wait for all HTTP fetches to complete.
 	wg.Wait()

@@ -202,7 +202,10 @@ func Start(params *Parameters) error {
 	httpServer.ControllerSetupDefault(&c)
 
 	// serve content
-	httpServer.Start(cfg.Server.Bind)
+	err = httpServer.Start(cfg.Server.Bind)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

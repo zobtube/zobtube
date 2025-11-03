@@ -2,14 +2,13 @@ package http
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"time"
 )
 
-func (s *Server) Start(bindAddress string) {
+func (s *Server) Start(bindAddress string) error {
 	s.Logger.Info().Str("kind", "system").Str("bind", bindAddress).Msg("http server binding")
 	// #nosec G112
 	s.Server = &http.Server{
@@ -18,8 +17,11 @@ func (s *Server) Start(bindAddress string) {
 	}
 	err := s.Server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
-		log.Panic(err.Error())
+		s.Logger.Error().Err(err).Msg("cannot start http server")
+		return err
 	}
+
+	return nil
 }
 
 func (s *Server) WaitForStopSignal(c <-chan int) {
