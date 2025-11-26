@@ -1,5 +1,20 @@
 # Changelog
 
+## Version 0.3.10
+### Chores
+* [048398e](https://github.com/zobtube/zobtube/commit/048398ec26aebe61f1d91818804e91f97965c0a1) chore(deps): update actions/checkout action to v6
+* [a3b592b](https://github.com/zobtube/zobtube/commit/a3b592b21e99897c8d2e638734636646b837e7ac) chore(deps): update dependency pytest-playwright to v0.7.2
+* [a99d75e](https://github.com/zobtube/zobtube/commit/a99d75e7e7cd20103d3c11a26626015435ae6cb3) chore(deps): update golangci/golangci-lint-action action to v9
+* [cf54014](https://github.com/zobtube/zobtube/commit/cf54014fa2819a4cd1b1e8717b50805269b2fcd2) chore(deps): update dependency playwright to v1.56.0
+### Fixes
+* [05e8e3a](https://github.com/zobtube/zobtube/commit/05e8e3aa6c93d5e3f9af2ecca4ad2fd31c7d372a) fix(deps): update module golang.org/x/text to v0.31.0
+* [09d81ac](https://github.com/zobtube/zobtube/commit/09d81ac6fd9255b3094a3395a2c50cde8c19b0a8) fix(security): CVE-2025-58181 and CVE-2025-47914
+* [12c50bd](https://github.com/zobtube/zobtube/commit/12c50bdcd6de5f53e5de276fd2462e4164c7c49a) fix(deps): update module github.com/urfave/cli/v3 to v3.6.0
+* [24a9182](https://github.com/zobtube/zobtube/commit/24a9182a6b0232c483e83d39f37e4a9e250c115e) fix(deps): update module gorm.io/gorm to v1.31.1
+* [2902857](https://github.com/zobtube/zobtube/commit/29028578b7bb5a795b54d7a7d1e4e3edb616a1f5) fix(deps): update module golang.org/x/image to v0.33.0
+* [b2a969d](https://github.com/zobtube/zobtube/commit/b2a969dedd6798c21fc66caeb6710bb9597d0e6b) fix(http): return error properly
+* [eb29ffe](https://github.com/zobtube/zobtube/commit/eb29ffe157851eb087385d35e1daf058cad3f0a6) fix(deps): update module github.com/urfave/cli/v3 to v3.6.1
+
 ## Version 0.3.9
 ### Features
 * [245f316](https://github.com/zobtube/zobtube/commit/245f31673b7234d9b079f0b655308c89475a628e) feat(actor/list): allow filtering by name
