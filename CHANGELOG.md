@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 0.3.11
+### Chores
+* [3bc8180](https://github.com/zobtube/zobtube/commit/3bc818073e4b7fd68d6612d4e09f2c2457c92870) chore(deps): update dependency playwright to v1.57.0
+* [5e22f50](https://github.com/zobtube/zobtube/commit/5e22f50e6100acc8eac494d74b411d3c5ca61f99) chore: tidy go mods
+* [6c2a66b](https://github.com/zobtube/zobtube/commit/6c2a66bdba2feb4dab637469fdf76ccc6b9cb1f5) chore(deps): update sonarsource/sonarqube-scan-action action to v7
+* [e86db8d](https://github.com/zobtube/zobtube/commit/e86db8d0226047340f179fad93d4523939bb6200) chore(deps): update alpine docker tag to v3.23.0
+### Fixes
+* [2ded92b](https://github.com/zobtube/zobtube/commit/2ded92bb6f49e532a84012b7da6706c41858d29e) fix(deps): update module golang.org/x/image to v0.34.0
+* [8c42e55](https://github.com/zobtube/zobtube/commit/8c42e552298294a64985e2bad702bc033cac412e) fix(deps): update module golang.org/x/text to v0.32.0
+* [b18a8c3](https://github.com/zobtube/zobtube/commit/b18a8c3339c2fc78ade587cdca6ed30362acac9c) fix(cve): fix cve-2025-64702
+
 ## Version 0.3.10
 ### Chores
 * [048398e](https://github.com/zobtube/zobtube/commit/048398ec26aebe61f1d91818804e91f97965c0a1) chore(deps): update actions/checkout action to v6
