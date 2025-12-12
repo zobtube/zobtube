@@ -649,4 +649,65 @@ function actorNameSend() {
   return false;
 }
 
+function actorDescriptionEdit() {
+  // update description
+  desc = document.getElementById('actor-description');
+  desc.old_value = desc.value;
+  desc.disabled = false;
+  desc.removeAttribute('readonly');
+
+  // change clickables
+  document.getElementById('actor-description-btn-edit').style.display = 'none';
+  document.getElementById('actor-description-btn-save').style.display = '';
+  document.getElementById('actor-description-btn-discard').style.display = '';
+}
+
+function actorDescriptionDiscard() {
+  // revert description
+  desc = document.getElementById('actor-description');
+  desc.value = desc.old_value;
+  desc.disabled = true;
+  desc.setAttribute('readonly', '');
+
+  // change clickables
+  document.getElementById('actor-description-btn-edit').style.display = '';
+  document.getElementById('actor-description-btn-save').style.display = 'none';
+  document.getElementById('actor-description-btn-discard').style.display = 'none';
+}
+
+function actorDescriptionSend() {
+  url = "/api/actor/"+actor_id+"/description";
+  $.ajax(url, {
+    method: 'POST',
+    data: {
+      'description': document.getElementById('actor-description').value,
+    },
+    xhr: function () {
+      var xhr = new XMLHttpRequest();
+      return xhr;
+    },
+
+    success: function (e) {
+      // freeze description
+      desc = document.getElementById('actor-description');
+      desc.disabled = true;
+      desc.setAttribute('readonly', '');
+
+      // change clickables
+      document.getElementById('actor-description-btn-edit').style.display = '';
+      document.getElementById('actor-description-btn-save').style.display = 'none';
+      document.getElementById('actor-description-btn-discard').style.display = 'none';
+
+      // display success
+      sendToast('Actor description updated', '', 'bg-success', 'Description changed for '+document.getElementById('actor-name').value);
+    },
+
+    error: function (e) {
+      console.debug('actor description update failed:', e.status, e.responseText);
+      sendToast('Actor description update failed', '', 'bg-danger', 'Unexpected error during actor description update');
+    },
+  });
+}
+
+
 {{ end }}

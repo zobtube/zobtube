@@ -10,17 +10,18 @@ import (
 )
 
 type Actor struct {
-	ID         string `gorm:"type:uuid;primary_key"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	DeletedAt  gorm.DeletedAt `gorm:"index"`
-	Name       string
-	Videos     []Video `gorm:"many2many:video_actors;"`
-	Thumbnail  bool
-	Sex        string `gorm:"size:2;"`
-	Aliases    []ActorAlias
-	Links      []ActorLink
-	Categories []CategorySub `gorm:"many2many:actor_categories;"`
+	ID          string `gorm:"type:uuid;primary_key"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	Name        string
+	Videos      []Video `gorm:"many2many:video_actors;"`
+	Thumbnail   bool
+	Sex         string `gorm:"size:2;"`
+	Aliases     []ActorAlias
+	Links       []ActorLink
+	Categories  []CategorySub `gorm:"many2many:actor_categories;"`
+	Description string
 }
 
 // UUID pre-hook

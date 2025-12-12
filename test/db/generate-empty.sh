@@ -21,7 +21,7 @@ sqlite3 $ZT_DB_CONNSTRING "insert into users values ('b23f4f4a-1c5c-11f0-8822-30
 sqlite3 $ZT_DB_CONNSTRING "insert into users values ('21e55ff0-1dc1-11f0-9c1f-305a3a05e04d', date('now'), date('now'), null, 'non-admin', '030d96618d48820fd7ad11e5fd465972b013aed8fdd2bdfc7b02d979a2d4be98', 0);"
 
 echo 'insert fake actor'
-sqlite3 $ZT_DB_CONNSTRING "insert into actors values ('045e1b0e-1dc4-11f0-a04a-305a3a05e04d', date('now'), date('now'), null, 'test', 0, 'f');"
+sqlite3 $ZT_DB_CONNSTRING "insert into actors values ('045e1b0e-1dc4-11f0-a04a-305a3a05e04d', date('now'), date('now'), null, 'test', 0, 'f', '');"
 
 echo 'insert fake channel'
 sqlite3 $ZT_DB_CONNSTRING "insert into channels values ('8c50735e-1dc4-11f0-b1fc-305a3a05e04d', date('now'), date('now'), null, 'test', 0);"

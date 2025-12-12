@@ -51,6 +51,7 @@ type AbstractController interface {
 	ActorAjaxNew(*gin.Context)
 	ActorAjaxProviderSearch(*gin.Context)
 	ActorAjaxRename(*gin.Context)
+	ActorAjaxDescription(*gin.Context)
 	ActorAjaxThumb(*gin.Context)
 	ActorAjaxLinkCreate(*gin.Context)
 	ActorAjaxAliasCreate(*gin.Context)

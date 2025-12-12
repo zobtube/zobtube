@@ -57,6 +57,16 @@ const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-00
         <div id="actor-sex-help" class="form-text"></div>
       </div>
 
+      <div class="mb-3">
+        <label class="form-label" for="description">
+          Description&nbsp;
+          <i id="actor-description-btn-edit" class="far fa-edit text-warning clickable" onclick="actorDescriptionEdit()"></i>
+          <i id="actor-description-btn-discard" class="fas fa-history text-danger clickable" onclick="actorDescriptionDiscard()" style="display:none;"></i>
+          <i id="actor-description-btn-save" class="far fa-save text-success clickable" onclick="actorDescriptionSend()" style="display:none;"></i>
+        </label>
+        <textarea class="form-control" id="actor-description" name="description" autocomplete="off" readonly disabled>{{ .Actor.Description }}</textarea>
+      </div>
+
       <h4 style="margin-top: 40px;" class="mb-3">Aliases</h4>
       <div class="form-control chip-selector" id="actor_chip_selector" style="height: unset; display: flex;">
         <div class="chips" id="aliasChips">

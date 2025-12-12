@@ -986,3 +986,7 @@ header .modal-body .btn.btn-primary {
   border-radius: 6px;
   gap: 4px;
 }
+
+.clickable {
+	cursor: pointer;
+}

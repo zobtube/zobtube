@@ -56,6 +56,7 @@ def test_pages_unusable_if_unauthenticated(page: Page):
             "/api/actor/",
             "/api/actor/:id/link",
             "/api/actor/:id/rename",
+            "/api/actor/:id/description",
             "/api/actor/:id/thumb",
             "/api/actor/:id/alias",
             "/api/category",
