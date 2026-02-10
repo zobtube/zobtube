@@ -21,6 +21,7 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version: stable
+          cache: false
       - name: Test with Go CLI
         run: go test ./...  -coverprofile=coverage.out
       - name: Update coverage report
