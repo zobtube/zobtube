@@ -22,8 +22,13 @@ function login() {
     },
 
     success: function (e) {
-      // auth successful
-      window.location.href = '/';
+      // auth successful - redirect to next if safe, else home
+      var next = document.getElementById('id_form').dataset.next || '';
+      if (next && next.startsWith('/') && !next.startsWith('//')) {
+        window.location.href = next;
+      } else {
+        window.location.href = '/';
+      }
     },
 
     error: function (data) {

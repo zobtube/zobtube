@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,14 @@ import (
 )
 
 const cookieName = "zt_auth"
+
+func authRedirectURL(g *gin.Context) string {
+	nextVal := g.Request.URL.Path
+	if g.Request.URL.RawQuery != "" {
+		nextVal += "?" + g.Request.URL.RawQuery
+	}
+	return "/auth?next=" + url.QueryEscape(nextVal)
+}
 
 func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 	return func(g *gin.Context) {
@@ -39,7 +48,7 @@ func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 		cookie, err := g.Cookie(cookieName)
 		if err != nil {
 			// cookie not set
-			g.Redirect(http.StatusFound, "/auth")
+			g.Redirect(http.StatusFound, authRedirectURL(g))
 			g.Abort()
 			return
 		}
@@ -52,21 +61,21 @@ func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 
 		// check result
 		if result.RowsAffected < 1 {
-			g.Redirect(http.StatusFound, "/auth")
+			g.Redirect(http.StatusFound, authRedirectURL(g))
 			g.Abort()
 			return
 		}
 
 		// check validity
 		if session.ValidUntil.Before(time.Now()) {
-			g.Redirect(http.StatusFound, "/auth")
+			g.Redirect(http.StatusFound, authRedirectURL(g))
 			g.Abort()
 			return
 		}
 
 		// check if user is authenticated
 		if session.UserID == nil || *session.UserID == "" {
-			g.Redirect(http.StatusFound, "/auth")
+			g.Redirect(http.StatusFound, authRedirectURL(g))
 			g.Abort()
 			return
 		}
@@ -77,7 +86,7 @@ func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 		}
 		result = c.GetUser(user)
 		if result.RowsAffected < 1 {
-			g.Redirect(http.StatusFound, "/auth")
+			g.Redirect(http.StatusFound, authRedirectURL(g))
 			g.Abort()
 			return
 		}

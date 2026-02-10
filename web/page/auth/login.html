@@ -4,7 +4,7 @@
   <div class="container">
     <h3 class="mb-4">Access is restricted, please authenticate</h3>
 
-    <form method="post" id="id_form" action="javascript:;" onsubmit="login(this)">
+    <form method="post" id="id_form" action="javascript:;" onsubmit="login(this)" data-next="{{ .next }}">
       <!-- Email input -->
       <div class="form-outline mb-4">
         <input type="text" id="id_username" name="username" class="form-control" placeholder="Username" />

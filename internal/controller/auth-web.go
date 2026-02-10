@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/zobtube/zobtube/internal/model"
@@ -18,7 +19,12 @@ func (c *Controller) AuthPage(g *gin.Context) {
 		c.createSession(g)
 	}
 
-	g.HTML(http.StatusOK, "auth/login.html", gin.H{})
+	next := g.Query("next")
+	if next != "" && (!strings.HasPrefix(next, "/") || strings.HasPrefix(next, "//")) {
+		next = ""
+	}
+
+	g.HTML(http.StatusOK, "auth/login.html", gin.H{"next": next})
 }
 
 func (c *Controller) AuthLogout(g *gin.Context) {
