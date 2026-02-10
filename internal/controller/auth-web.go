@@ -45,5 +45,7 @@ func (c *Controller) AuthLogout(g *gin.Context) {
 		c.datastore.Delete(&session)
 	}
 
+	// clear the auth cookie so the next visit to /auth gets a fresh session
+	g.SetCookie(cookieName, "", -1, "/", "127.0.0.1:8069", cookieSecure, cookieHttpOnly)
 	g.Redirect(http.StatusFound, "/auth")
 }
