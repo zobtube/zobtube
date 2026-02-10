@@ -56,6 +56,7 @@ type AbstractController interface {
 	ActorAjaxLinkCreate(*gin.Context)
 	ActorAjaxAliasCreate(*gin.Context)
 	ActorAjaxAliasRemove(*gin.Context)
+	ActorAjaxMerge(*gin.Context)
 	ActorEdit(*gin.Context)
 	ActorList(*gin.Context)
 	ActorNew(*gin.Context)

@@ -59,6 +59,7 @@ def test_pages_unusable_if_unauthenticated(page: Page):
             "/api/actor/:id/description",
             "/api/actor/:id/thumb",
             "/api/actor/:id/alias",
+            "/api/actor/:id/merge",
             "/api/category",
             "/api/category-sub",
             "/api/category-sub/d17232c1-1512-46c9-8b7a-158c4d89df6b/rename",

@@ -106,11 +106,16 @@ func (c *Controller) ActorEdit(g *gin.Context) {
 	var providers []model.Provider
 	c.datastore.Find(&providers)
 
+	// actors that can be merge targets (all except current)
+	var mergeTargets []model.Actor
+	c.datastore.Preload("Aliases").Where("id != ?", actor.ID).Order("name").Find(&mergeTargets)
+
 	c.HTML(g, http.StatusOK, "actor/edit.html", gin.H{
-		"Actor":       actor,
-		"Providers":   providers,
-		"Categories":  categories,
-		"OfflineMode": dbconfig.OfflineMode,
+		"Actor":        actor,
+		"Providers":    providers,
+		"Categories":   categories,
+		"MergeTargets": mergeTargets,
+		"OfflineMode":  dbconfig.OfflineMode,
 	})
 }
 

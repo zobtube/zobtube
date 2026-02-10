@@ -709,5 +709,66 @@ function actorDescriptionSend() {
   });
 }
 
+/* -- merge actor modal -- */
+function mergeActorInto(targetId, targetName) {
+  var sourceName = document.getElementById('actor-name').value;
+  if (!confirm('Merge "' + sourceName + '" into "' + targetName + '"? All videos linked to the current actor will be updated and the current actor will be deleted.')) {
+    return;
+  }
+  $.ajax({
+    url: '/api/actor/' + actor_id + '/merge',
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({ target_id: targetId }),
+    success: function (data) {
+      if (data.redirect) {
+        window.location = data.redirect;
+      } else {
+        window.location = '/actor/' + targetId + '/edit';
+      }
+    },
+    error: function (xhr) {
+      var msg = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : ('Request failed: ' + xhr.status);
+      sendToast('Merge failed', '', 'bg-danger', msg);
+    },
+  });
+}
+
+function mergeTargetFilter(filterText) {
+  var re = new RegExp((filterText || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  var items = document.querySelectorAll('#mergeActorModal .merge-target-item');
+  var maxShow = 30;
+  var shown = 0;
+  for (var i = 0; i < items.length; i++) {
+    var el = items[i];
+    var name = (el.getAttribute('data-actor-name') || '');
+    var aliases = (el.getAttribute('data-actor-aliases') || '').split(/\s*\/\s*/);
+    var match = re.test(name) || aliases.some(function (a) { return re.test(a.trim()); });
+    if (match && shown < maxShow) {
+      el.style.display = '';
+      shown++;
+    } else {
+      el.style.display = 'none';
+    }
+  }
+}
+
+(function () {
+  var searchInput = document.getElementById('mergeActorSearchInput');
+  var modal = document.getElementById('mergeActorModal');
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      mergeTargetFilter(this.value);
+    });
+  }
+  if (modal) {
+    modal.addEventListener('show.bs.modal', function () {
+      if (searchInput) {
+        searchInput.value = '';
+        mergeTargetFilter('');
+      }
+    });
+  }
+})();
 
 {{ end }}

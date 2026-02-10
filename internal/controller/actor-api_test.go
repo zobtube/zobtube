@@ -162,3 +162,74 @@ func TestController_ActorAPI_ActorAjaxProviderSearch_Success(t *testing.T) {
 		t.Errorf("expected url=https://mock.com/Alice, got %#v", body["link_url"])
 	}
 }
+
+func TestController_ActorAPI_ActorAjaxMerge_Success(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupActorController(t)
+
+	source := &model.Actor{Name: "Source Actor", Sex: "f"}
+	target := &model.Actor{Name: "Target Actor", Sex: "f"}
+	if err := ctrl.datastore.Create(source).Error; err != nil {
+		t.Fatalf("create source: %v", err)
+	}
+	if err := ctrl.datastore.Create(target).Error; err != nil {
+		t.Fatalf("create target: %v", err)
+	}
+
+	video := &model.Video{Name: "Test Video", Filename: "test.mp4", Type: "v"}
+	if err := ctrl.datastore.Create(video).Error; err != nil {
+		t.Fatalf("create video: %v", err)
+	}
+	if err := ctrl.datastore.Model(video).Association("Actors").Append(source); err != nil {
+		t.Fatalf("link video to source: %v", err)
+	}
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Params = gin.Params{{Key: "id", Value: source.ID}}
+	c.Request = httptest.NewRequest("POST", "/api/actor/"+source.ID+"/merge", strings.NewReader(`{"target_id":"`+target.ID+`"}`))
+	c.Request.Header.Set("Content-Type", "application/json")
+
+	ctrl.ActorAjaxMerge(c)
+
+	if w.Code != http.StatusOK {
+		body, _ := io.ReadAll(w.Result().Body)
+		t.Fatalf("expected 200, got %d: %s", w.Code, string(body))
+	}
+
+	var videoCheck model.Video
+	if err := ctrl.datastore.Preload("Actors").First(&videoCheck, "id = ?", video.ID).Error; err != nil {
+		t.Fatalf("load video: %v", err)
+	}
+	if len(videoCheck.Actors) != 1 || videoCheck.Actors[0].ID != target.ID {
+		t.Errorf("video should have only target actor; got %d actors: %v", len(videoCheck.Actors), videoCheck.Actors)
+	}
+
+	var sourceCheck model.Actor
+	if res := ctrl.datastore.First(&sourceCheck, "id = ?", source.ID); res.RowsAffected > 0 {
+		t.Error("source actor should be deleted (not found by normal query)")
+	}
+}
+
+func TestController_ActorAPI_ActorAjaxMerge_SameID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupActorController(t)
+
+	actor := &model.Actor{Name: "Only", Sex: "f"}
+	if err := ctrl.datastore.Create(actor).Error; err != nil {
+		t.Fatalf("create actor: %v", err)
+	}
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Params = gin.Params{{Key: "id", Value: actor.ID}}
+	c.Request = httptest.NewRequest("POST", "/api/actor/"+actor.ID+"/merge", strings.NewReader(`{"target_id":"`+actor.ID+`"}`))
+	c.Request.Header.Set("Content-Type", "application/json")
+
+	ctrl.ActorAjaxMerge(c)
+
+	if w.Code != http.StatusBadRequest {
+		body, _ := io.ReadAll(w.Result().Body)
+		t.Fatalf("expected 400, got %d: %s", w.Code, string(body))
+	}
+}

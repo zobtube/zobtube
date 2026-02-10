@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -502,4 +503,139 @@ func (c *Controller) ActorAjaxDescription(g *gin.Context) {
 	}
 
 	g.JSON(200, gin.H{})
+}
+
+func (c *Controller) ActorAjaxMerge(g *gin.Context) {
+	sourceID := g.Param("id")
+	form := struct {
+		TargetID string `json:"target_id"`
+	}{}
+	if err := g.ShouldBindJSON(&form); err != nil {
+		g.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	targetID := form.TargetID
+	if targetID == "" {
+		g.JSON(400, gin.H{"error": "target_id is required"})
+		return
+	}
+	if sourceID == targetID {
+		g.JSON(400, gin.H{"error": "source and target must be different"})
+		return
+	}
+
+	source := &model.Actor{ID: sourceID}
+	if res := c.datastore.Preload("Videos").Preload("Aliases").Preload("Links").Preload("Categories").First(source); res.RowsAffected < 1 {
+		g.JSON(404, gin.H{"error": "source actor not found"})
+		return
+	}
+	target := &model.Actor{ID: targetID}
+	if res := c.datastore.Preload("Aliases").Preload("Links").First(target); res.RowsAffected < 1 {
+		g.JSON(404, gin.H{"error": "target actor not found"})
+		return
+	}
+
+	tx := c.datastore.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for i := range source.Videos {
+		video := &source.Videos[i]
+		if err := tx.Model(video).Association("Actors").Delete(source); err != nil {
+			tx.Rollback()
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		if err := tx.Model(video).Association("Actors").Append(target); err != nil {
+			tx.Rollback()
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	targetAliasNames := make(map[string]struct{})
+	for _, a := range target.Aliases {
+		targetAliasNames[a.Name] = struct{}{}
+	}
+	for i := range source.Aliases {
+		a := &source.Aliases[i]
+		if _, exists := targetAliasNames[a.Name]; exists {
+			if err := tx.Delete(a).Error; err != nil {
+				tx.Rollback()
+				g.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+		} else {
+			a.ActorID = target.ID
+			if err := tx.Save(a).Error; err != nil {
+				tx.Rollback()
+				g.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			targetAliasNames[a.Name] = struct{}{}
+		}
+	}
+
+	type linkKey struct{ Provider, URL string }
+	targetLinks := make(map[linkKey]struct{})
+	for _, l := range target.Links {
+		targetLinks[linkKey{l.Provider, l.URL}] = struct{}{}
+	}
+	for i := range source.Links {
+		l := &source.Links[i]
+		k := linkKey{l.Provider, l.URL}
+		if _, exists := targetLinks[k]; exists {
+			if err := tx.Delete(l).Error; err != nil {
+				tx.Rollback()
+				g.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+		} else {
+			l.ActorID = target.ID
+			if err := tx.Save(l).Error; err != nil {
+				tx.Rollback()
+				g.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			targetLinks[k] = struct{}{}
+		}
+	}
+
+	for i := range source.Categories {
+		cat := &source.Categories[i]
+		if err := tx.Model(target).Association("Categories").Append(cat); err != nil {
+			tx.Rollback()
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+	}
+	if err := tx.Model(source).Association("Categories").Clear(); err != nil {
+		tx.Rollback()
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := tx.Delete(source).Error; err != nil {
+		tx.Rollback()
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if err := tx.Commit().Error; err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	thumbPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, source.ID, "thumb.jpg")
+	if _, err := os.Stat(thumbPath); err == nil {
+		_ = os.Remove(thumbPath)
+	}
+	folderPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, source.ID)
+	if _, err := os.Stat(folderPath); err == nil {
+		_ = os.RemoveAll(folderPath)
+	}
+
+	g.JSON(200, gin.H{"redirect": "/actor/" + target.ID + "/edit"})
 }

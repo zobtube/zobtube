@@ -13,6 +13,9 @@ img {
   display: block;
   max-width: 100%;
 }
+#mergeActorModal .merge-into-btn {
+  min-width: 5rem;
+}
 </style>
 
 <script>
@@ -32,6 +35,7 @@ const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-00
     <img class="rounded" src="{{ .Actor.URLThumb }}" style="width: 100%;">
     <div id="profile-actions">
       <a class="btn btn-success" style="margin-top: 15px; width: 100%" href="{{ .Actor.URLView }}">View profile</a>
+      <button type="button" class="btn btn-warning" style="margin-top: 15px; width: 100%" data-bs-toggle="modal" data-bs-target="#mergeActorModal">Merge into another actor</button>
       <a class="btn btn-danger" style="margin-top: 15px; width: 100%" href="{{ .Actor.URLAdmDelete }}">Delete actor profile</a>
       <a class="btn btn-info" style="margin-top: 15px; width: 100%" onclick="showActorPictures()">View link pictures</a>
     </div>
@@ -306,6 +310,37 @@ const url_actor_category_edit = '/api/actor/{{ .Actor.ID }}/category/00000000-00
 </div>
 <!-- End of add category modal -->
 
+<!-- Merge actor modal -->
+<div class="modal fade" id="mergeActorModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Merge "{{ .Actor.Name }}" into another actor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted">All videos, aliases, links and categories of the current actor will be moved to the chosen actor. The current actor will be deleted.</p>
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="mergeActorSearchInput" autocomplete="off" placeholder=" ">
+          <label for="mergeActorSearchInput">Search by name or alias</label>
+        </div>
+        <div class="chips" id="mergeTargetChips">
+          {{ range $actor := .MergeTargets }}
+          <div class="chip merge-target-item" data-actor-id="{{ $actor.ID }}" data-actor-name="{{ $actor.Name }}" data-actor-aliases="{{ $actor.AliasesAsNiceString }}">
+            <img class="lazy" data-src="{{ $actor.URLThumb }}" width="50" height="50">
+            {{ $actor.Name }}
+            <button type="button" class="btn btn-warning btn-sm merge-into-btn" onclick="mergeActorInto('{{ $actor.ID }}', '{{ $actor.Name }}')"><i class="fas fa-object-group"></i> Merge</button>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End merge actor modal -->
 
 <script>
 {{ template "actor/edit.js" . }}
