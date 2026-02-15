@@ -1,5 +1,33 @@
 # Changelog
 
+## Version 0.4.0
+### Features
+* [3df3f9a](https://github.com/zobtube/zobtube/commit/3df3f9a4f27827b0ace3addabafff371eadd285e) feat(actors): allow merging actors
+* [4e0a53b](https://github.com/zobtube/zobtube/commit/4e0a53b9d506824ff461f28480352b4a80df1654) feat(actor): add description (fix #68)
+* [c46726e](https://github.com/zobtube/zobtube/commit/c46726e642fe5fb87a836250739e7a9f13f1d8ad) feat(api): harmonize endpoints (fix #103)
+* [c46726e](https://github.com/zobtube/zobtube/commit/c46726e642fe5fb87a836250739e7a9f13f1d8ad) feat: refacto to api only
+* [c46726e](https://github.com/zobtube/zobtube/commit/c46726e642fe5fb87a836250739e7a9f13f1d8ad) feat(test): add e2e on most happy path endpoints
+* [c46726e](https://github.com/zobtube/zobtube/commit/c46726e642fe5fb87a836250739e7a9f13f1d8ad) feat(test): add unit tests on most happy path endpoints
+* [d40aa90](https://github.com/zobtube/zobtube/commit/d40aa906d6ace1c77521188edb47b3abd7b147fc) feat: redirect to requested page after login
+### Chores
+* [24f9ee6](https://github.com/zobtube/zobtube/commit/24f9ee6d1d977ece08045b3c0095df7a949765af) chore(deps): update actions/upload-artifact action to v6
+* [2fac589](https://github.com/zobtube/zobtube/commit/2fac58936042f16bca28e59369f30151d8f3552c) chore(deps): update alpine docker tag to v3.23.2
+* [8d51d65](https://github.com/zobtube/zobtube/commit/8d51d65ae314eeee24ace94a635f330fae7c0370) chore(deps): update dependency playwright to v1.58.0
+* [9436ad3](https://github.com/zobtube/zobtube/commit/9436ad33f0d76f1e69c8da3f00b5b9da852d70c7) chore(deps): update alpine docker tag to v3.23.3
+* [c46726e](https://github.com/zobtube/zobtube/commit/c46726e642fe5fb87a836250739e7a9f13f1d8ad) chore(ci) : upgrade golangci-lint to 2.9
+* [c46726e](https://github.com/zobtube/zobtube/commit/c46726e642fe5fb87a836250739e7a9f13f1d8ad) chore(go): upgrade to 1.25
+* [c46726e](https://github.com/zobtube/zobtube/commit/c46726e642fe5fb87a836250739e7a9f13f1d8ad) chore(test): add vscode task for e2e
+* [c46726e](https://github.com/zobtube/zobtube/commit/c46726e642fe5fb87a836250739e7a9f13f1d8ad) chore(test): change e2e testing port
+### Fixes
+* [182149f](https://github.com/zobtube/zobtube/commit/182149ff67d94b6ad262b7bd118346b14d0ba6e2) fix(deps): update module golang.org/x/image to v0.35.0
+* [54351b5](https://github.com/zobtube/zobtube/commit/54351b59a746f5185f3c393b62c25f1f206af3cf) fix(deps): update module golang.org/x/text to v0.34.0
+* [72ded2e](https://github.com/zobtube/zobtube/commit/72ded2eac8e64ee8ab487bafb18dcfd6fb2770b9) fix(auth): remove cookie after logout to avoid invalid sessions
+* [7a1f592](https://github.com/zobtube/zobtube/commit/7a1f5926cd250916ce75b091f2ae9fa87f23a1a9) fix(deps): update module golang.org/x/image to v0.36.0
+* [903d486](https://github.com/zobtube/zobtube/commit/903d486df1c138e46a75fb9cf1394b008c564c5c) fix(deps): update module golang.org/x/text to v0.33.0
+* [b7ff692](https://github.com/zobtube/zobtube/commit/b7ff692e4a5182ca8a88fca7b122446eefd22a65) fix(ci): remove golang mod caching
+* [c46726e](https://github.com/zobtube/zobtube/commit/c46726e642fe5fb87a836250739e7a9f13f1d8ad) fix(ui): remove hardcoded cookie host
+* [fdd8d5b](https://github.com/zobtube/zobtube/commit/fdd8d5b3f55100d42dd1de41f5357fcf84fb86e1) fix(deps): update module github.com/urfave/cli/v3 to v3.6.2
+
 ## Version 0.3.11
 ### Chores
 * [3bc8180](https://github.com/zobtube/zobtube/commit/3bc818073e4b7fd68d6612d4e09f2c2457c92870) chore(deps): update dependency playwright to v1.57.0
