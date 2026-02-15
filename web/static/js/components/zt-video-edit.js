@@ -96,8 +96,8 @@ ZtVideoEdit.prototype.connectedCallback = function() {
           aid = addChips[i].getAttribute("actor-id");
           var addBtn = addChips[i].querySelector(".btn-success");
           var delBtn = addChips[i].querySelector(".btn-danger");
-          if(aid in actorSel.actorSelected){ if(addBtn)addBtn.style.display="none"; if(delBtn)delBtn.style.display=""; }
-          else { if(addBtn)addBtn.style.display=""; if(delBtn)delBtn.style.display="none"; }
+          if(aid in actorSel.actorSelected){ if(addBtn)addBtn.style.display="none"; if(delBtn)delBtn.style.display=""; addChips[i].style.display="none"; }
+          else { if(addBtn)addBtn.style.display=""; if(delBtn)delBtn.style.display="none"; addChips[i].style.display=""; }
         }
       };
       actorSel.actorSelect = function(aid){ actorSel.actorSelected[aid]=undefined; actorSel._updateSelectedActors(); };
@@ -175,7 +175,7 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       var actorModalChips = actors.map(function(a){
         var aid = a.ID||a.id;
         var sel = actorSelectedIds.indexOf(aid)>=0;
-        return '<div class="chip add-actor-list" actor-id="'+aid+'"><img class="lazy" data-src="/api/actor/'+encodeURIComponent(aid)+'/thumb" width="50" height="50">'+esc(a.Name||a.name)+'<button class="btn btn-success add-actor-add"><i class="fa fa-plus-circle"></i></button><button class="btn btn-danger add-actor-remove" style="'+(sel?'':'display:none')+'"><i class="fa fa-trash-alt"></i></button></div>';
+        return '<div class="chip add-actor-list" actor-id="'+aid+'" style="'+(sel?'display:none;':'')+'"><img src="/api/actor/'+encodeURIComponent(aid)+'/thumb" width="50" height="50">'+esc(a.Name||a.name)+'<button class="btn btn-success add-actor-add"><i class="fa fa-plus-circle"></i></button><button class="btn btn-danger add-actor-remove" style="'+(sel?'':'display:none')+'"><i class="fa fa-trash-alt"></i></button></div>';
       }).join("");
 
       var categoryModalHtml = "";
