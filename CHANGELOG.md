@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 0.4.1
+### Fixes
+* [0a9c944](https://github.com/zobtube/zobtube/commit/0a9c9449a246bc9f8d3c2af5ffc69c4eb2499431) fix(profile): add missing thumbnail for actors without thumbnail
+* [0d949c5](https://github.com/zobtube/zobtube/commit/0d949c5ffdcfde44f2c7e98849064dd91adcaaff) fix(video/edit): display categories properly
+* [997c5a4](https://github.com/zobtube/zobtube/commit/997c5a43c086cbf7562084687db02dfe15d84ff7) fix(router): add backup lazy loader
+* [f8cb607](https://github.com/zobtube/zobtube/commit/f8cb60770fc75499905c888d912a46e9b7c02d70) fix(video/edit): display actor thumbnail properly
+
 ## Version 0.4.0
 ### Features
 * [3df3f9a](https://github.com/zobtube/zobtube/commit/3df3f9a4f27827b0ace3addabafff371eadd285e) feat(actors): allow merging actors
@@ -22,6 +29,7 @@
 * [182149f](https://github.com/zobtube/zobtube/commit/182149ff67d94b6ad262b7bd118346b14d0ba6e2) fix(deps): update module golang.org/x/image to v0.35.0
 * [54351b5](https://github.com/zobtube/zobtube/commit/54351b59a746f5185f3c393b62c25f1f206af3cf) fix(deps): update module golang.org/x/text to v0.34.0
 * [548b614](https://github.com/zobtube/zobtube/commit/548b61400a510b1245ec8091765f945a8866f8b5) fix(actor/edit): add provider picture view back
+* [6938899](https://github.com/zobtube/zobtube/commit/6938899632e4d8a8ff2a70361ff4b34898ecb0c8) fix(ci): use correct go version to build on tags
 * [72ded2e](https://github.com/zobtube/zobtube/commit/72ded2eac8e64ee8ab487bafb18dcfd6fb2770b9) fix(auth): remove cookie after logout to avoid invalid sessions
 * [7a1f592](https://github.com/zobtube/zobtube/commit/7a1f5926cd250916ce75b091f2ae9fa87f23a1a9) fix(deps): update module golang.org/x/image to v0.36.0
 * [903d486](https://github.com/zobtube/zobtube/commit/903d486df1c138e46a75fb9cf1394b008c564c5c) fix(deps): update module golang.org/x/text to v0.33.0
