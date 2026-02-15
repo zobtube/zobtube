@@ -1,6 +1,9 @@
 package http
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/zobtube/zobtube/internal/controller"
@@ -9,17 +12,17 @@ import (
 
 func UserIsAdmin(c controller.AbstractController) gin.HandlerFunc {
 	return func(g *gin.Context) {
-		// get user
 		user := g.MustGet("user").(*model.User)
-
-		// check if admin
 		if !user.Admin {
-			g.Redirect(307, "/error/unauthorized")
+			if strings.HasPrefix(g.Request.URL.Path, "/api") {
+				g.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+				g.Abort()
+				return
+			}
+			g.Redirect(http.StatusTemporaryRedirect, "/api/error/unauthorized")
 			g.Abort()
 			return
 		}
-
-		// all good
 		g.Next()
 	}
 }

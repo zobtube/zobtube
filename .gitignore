@@ -6,3 +6,5 @@ dist/
 config.yml
 internal/model/zt-test.sqlite
 __pycache__
+coverage.out
+e2e-result.xml

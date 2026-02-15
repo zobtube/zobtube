@@ -64,8 +64,8 @@ func New(embedfs *embed.FS, ginDebug bool, logger *zerolog.Logger) *Server {
 		}
 	})
 
-	// load templates
-	server.LoadHTMLFromEmbedFS("web/page/**/*")
+	// load templates (web/page/** matches files in page and in subdirs e.g. app.html, actor/list.html)
+	server.LoadHTMLFromEmbedFS("web/page/**")
 
 	// prepare subfs
 	staticFS, _ := fs.Sub(server.FS, "web/static")

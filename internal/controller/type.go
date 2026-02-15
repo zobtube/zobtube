@@ -37,93 +37,90 @@ type AbstractController interface {
 
 	// Auth
 	AuthenticationEnabled() bool
-	AuthPage(*gin.Context)
 	AuthLogin(*gin.Context)
 	AuthLogout(*gin.Context)
+	AuthLogoutRedirect(*gin.Context)
+	AuthMe(*gin.Context)
 	GetSession(*model.UserSession) *gorm.DB
 	GetUser(*model.User) *gorm.DB
 	GetFirstUser(*model.User) *gorm.DB
 
 	// Actors
-	ActorAjaxCategories(*gin.Context)
-	ActorAjaxLinkThumbGet(*gin.Context)
-	ActorAjaxLinkThumbDelete(*gin.Context)
-	ActorAjaxNew(*gin.Context)
-	ActorAjaxProviderSearch(*gin.Context)
-	ActorAjaxRename(*gin.Context)
-	ActorAjaxDescription(*gin.Context)
-	ActorAjaxThumb(*gin.Context)
-	ActorAjaxLinkCreate(*gin.Context)
-	ActorAjaxAliasCreate(*gin.Context)
-	ActorAjaxAliasRemove(*gin.Context)
-	ActorAjaxMerge(*gin.Context)
-	ActorEdit(*gin.Context)
-	ActorList(*gin.Context)
+	ActorCategories(*gin.Context)
+	ActorLinkThumbGet(*gin.Context)
+	ActorLinkThumbDelete(*gin.Context)
 	ActorNew(*gin.Context)
-	ActorView(*gin.Context)
-	ActorThumb(*gin.Context)
+	ActorProviderSearch(*gin.Context)
+	ActorRename(*gin.Context)
+	ActorDescription(*gin.Context)
+	ActorUploadThumb(*gin.Context)
+	ActorLinkCreate(*gin.Context)
+	ActorAliasCreate(*gin.Context)
+	ActorAliasRemove(*gin.Context)
+	ActorMerge(*gin.Context)
+	ActorList(*gin.Context)
+	ActorGet(*gin.Context)
 	ActorDelete(*gin.Context)
+	ActorThumb(*gin.Context)
 
 	// Categories
-	CategoryAjaxAdd(*gin.Context)
-	CategoryAjaxDelete(*gin.Context)
+	CategoryAdd(*gin.Context)
+	CategoryDelete(*gin.Context)
 	CategoryList(*gin.Context)
+	CategorySubGet(*gin.Context)
 
 	// Sub categories
-	CategorySubAjaxAdd(*gin.Context)
-	CategorySubAjaxRename(*gin.Context)
-	CategorySubAjaxThumbSet(*gin.Context)
-	CategorySubAjaxThumbRemove(*gin.Context)
+	CategorySubAdd(*gin.Context)
+	CategorySubRename(*gin.Context)
+	CategorySubThumbSet(*gin.Context)
+	CategorySubThumbRemove(*gin.Context)
 	CategorySubThumb(*gin.Context)
-	CategorySubView(*gin.Context)
 
 	// Video, used for Clips, Movies and Videos
-	VideoAjaxGet(*gin.Context)
-	VideoAjaxActors(*gin.Context)
-	VideoAjaxCategories(*gin.Context)
-	VideoAjaxRename(*gin.Context)
-	VideoAjaxUpload(*gin.Context)
-	VideoAjaxUploadThumb(*gin.Context)
-	VideoAjaxCreate(*gin.Context)
-	VideoAjaxStreamInfo(*gin.Context)
-	VideoAjaxDelete(*gin.Context)
-	VideoAjaxMigrate(*gin.Context)
-	VideoAjaxGenerateThumbnail(*gin.Context)
-	VideoEdit(*gin.Context)
-	VideoAjaxEditChannel(*gin.Context)
+	VideoGet(*gin.Context)
+	VideoActors(*gin.Context)
+	VideoCategories(*gin.Context)
+	VideoRename(*gin.Context)
+	VideoUpload(*gin.Context)
+	VideoUploadThumb(*gin.Context)
+	VideoCreate(*gin.Context)
+	VideoStreamInfo(*gin.Context)
+	VideoDelete(*gin.Context)
+	VideoMigrate(*gin.Context)
+	VideoGenerateThumbnail(*gin.Context)
+	VideoEditChannel(*gin.Context)
 	VideoStream(*gin.Context)
 	VideoThumb(*gin.Context)
 	VideoThumbXS(*gin.Context)
-	VideoView(*gin.Context)
 
 	// Video Views
-	VideoViewAjaxIncrement(*gin.Context)
+	VideoViewIncrement(*gin.Context)
 
 	ClipList(*gin.Context)
 	ClipView(*gin.Context)
 	MovieList(*gin.Context)
 	VideoList(*gin.Context)
-	GenericVideoList(string, *gin.Context)
+	VideoView(*gin.Context)
+	VideoEdit(*gin.Context)
 
 	// Channels
-	ChannelCreate(*gin.Context)
 	ChannelList(*gin.Context)
-	ChannelView(*gin.Context)
+	ChannelGet(*gin.Context)
+	ChannelCreate(*gin.Context)
+	ChannelUpdate(*gin.Context)
 	ChannelThumb(*gin.Context)
-	ChannelAjaxList(*gin.Context)
-	ChannelEdit(*gin.Context)
+	ChannelMap(*gin.Context)
 
 	// Uploads
-	UploadTriage(*gin.Context)
-	UploadPreview(*gin.Context)
 	UploadImport(*gin.Context)
-	UploadAjaxTriageFolder(*gin.Context)
-	UploadAjaxTriageFile(*gin.Context)
-	UploadAjaxUploadFile(*gin.Context)
-	UploadAjaxDeleteFile(*gin.Context)
-	UploadAjaxFolderCreate(*gin.Context)
-	UploadAjaxMassDelete(*gin.Context)
-	UploadAjaxMassImport(*gin.Context)
+	UploadPreview(*gin.Context)
+	UploadTriageFolder(*gin.Context)
+	UploadTriageFile(*gin.Context)
+	UploadFile(*gin.Context)
+	UploadDeleteFile(*gin.Context)
+	UploadFolderCreate(*gin.Context)
+	UploadMassDelete(*gin.Context)
+	UploadMassImport(*gin.Context)
 
 	// Providers
 	ProviderRegister(provider.Provider) error
@@ -135,6 +132,11 @@ type AbstractController interface {
 	// Error pages
 	ErrNotFound(*gin.Context)
 	ErrUnauthorized(*gin.Context)
+
+	// SPA
+	Bootstrap(*gin.Context)
+	SPAApp(*gin.Context)
+	NoRouteOrSPA(*gin.Context)
 
 	// Init
 	LoggerRegister(*zerolog.Logger)

@@ -69,15 +69,15 @@ func (v *Video) URLView() string {
 }
 
 func (v *Video) URLThumb() string {
-	return fmt.Sprintf("/video/%s/thumb", v.ID)
+	return fmt.Sprintf("/api/video/%s/thumb", v.ID)
 }
 
 func (v *Video) URLThumbXS() string {
-	return fmt.Sprintf("/video/%s/thumb_xs", v.ID)
+	return fmt.Sprintf("/api/video/%s/thumb_xs", v.ID)
 }
 
 func (v *Video) URLStream() string {
-	return fmt.Sprintf("/video/%s/stream", v.ID)
+	return fmt.Sprintf("/api/video/%s/stream", v.ID)
 }
 
 func (v *Video) URLAdmEdit() string {

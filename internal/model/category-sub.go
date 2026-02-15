@@ -36,5 +36,5 @@ func (c *CategorySub) BeforeCreate(tx *gorm.DB) error {
 }
 
 func (c *CategorySub) URLThumb() string {
-	return fmt.Sprintf("/category-sub/%s/thumb", c.ID)
+	return fmt.Sprintf("/api/category-sub/%s/thumb", c.ID)
 }

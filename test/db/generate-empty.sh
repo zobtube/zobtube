@@ -1,9 +1,10 @@
 #!/bin/sh
 
-export ZT_SERVER_BIND='127.0.0.1:8069'
-export ZT_DB_DRIVER='sqlite'
-export ZT_DB_CONNSTRING='/tmp/zt-db.sqlite3'
-export ZT_MEDIA_PATH='/tmp/zt-data'
+# Use env vars if set (for per-worker isolation when running with pytest-xdist)
+export ZT_SERVER_BIND="${ZT_SERVER_BIND:-127.0.0.1:6969}"
+export ZT_DB_DRIVER="${ZT_DB_DRIVER:-sqlite}"
+export ZT_DB_CONNSTRING="${ZT_DB_CONNSTRING:-/tmp/zt-db.sqlite3}"
+export ZT_MEDIA_PATH="${ZT_MEDIA_PATH:-/tmp/zt-data}"
 
 echo 'delete existing database'
 rm -f $ZT_DB_CONNSTRING
@@ -28,9 +29,14 @@ sqlite3 $ZT_DB_CONNSTRING "insert into channels values ('8c50735e-1dc4-11f0-b1fc
 
 echo 'insert fake video'
 sqlite3 $ZT_DB_CONNSTRING "insert into videos (id, created_at, updated_at, deleted_at, name, filename, thumbnail, thumbnail_mini, duration, type, imported, status, channel_id) values ('d8045d56-1dc4-11f0-9970-305a3a05e04d', date('now'), date('now'), null, 'test', 'test-filename', 0, 0, 0, 'v', 1, 'ready', null);"
+sqlite3 $ZT_DB_CONNSTRING "insert into videos (id, created_at, updated_at, deleted_at, name, filename, thumbnail, thumbnail_mini, duration, type, imported, status, channel_id) values ('e8045d56-1dc4-11f0-9970-305a3a05e04d', date('now'), date('now'), null, 'test', 'test-filename', 0, 0, 0, 'c', 1, 'ready', null);"
 
 echo 'copy fake video'
 mkdir -p $ZT_MEDIA_PATH/videos/d8045d56-1dc4-11f0-9970-305a3a05e04d
 cp test/video/Big_Buck_Bunny_360_10s_1MB.mp4 $ZT_MEDIA_PATH/videos/d8045d56-1dc4-11f0-9970-305a3a05e04d/video.mp4
+
+echo 'copy sample to triage for upload e2e tests'
+mkdir -p $ZT_MEDIA_PATH/triage
+cp test/video/Big_Buck_Bunny_360_10s_1MB.mp4 $ZT_MEDIA_PATH/triage/sample_clip.mp4
 
 echo 'done'

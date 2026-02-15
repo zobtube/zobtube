@@ -1,0 +1,34 @@
+/* Critical above-the-fold CSS */
+body{font-family:'Poppins',sans-serif;font-size:16px;font-weight:400;color:#252525}
+a{color:#252525;text-decoration:none}
+a:hover{color:#167ac6}
+img{max-width:100%}
+ul{margin:0;padding:0;list-style:none}
+.container{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}
+@media (min-width:576px){.container{max-width:540px}}
+@media (min-width:768px){.container{max-width:720px}}
+@media (min-width:992px){.container{max-width:960px}}
+@media (min-width:1200px){.container{max-width:1140px}}
+.row{display:flex;flex-wrap:wrap;margin-right:-15px;margin-left:-15px}
+.col-md-12{flex:0 0 100%;max-width:100%;padding-right:15px;padding-left:15px}
+.header-top{background-color:#f44336;overflow:hidden;min-height:40px;line-height:40px}
+.header-top .user-info,.header-top .user-info a,.site-info,.site-info a{color:#fff;padding-right:15px}
+.header-top i{padding-right:10px;display:inline-block}
+.user-info div,.site-info div{display:inline-block}
+.main-menu{position:relative}
+.header-section{background-color:#f7f7f7}
+.main-menu .themeix-nav>li>a{display:inline-block;padding:20px 10px;font-weight:700}
+.preloader{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:9999;display:flex;align-items:center;justify-content:center}
+.text-muted{color:#6c757d}
+.text-center{text-align:center}
+.py-4{padding-top:1.5rem;padding-bottom:1.5rem}
+.hidden-xs{display:block}
+@media (max-width:767px){.hidden-xs{display:none}}
+.container-fluid{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}
+.col-3{flex:0 0 25%;max-width:25%}
+.col-9{flex:0 0 75%;max-width:75%}
+.nopadding{padding:0}
+.position-fixed{position:fixed}
+.bottom-0{bottom:0}
+.end-0{right:0}
+.p-3{padding:1rem}

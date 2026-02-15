@@ -5,11 +5,17 @@ import (
 )
 
 func (s *Server) setupRoutes(c controller.AbstractController) {
-	// authentication
+	// Auth (no auth required): SPA at /auth shows login form; POST /auth/login for login
 	auth := s.Router.Group("/auth")
-	auth.GET("", c.AuthPage)
+	auth.GET("", c.SPAApp)
 	auth.POST("/login", c.AuthLogin)
-	auth.GET("/logout", c.AuthLogout)
+	auth.GET("/logout", c.AuthLogoutRedirect)
+
+	// SPA shell - single endpoint for the app
+	s.Router.GET("/", c.SPAApp)
+
+	// Bootstrap (unauthenticated) - returns auth_enabled and user for SPA init
+	s.Router.GET("/api/bootstrap", c.Bootstrap)
 
 	authGroup := s.Router.Group("")
 	authGroup.Use(UserIsAuthenticated(c))
@@ -18,165 +24,135 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 	admGroup.Use(UserIsAuthenticated(c))
 	admGroup.Use(UserIsAdmin(c))
 
-	// not found
-	s.Router.NoRoute(c.ErrNotFound)
+	// Logout (authenticated)
+	authGroup.POST("/api/auth/logout", c.AuthLogout)
+	authGroup.GET("/api/auth/me", c.AuthMe)
 
-	// home
-	authGroup.GET("", c.Home)
+	// Home
+	authGroup.GET("/api/home", c.Home)
 
-	// actors
-	authGroup.GET("/actors", c.ActorList)
-	admGroup.GET("/actor/new", c.ActorNew)
-	admGroup.POST("/actor/new", c.ActorNew)
-	authGroup.GET("/actor/:id", c.ActorView)
-	admGroup.GET("/actor/:id/edit", c.ActorEdit)
-	authGroup.GET("/actor/:id/thumb", c.ActorThumb)
-	admGroup.GET("/actor/:id/delete", c.ActorDelete)
+	// Actors - list and get for all auth users; create/delete/mutate for admin
+	authGroup.GET("/api/actor", c.ActorList)
+	authGroup.GET("/api/actor/:id", c.ActorGet)
+	authGroup.GET("/api/actor/:id/thumb", c.ActorThumb)
 
-	actorAPI := admGroup.Group("/api/actor")
+	actorGroup := admGroup.Group("/api/actor")
 	{
-		actorAPI.POST("/", c.ActorAjaxNew)
-		actorAPI.POST("/:id/rename", c.ActorAjaxRename)
-		actorAPI.POST("/:id/description", c.ActorAjaxDescription)
-		actorAPI.POST("/:id/merge", c.ActorAjaxMerge)
+		actorGroup.POST("/", c.ActorNew)
+		actorGroup.DELETE("/:id", c.ActorDelete)
+		actorGroup.POST("/:id/rename", c.ActorRename)
+		actorGroup.POST("/:id/description", c.ActorDescription)
+		actorGroup.POST("/:id/merge", c.ActorMerge)
 
 		// providers
-		actorAPI.GET("/:id/provider/:provider_slug", c.ActorAjaxProviderSearch)
+		actorGroup.GET("/:id/provider/:provider_slug", c.ActorProviderSearch)
 
 		// links
-		actorAPI.DELETE("/link/:id", c.ActorAjaxLinkThumbDelete)
-		actorAPI.GET("/link/:id/thumb", c.ActorAjaxLinkThumbGet)
-		actorAPI.POST("/:id/link", c.ActorAjaxLinkCreate)
+		actorGroup.DELETE("/link/:id", c.ActorLinkThumbDelete)
+		actorGroup.GET("/link/:id/thumb", c.ActorLinkThumbGet)
+		actorGroup.POST("/:id/link", c.ActorLinkCreate)
 
 		// thumb
-		actorAPI.POST("/:id/thumb", c.ActorAjaxThumb)
+		actorGroup.POST("/:id/thumb", c.ActorUploadThumb)
 
 		// alias
-		actorAPI.POST("/:id/alias", c.ActorAjaxAliasCreate)
-		actorAPI.DELETE("/alias/:id", c.ActorAjaxAliasRemove)
+		actorGroup.POST("/:id/alias", c.ActorAliasCreate)
+		actorGroup.DELETE("/alias/:id", c.ActorAliasRemove)
 
 		// categories
-		actorAPI.PUT("/:id/category/:category_id", c.ActorAjaxCategories)
-		actorAPI.DELETE("/:id/category/:category_id", c.ActorAjaxCategories)
+		actorGroup.PUT("/:id/category/:category_id", c.ActorCategories)
+		actorGroup.DELETE("/:id/category/:category_id", c.ActorCategories)
 	}
 
-	// categories
-	authGroup.GET("/categories", c.CategoryList)
-	admGroup.POST("/api/category", c.CategoryAjaxAdd)
-	admGroup.DELETE("/api/category/:id", c.CategoryAjaxDelete)
+	// Categories
+	authGroup.GET("/api/category", c.CategoryList)
+	authGroup.GET("/api/category/:id", c.CategorySubGet)
+	authGroup.GET("/api/category-sub/:id/thumb", c.CategorySubThumb)
+	admGroup.POST("/api/category", c.CategoryAdd)
+	admGroup.DELETE("/api/category/:id", c.CategoryDelete)
+	admGroup.POST("/api/category-sub/:id/thumb", c.CategorySubThumbSet)
+	admGroup.DELETE("/api/category-sub/:id/thumb", c.CategorySubThumbRemove)
+	admGroup.POST("/api/category-sub", c.CategorySubAdd)
+	admGroup.POST("/api/category-sub/:id/rename", c.CategorySubRename)
 
-	// sub categories
-	authGroup.GET("/category/:id", c.CategorySubView)
-	authGroup.GET("/category-sub/:id/thumb", c.CategorySubThumb)
-	admGroup.POST("/api/category-sub/:id/thumb", c.CategorySubAjaxThumbSet)
-	admGroup.DELETE("/api/category-sub/:id/thumb", c.CategorySubAjaxThumbRemove)
-	admGroup.POST("/api/category-sub", c.CategorySubAjaxAdd)
-	admGroup.POST("/api/category-sub/:id/rename", c.CategorySubAjaxRename)
+	// Channels
+	authGroup.GET("/api/channel/map", c.ChannelMap)
+	authGroup.GET("/api/channel", c.ChannelList)
+	authGroup.GET("/api/channel/:id", c.ChannelGet)
+	authGroup.GET("/api/channel/:id/thumb", c.ChannelThumb)
+	admGroup.POST("/api/channel", c.ChannelCreate)
+	admGroup.PUT("/api/channel/:id", c.ChannelUpdate)
 
-	// channels
-	authGroup.GET("/channels", c.ChannelList)
-	admGroup.GET("/channel/new", c.ChannelCreate)
-	admGroup.POST("/channel/new", c.ChannelCreate)
-	authGroup.GET("/channel/:id", c.ChannelView)
-	authGroup.GET("/channel/:id/thumb", c.ChannelThumb)
-	admGroup.GET("/channel/:id/edit", c.ChannelEdit)
-	admGroup.POST("/channel/:id/edit", c.ChannelEdit)
+	// Videos
+	authGroup.GET("/api/clip", c.ClipList)
+	authGroup.GET("/api/clip/:id", c.ClipView)
+	authGroup.GET("/api/movie", c.MovieList)
+	authGroup.GET("/api/video", c.VideoList)
+	authGroup.GET("/api/video/:id", c.VideoView)
+	admGroup.GET("/api/video/:id/edit", c.VideoEdit)
+	authGroup.GET("/api/video/:id/summary", c.VideoGet)
+	authGroup.GET("/api/video/:id/stream", c.VideoStream)
+	authGroup.GET("/api/video/:id/thumb", c.VideoThumb)
+	authGroup.GET("/api/video/:id/thumb_xs", c.VideoThumbXS)
 
-	// channels API
-	authGroup.GET("/api/channels", c.ChannelAjaxList)
+	videoGroup := admGroup.Group("/api/video")
+	{
+		videoGroup.POST("", c.VideoCreate)
+		videoGroup.HEAD("/:id", c.VideoStreamInfo)
+		videoGroup.DELETE("/:id", c.VideoDelete)
+		videoGroup.POST("/:id/upload", c.VideoUpload)
+		videoGroup.POST("/:id/thumb", c.VideoUploadThumb)
+		videoGroup.POST("/:id/migrate", c.VideoMigrate)
+		videoGroup.PUT("/:id/actor/:actor_id", c.VideoActors)
+		videoGroup.DELETE("/:id/actor/:actor_id", c.VideoActors)
+		videoGroup.PUT("/:id/category/:category_id", c.VideoCategories)
+		videoGroup.DELETE("/:id/category/:category_id", c.VideoCategories)
+		videoGroup.POST("/:id/generate-thumbnail/:timing", c.VideoGenerateThumbnail)
+		videoGroup.POST("/:id/rename", c.VideoRename)
+		videoGroup.POST("/:id/count-view", c.VideoViewIncrement)
+		videoGroup.POST("/:id/channel", c.VideoEditChannel)
+	}
 
-	// videos
-	authGroup.GET("/clips", c.ClipList)
-	authGroup.GET("/clip/:id", c.ClipView)
-	authGroup.GET("/movies", c.MovieList)
-	authGroup.GET("/videos", c.VideoList)
-	authGroup.GET("/video/:id", c.VideoView)
-	admGroup.GET("/video/:id/edit", c.VideoEdit)
-	authGroup.GET("/video/:id/stream", c.VideoStream)
-	authGroup.GET("/video/:id/thumb", c.VideoThumb)
-	authGroup.GET("/video/:id/thumb_xs", c.VideoThumbXS)
+	// Uploads
+	uploadGroup := admGroup.Group("/api/upload")
+	{
+		uploadGroup.POST("/import", c.UploadImport)
+		uploadGroup.GET("/preview/:filepath", c.UploadPreview)
+		uploadGroup.POST("/triage/folder", c.UploadTriageFolder)
+		uploadGroup.POST("/triage/file", c.UploadTriageFile)
+		uploadGroup.POST("/file", c.UploadFile)
+		uploadGroup.DELETE("/file", c.UploadDeleteFile)
+		uploadGroup.POST("/folder", c.UploadFolderCreate)
+		uploadGroup.POST("/triage/mass-action", c.UploadMassImport)
+		uploadGroup.DELETE("/triage/mass-action", c.UploadMassDelete)
+	}
 
-	// videos API
-	videoAPI := admGroup.Group("/api/video")
-	videoAPI.POST("", c.VideoAjaxCreate)
-	videoAPI.HEAD("/:id", c.VideoAjaxStreamInfo)
-	videoAPI.GET("/:id", c.VideoAjaxGet)
-	videoAPI.DELETE("/:id", c.VideoAjaxDelete)
-	videoAPI.POST("/:id/upload", c.VideoAjaxUpload)
-	videoAPI.POST("/:id/thumb", c.VideoAjaxUploadThumb)
-	videoAPI.POST("/:id/migrate", c.VideoAjaxMigrate)
-	videoAPI.PUT("/:id/actor/:actor_id", c.VideoAjaxActors)
-	videoAPI.DELETE("/:id/actor/:actor_id", c.VideoAjaxActors)
-	videoAPI.PUT("/:id/category/:category_id", c.VideoAjaxCategories)
-	videoAPI.DELETE("/:id/category/:category_id", c.VideoAjaxCategories)
-	videoAPI.POST("/:id/generate-thumbnail/:timing", c.VideoAjaxGenerateThumbnail)
-	videoAPI.POST("/:id/rename", c.VideoAjaxRename)
-	videoAPI.POST("/:id/count-view", c.VideoViewAjaxIncrement)
-	videoAPI.POST("/:id/channel", c.VideoAjaxEditChannel)
+	// Adm
+	admGroup.GET("/api/adm", c.AdmHome)
+	admGroup.GET("/api/adm/video", c.AdmVideoList)
+	admGroup.GET("/api/adm/actor", c.AdmActorList)
+	admGroup.GET("/api/adm/channel", c.AdmChannelList)
+	admGroup.GET("/api/adm/category", c.AdmCategory)
+	admGroup.GET("/api/adm/config/auth", c.AdmConfigAuth)
+	admGroup.GET("/api/adm/config/auth/:action", c.AdmConfigAuthUpdate)
+	admGroup.GET("/api/adm/config/provider", c.AdmConfigProvider)
+	admGroup.GET("/api/adm/config/provider/:id/switch", c.AdmConfigProviderSwitch)
+	admGroup.GET("/api/adm/config/offline", c.AdmConfigOfflineMode)
+	admGroup.GET("/api/adm/config/offline/:action", c.AdmConfigOfflineModeUpdate)
+	admGroup.GET("/api/adm/task/home", c.AdmTaskHome)
+	admGroup.GET("/api/adm/task", c.AdmTaskList)
+	admGroup.GET("/api/adm/task/:id", c.AdmTaskView)
+	admGroup.POST("/api/adm/task/:id/retry", c.AdmTaskRetry)
+	admGroup.GET("/api/adm/user", c.AdmUserList)
+	admGroup.POST("/api/adm/user", c.AdmUserNew)
+	admGroup.DELETE("/api/adm/user/:id", c.AdmUserDelete)
 
-	// uploads
-	uploads := admGroup.Group("/upload")
-	uploads.GET("/", c.UploadTriage)
-	uploads.GET("/preview/:filepath", c.UploadPreview)
-	uploads.POST("/import", c.UploadImport)
-	uploadAPI := admGroup.Group("/api/upload")
-	uploadAPI.POST("/triage/folder", c.UploadAjaxTriageFolder)
-	uploadAPI.POST("/triage/file", c.UploadAjaxTriageFile)
-	uploadAPI.POST("/file", c.UploadAjaxUploadFile)
-	uploadAPI.DELETE("/file", c.UploadAjaxDeleteFile)
-	uploadAPI.POST("/folder", c.UploadAjaxFolderCreate)
-	uploadAPI.POST("/triage/mass-action", c.UploadAjaxMassImport)
-	uploadAPI.DELETE("/triage/mass-action", c.UploadAjaxMassDelete)
+	// Profile
+	authGroup.GET("/api/profile", c.ProfileView)
 
-	// adm
-	admGroup.GET("/adm", c.AdmHome)
-	admGroup.GET("/adm/videos", c.AdmVideoList)
-	admGroup.GET("/adm/actors", c.AdmActorList)
-	admGroup.GET("/adm/categories", c.AdmCategory)
-	admGroup.GET("/adm/channels", c.AdmChannelList)
-	admGroup.GET("/adm/config/auth", c.AdmConfigAuth)
-	admGroup.GET("/adm/config/auth/:action", c.AdmConfigAuthUpdate)
-	admGroup.GET("/adm/config/offline", c.AdmConfigOfflineMode)
-	admGroup.GET("/adm/config/offline/:action", c.AdmConfigOfflineModeUpdate)
-	admGroup.GET("/adm/config/provider", c.AdmConfigProvider)
-	admGroup.GET("/adm/config/provider/:id/switch", c.AdmConfigProviderSwitch)
-	admGroup.GET("/adm/task/home", c.AdmTaskHome)
-	admGroup.GET("/adm/tasks", c.AdmTaskList)
-	admGroup.GET("/adm/task/:id", c.AdmTaskView)
-	admGroup.GET("/adm/users", c.AdmUserList)
-	admGroup.GET("/adm/user", c.AdmUserNew)
-	admGroup.POST("/adm/user", c.AdmUserNew)
-	admGroup.GET("/adm/user/:id/delete", c.AdmUserDelete)
-	admGroup.POST("/adm/task/:id/retry", c.AdmTaskRetry)
+	// Error
+	authGroup.Any("/api/error/unauthorized", c.ErrUnauthorized)
 
-	// profile
-	authGroup.GET("/profile", c.ProfileView)
-
-	// errors
-	authGroup.Any("/error/unauthorized", c.ErrUnauthorized)
-	// remainings routes to implement
-	/*
-	   path('actor/<uuid:id>/edit/first-time', views.actor_edit, name='actor_edit_first_time', kwargs={'first_time': True}),
-	   path('actor/<uuid:id>/remove', views.actor_remove, name='actor_remove'),
-
-	   path('channels', views.ChannelListView.as_view(), name='channel_list'),
-	   path('channel/new', views.channel_new, name='channel_new'),
-	   path('channel/<uuid:id>', views.channel_view, name='channel_view'),
-	   path('channel/<uuid:id>/thumb', views.channel_thumb, name='channel_thumb'),
-
-	   path('profile', views.profile_view, name='profile_view'),
-
-	   path('triage/delete/<path:name>', views.triage_delete, name='triage_delete'),
-	   path('uploads', views.upload_home, name='upload_home'),
-	   path('upload/list', views.upload_list, name='upload_list'),
-	   path('upload/<uuid:pk>/stream', views.upload_stream, name='upload_stream'),
-	   path('upload/<uuid:pk>/delete', views.upload_delete, name='upload_delete'),
-	   path('upload/<uuid:pk>/import/<str:import_as>', views.upload_import, name='upload_import'),
-	   path('upload/new', views.upload_new, name='upload_new'),
-	   path('upload/file', views.ChunkedUploadView.as_view(), name='upload_file'),
-	   path('upload/file/<uuid:pk>', views.ChunkedUploadView.as_view(), name='upload_file_view'),
-	   path('adm/actor/fix-thumb', views.adm_actor_fix_missing_thumb, name='adm_actor_fix_missing_thumb'),
-	   path('adm/actor/<uuid:id>/fix-thumb', views.adm_actor_fix_thumb, name='adm_actor_fix_thumb'),
-	   path('adm/actor/<uuid:id>/gen-thumb', views.adm_actor_gen_thumb, name='adm_actor_gen_thumb'),
-	*/
+	// NoRoute: serve SPA for GET (client-side routes) or JSON 404
+	s.Router.NoRoute(c.NoRouteOrSPA)
 }

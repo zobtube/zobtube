@@ -64,7 +64,7 @@ func (a *Actor) URLView() string {
 }
 
 func (a *Actor) URLThumb() string {
-	return fmt.Sprintf("/actor/%s/thumb", a.ID)
+	return fmt.Sprintf("/api/actor/%s/thumb", a.ID)
 }
 
 func (a *Actor) URLAdmEdit() string {

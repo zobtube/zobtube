@@ -20,24 +20,22 @@ jobs:
           distribution: goreleaser
           version: '~> v2'
           args: build --snapshot --single-target -o /tmp/zt
-      - name: Setup fake DB
-        run: ./test/db/generate-empty.sh
       - name: Install dependencies
         run: |
-          python3 -m venv work-dir
-          source work-dir/bin/activate
+          python3 -m venv .venv
+          source .venv/bin/activate
           python3 -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Ensure browsers are installed
         run: |
-          source work-dir/bin/activate
+          source .venv/bin/activate
           python -m playwright install --with-deps
       - name: Run your tests
         run: |
-          source work-dir/bin/activate
-          pytest
+          source .venv/bin/activate
+          ./tools/e2e-run.sh
       - uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           name: playwright-traces
-          path: test-results/
+          path: e2e-result.xml

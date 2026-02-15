@@ -1,0 +1,244 @@
+{{ define "web/page/app-static.html" }}
+<!DOCTYPE html>
+<html lang="zxx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>ZobTube</title>
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
+    <style>body{font-family:'Poppins',sans-serif;font-size:16px;color:#252525}a{color:#252525;text-decoration:none}a:hover{color:#167ac6}img{max-width:100%}ul{margin:0;padding:0;list-style:none}.container{width:100%;padding:0 15px;margin:0 auto;max-width:1140px}.header-top{background:#f44336;min-height:40px;line-height:40px}.header-top .user-info,.header-top a,.site-info,.site-info a{color:#fff}.header-section{background:#f7f7f7}.preloader{position:fixed;inset:0;background:#fff;z-index:9999;display:flex;align-items:center;justify-content:center}.text-muted{color:#6c757d}.text-center{text-align:center}.py-4{padding:1.5rem 0}</style>
+    <link href="/static/css/font-poppins.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/bootstrap-5.3.3.min.css">
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/megamenu.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <link rel="stylesheet" href="/static/css/cropper-1.5.13.min.css">
+</head>
+<body>
+    <script>
+const zt = { onload: [] };
+window.zt = Object(zt);
+zt.updateHeader = function(user) {
+  var upload = document.getElementById("zt-header-upload");
+  var admin = document.getElementById("zt-header-admin");
+  var profile = document.getElementById("zt-header-profile");
+  var username = document.getElementById("zt-header-username");
+  var sep = document.getElementById("zt-header-sep");
+  var logout = document.getElementById("zt-header-logout");
+  if (upload) upload.style.display = (user && user.admin) ? "" : "none";
+  if (admin) admin.style.display = (user && user.admin) ? "" : "none";
+  if (profile) { profile.style.display = (user && user.username) ? "" : "none"; }
+  if (username && user) username.textContent = user.username || "";
+  if (sep) sep.style.display = (user && user.username && window.__INITIAL__ && window.__INITIAL__.authentication_enabled) ? "" : "none";
+  if (logout) logout.style.display = (window.__INITIAL__ && window.__INITIAL__.authentication_enabled) ? "" : "none";
+};
+    </script>
+
+    <div class="preloader">
+        <div class='uil-ring-css' style='transform:scale(0.45);'><div></div></div>
+    </div>
+
+    <header>
+        <div class="header-top hidden-xs">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="header-top-area">
+                            <div class="site-info left">
+                                <div class="mail-address">
+                                    <a>ZobTube, Passion of the Zob, Lube for the Tube!</a>
+                                </div>
+                            </div>
+                            <div class="user-info right" id="zt-header-user">
+                                <div class="upload-opt" id="zt-header-upload" style="display:none;">
+                                    <i class="fa fa-upload"></i>
+                                    <a href="/upload">uploads</a>
+                                    <span class="sepator">|</span>
+                                </div>
+                                <div class="admin-info" id="zt-header-admin" style="display:none;">
+                                    <i class="fa fa-hammer"></i>
+                                    <a href="/adm">admin</a>
+                                    <span class="sepator">|</span>
+                                </div>
+                                <div class="user-info" id="zt-header-profile" style="display:none;">
+                                    <i class="fa fa-user"></i>
+                                    <a href="/profile" id="zt-header-username"></a>
+                                </div>
+                                <span class="sepator" id="zt-header-sep" style="display:none;">|</span>
+                                <div class="user-logout" id="zt-header-logout" style="display:none;">
+                                    <i class="fa fa-sign-out-alt"></i>
+                                    <a href="/auth/logout" data-full-reload>logout</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="main-menu">
+            <nav class="header-section pin-style">
+                <div class="container-fluid">
+                    <div class="mod-menu">
+                        <div class="row">
+                            <div class="col-3">
+                                <a href="/" title="logo" class="logo"><img src="/static/images/logo.png" alt="logo" height="55"></a>
+                            </div>
+                            <div class="col-9 nopadding">
+                                <div class="main-nav rightnav">
+                                    <ul class="top-nav">
+                                        <li class="visible-this d-md-none menu-icon">
+                                            <a href="#" class="navbar-toggle collapsed" data-bs-toggle="collapse" data-bs-target="#menu" aria-expanded="false"><i class="fa fa-bars"></i></a>
+                                        </li>
+                                    </ul>
+                                    <div id="menu" class="collapse header-menu">
+                                        <ul class="nav themeix-nav">
+                                            <li><a href="/">Home</a></li>
+                                            <li><a href="/movies">Movies</a></li>
+                                            <li><a href="/categories">Categories</a></li>
+                                            <li><a href="/channels">Channels</a></li>
+                                            <li><a href="/actors">Actors</a></li>
+                                            <li><a href="/clips">Clips</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            <div id="zt-nav-progress" class="zt-nav-progress" aria-hidden="true"></div>
+        </div>
+    </header>
+
+    <div id="login-form" style="display:none; max-width: 400px; margin: 2rem auto; padding: 1rem;">
+        <h2>Sign in</h2>
+        <form id="login-form-elem" method="post" action="/auth/login">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required aria-label="Username">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required aria-label="Password">
+            </div>
+            <button type="submit" class="btn btn-primary">Sign in</button>
+        </form>
+    </div>
+    <div id="app" class="container" style="padding-top:50px;"></div>
+    <div id="app-staging" aria-hidden="true" style="position:absolute;left:-9999px;top:0;width:100%;visibility:hidden;pointer-events:none"></div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" id="zt-toast-container">
+        <div id="toastTemplate" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header text-white">
+                <strong class="me-auto zt-toast-title">Bootstrap</strong>
+                <small class="zt-toast-subtitle">11 mins ago</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body zt-toast-body">Hello, world!</div>
+        </div>
+    </div>
+
+    <div class="scroll-top">
+        <div class="scroll-icon"><i class="fa fa-angle-up"></i></div>
+    </div>
+
+    <script src="/static/js/auth-login.js"></script>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/js/bootstrap-5.3.3.min.js"></script>
+    <script src="/static/js/vanilla-lazyload-19.1.3.min.js"></script>
+    <script src="/static/js/cropper-1.5.13.min.js"></script>
+    <script src="/static/js/components/zt-thumb-preview.js"></script>
+    <script src="/static/js/components/zt-video-tile.js"></script>
+    <script src="/static/js/components/zt-video-view-tile.js"></script>
+    <script src="/static/js/components/zt-adm-tabs.js"></script>
+    <script src="/static/js/components/zt-category-selection.js"></script>
+    <script src="/static/js/components/zt-actor-selection.js"></script>
+    <script src="/static/js/components/zt-home.js"></script>
+    <script src="/static/js/components/zt-actor-list.js"></script>
+    <script src="/static/js/components/zt-actor-view.js"></script>
+    <script src="/static/js/components/zt-actor-create.js"></script>
+    <script src="/static/js/components/zt-actor-edit.js"></script>
+    <script src="/static/js/components/zt-category-list.js"></script>
+    <script src="/static/js/components/zt-category-view.js"></script>
+    <script src="/static/js/components/zt-channel-list.js"></script>
+    <script src="/static/js/components/zt-channel-view.js"></script>
+    <script src="/static/js/components/zt-channel-create.js"></script>
+    <script src="/static/js/components/zt-channel-edit.js"></script>
+    <script src="/static/js/components/zt-clip-list.js"></script>
+    <script src="/static/js/components/zt-video-list.js"></script>
+    <script src="/static/js/components/zt-video-view.js"></script>
+    <script src="/static/js/components/zt-video-edit.js"></script>
+    <script src="/static/js/components/zt-clip-view.js"></script>
+    <script src="/static/js/components/zt-profile-view.js"></script>
+    <script src="/static/js/components/zt-upload-home.js"></script>
+    <script src="/static/js/components/zt-adm-home.js"></script>
+    <script src="/static/js/components/zt-adm-object-list.js"></script>
+    <script src="/static/js/components/zt-adm-category.js"></script>
+    <script src="/static/js/components/zt-adm-task-home.js"></script>
+    <script src="/static/js/components/zt-adm-task-list.js"></script>
+    <script src="/static/js/components/zt-adm-task-view.js"></script>
+    <script src="/static/js/components/zt-adm-user-new.js"></script>
+    <script src="/static/js/components/zt-adm-user-list.js"></script>
+    <script src="/static/js/components/zt-adm-config-auth.js"></script>
+    <script src="/static/js/components/zt-adm-config-provider.js"></script>
+    <script src="/static/js/components/zt-adm-config-offline.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/router.js"></script>
+    <script>
+(function init() {
+    var loginForm = document.getElementById("login-form");
+    var app = document.getElementById("app");
+    if (!app) return;
+
+    fetch("/api/bootstrap", { credentials: "same-origin" })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            window.__INITIAL__ = { authentication_enabled: data.auth_enabled };
+            window.__USER__ = data.user || null;
+            if (window.zt && window.zt.updateHeader) window.zt.updateHeader(data.user);
+
+            if (!data.auth_enabled) {
+                app.style.display = "block";
+                if (loginForm) loginForm.style.display = "none";
+                loadPage("/");
+                history.replaceState({ path: "/" }, "", window.location.pathname || "/");
+                return;
+            }
+            if (data.user) {
+                if (loginForm) loginForm.style.display = "none";
+                app.style.display = "block";
+                var path = window.location.pathname || "/";
+                loadPage(path);
+                history.replaceState({ path: path }, "", path);
+            } else {
+                if (loginForm) loginForm.style.display = "block";
+                app.style.display = "none";
+            }
+        })
+        .catch(function() {
+            app.innerHTML = "<div class=\"text-muted text-center py-4\">Failed to load.</div>";
+        });
+
+    document.getElementById("login-form-elem").addEventListener("submit", function(e) {
+        e.preventDefault();
+        var form = e.target;
+        var fd = new FormData(form);
+        fd.set("password", sha256(getCookie("zt_auth") + sha256(fd.get("password"))));
+        fetch(form.action, { method: "POST", body: fd, credentials: "same-origin" })
+            .then(function(r) {
+                if (r.status === 200) window.location.href = "/";
+                else return r.json().then(function(data) {
+                    if (typeof sendToast === "function") sendToast("Unable to login", "", "bg-warning", (data && data.error) || "Login failed");
+                });
+            })
+            .catch(function() {
+                if (typeof sendToast === "function") sendToast("Unable to login", "", "bg-warning", "Request failed");
+            });
+    });
+})();
+    </script>
+</body>
+</html>
+{{ end }}

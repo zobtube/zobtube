@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,17 +22,25 @@ func authRedirectURL(g *gin.Context) string {
 	return "/auth?next=" + url.QueryEscape(nextVal)
 }
 
+func apiUnauthorized(g *gin.Context) {
+	g.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+	g.Abort()
+}
+
 func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 	return func(g *gin.Context) {
+		isAPI := strings.HasPrefix(g.Request.URL.Path, "/api")
+
 		if !c.AuthenticationEnabled() {
 			// get user
 			user := &model.User{}
 			result := c.GetFirstUser(user)
 			if result.RowsAffected < 1 {
-				// something bad happened
-				// most likely someone deleted the last user
-				// restart the application to re-create the default user
-				c.Restart()
+				if isAPI {
+					g.JSON(http.StatusInternalServerError, gin.H{"error": "no user"})
+					g.Abort()
+					return
+				}
 				g.Redirect(http.StatusFound, "/")
 				g.Abort()
 				return
@@ -47,7 +56,10 @@ func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 
 		cookie, err := g.Cookie(cookieName)
 		if err != nil {
-			// cookie not set
+			if isAPI {
+				apiUnauthorized(g)
+				return
+			}
 			g.Redirect(http.StatusFound, authRedirectURL(g))
 			g.Abort()
 			return
@@ -68,6 +80,10 @@ func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 
 		// check validity
 		if session.ValidUntil.Before(time.Now()) {
+			if isAPI {
+				apiUnauthorized(g)
+				return
+			}
 			g.Redirect(http.StatusFound, authRedirectURL(g))
 			g.Abort()
 			return
@@ -75,6 +91,10 @@ func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 
 		// check if user is authenticated
 		if session.UserID == nil || *session.UserID == "" {
+			if isAPI {
+				apiUnauthorized(g)
+				return
+			}
 			g.Redirect(http.StatusFound, authRedirectURL(g))
 			g.Abort()
 			return
@@ -86,6 +106,10 @@ func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 		}
 		result = c.GetUser(user)
 		if result.RowsAffected < 1 {
+			if isAPI {
+				apiUnauthorized(g)
+				return
+			}
 			g.Redirect(http.StatusFound, authRedirectURL(g))
 			g.Abort()
 			return
@@ -93,7 +117,6 @@ func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 
 		// set meta in context
 		g.Set("user", user)
-
 		g.Next()
 	}
 }

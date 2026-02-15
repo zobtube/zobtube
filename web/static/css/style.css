@@ -990,3 +990,34 @@ header .modal-body .btn.btn-primary {
 .clickable {
 	cursor: pointer;
 }
+
+/* Navigation progress bar - bottom of menu */
+.zt-nav-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: transparent;
+  overflow: hidden;
+  visibility: hidden;
+  transition: visibility 0.15s;
+}
+.zt-nav-progress.active {
+  visibility: visible;
+}
+.zt-nav-progress::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 30%;
+  background: #f44336;
+  animation: zt-nav-progress-slide 1.5s ease-in-out infinite;
+}
+@keyframes zt-nav-progress-slide {
+  0% { left: -30%; }
+  100% { left: 100%; }
+}
