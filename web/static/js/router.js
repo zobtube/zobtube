@@ -84,6 +84,9 @@ function finishLoad(id, el) {
     window.zt.onload.forEach(function(fn) { try { fn(); } catch (e) {} });
   }
   if (window.lazyLoadInstance) window.lazyLoadInstance.update();
+  setTimeout(function() {
+    if (window.lazyLoadInstance) window.lazyLoadInstance.update();
+  }, 200);
 }
 
 function handlePageReady(el) {
