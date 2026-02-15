@@ -143,8 +143,8 @@ ZtVideoEdit.prototype.connectedCallback = function() {
           cid = addChips[k].getAttribute("category-id");
           var addBtn = addChips[k].querySelector(".btn-success");
           var delBtn = addChips[k].querySelector(".btn-danger");
-          if(cid in catSel.categorySelected){ if(addBtn)addBtn.style.display="none"; if(delBtn)delBtn.style.display=""; }
-          else { if(addBtn)addBtn.style.display=""; if(delBtn)delBtn.style.display="none"; }
+          if(cid in catSel.categorySelected){ if(addBtn)addBtn.style.display="none"; if(delBtn)delBtn.style.display=""; addChips[k].style.display="none"; }
+          else { if(addBtn)addBtn.style.display=""; if(delBtn)delBtn.style.display="none"; addChips[k].style.display=""; }
         }
       };
       catSel.categorySelect = function(cid){ catSel.categorySelected[cid]=undefined; catSel._updateSelectedCategories(); };
@@ -167,7 +167,7 @@ ZtVideoEdit.prototype.connectedCallback = function() {
         (c.Sub||c.sub||[]).forEach(function(s){
           var sid = s.ID||s.id;
           var show = categorySelectedIds.indexOf(sid)>=0 ? "" : "display:none";
-          var thumb = (s.Thumbnail||s.thumbnail) ? '<img src="/api/category-sub/'+encodeURIComponent(sid)+'/thumb" width="100" height="50">' : "";
+          var thumb = '<img src="/api/category-sub/'+encodeURIComponent(sid)+'/thumb" width="50" height="50">';
           categoryChips.push('<div class="chip video-category-list" category-id="'+sid+'" style="'+show+'">'+thumb+esc(s.Name||s.name)+'<button class="btn btn-danger" onclick="window.zt.categorySelection.categoryDeselect(\''+sid+'\');"><i class="fa fa-trash-alt"></i></button></div>');
         });
       });
@@ -186,8 +186,8 @@ ZtVideoEdit.prototype.connectedCallback = function() {
         subs.forEach(function(s){
           var sid = s.ID||s.id;
           var sel = categorySelectedIds.indexOf(sid)>=0;
-          var thumb = (s.Thumbnail||s.thumbnail) ? '<img class="lazy" data-src="/api/category-sub/'+encodeURIComponent(sid)+'/thumb" width="100" height="50">' : "";
-          categoryModalHtml += '<div class="chip add-category-list" category-id="'+sid+'">'+thumb+esc(s.Name||s.name)+'<button class="btn btn-success add-category-add"><i class="fa fa-plus-circle"></i></button><button class="btn btn-danger add-category-remove" style="'+(sel?'':'display:none')+'"><i class="fa fa-trash-alt"></i></button></div>';
+          var thumb = '<img src="/api/category-sub/'+encodeURIComponent(sid)+'/thumb" width="50" height="50">';
+          categoryModalHtml += '<div class="chip add-category-list" category-id="'+sid+'" style="'+(sel?'display:none;':'')+'">'+thumb+esc(s.Name||s.name)+'<button class="btn btn-success add-category-add"><i class="fa fa-plus-circle"></i></button><button class="btn btn-danger add-category-remove" style="'+(sel?'':'display:none')+'"><i class="fa fa-trash-alt"></i></button></div>';
         });
         categoryModalHtml += '</div>';
       });
