@@ -37,7 +37,7 @@ ZtProfileView.prototype.connectedCallback = function() {
           if (!a) return;
           var aid = a.ID || a.id;
           var an = (a.Name||a.name||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
-          var thumb = (a.Thumbnail||a.thumbnail) ? '<img class="lazy" data-src="/api/actor/'+encodeURIComponent(aid)+'/thumb" class="card-img-top lazy" alt="">' : "";
+          var thumb = '<img class="lazy" data-src="/api/actor/'+encodeURIComponent(aid)+'/thumb" class="card-img-top lazy" alt="">';
           html += '<div class="col-md-2"><div class="video-img"><a href="/actor/'+encodeURIComponent(aid)+'">'+thumb+'</a></div><div class="video-content"><h4><a href="/actor/'+encodeURIComponent(aid)+'" class="video-title">'+an+'</a></h4><div class="video-counter"><div class="video-viewers"><span class="fa fa-eye view-icon"></span><span>'+c+'</span></div></div></div></div>';
         });
       }
