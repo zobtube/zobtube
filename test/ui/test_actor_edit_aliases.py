@@ -20,7 +20,7 @@ def test_actor_edit_create_alias_and_persists_after_reload(page: Page):
     # Click "create alias" (button that opens Add alias modal)
     page.locator('button[data-bs-target="#addActorAliasModal"]').click()
     page.get_by_label("Alias").fill("E2E Test Alias")
-    page.get_by_role("button", name="Add").click()
+    page.locator("#addActorAliasModal").get_by_role("button", name="Add").click()
 
     # Alias appears immediately (page may refresh)
     expect(page.get_by_text("E2E Test Alias", exact=True)).to_be_visible(timeout=5000)
