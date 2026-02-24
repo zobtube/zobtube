@@ -8,6 +8,13 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
+// CategoryList godoc
+//
+//	@Summary	List all categories
+//	@Tags		category
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/category [get]
 func (c *Controller) CategoryList(g *gin.Context) {
 	var categories []model.Category
 	c.datastore.Preload("Sub").Find(&categories)
@@ -17,6 +24,15 @@ func (c *Controller) CategoryList(g *gin.Context) {
 	})
 }
 
+// CategorySubGet godoc
+//
+//	@Summary	Get category sub with videos and actors
+//	@Tags		category
+//	@Produce	json
+//	@Param		id	path	string	true	"Category sub ID"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/category/{id} [get]
 func (c *Controller) CategorySubGet(g *gin.Context) {
 	id := g.Param("id")
 	sub := &model.CategorySub{ID: id}
@@ -28,6 +44,17 @@ func (c *Controller) CategorySubGet(g *gin.Context) {
 	g.JSON(http.StatusOK, sub)
 }
 
+// CategoryAdd godoc
+//
+//	@Summary	Create a new category
+//	@Tags		category
+//	@Accept		x-www-form-urlencoded
+//	@Param		Name	formData	string	true	"Category name"
+//	@Param		Type	formData	string	false	"Category type"
+//	@Param		Scope	formData	string	false	"Category scope"
+//	@Success	200
+//	@Failure	400	{object}	map[string]interface{}
+//	@Router		/category [post]
 func (c *Controller) CategoryAdd(g *gin.Context) {
 	var err error
 
@@ -75,6 +102,15 @@ func (c *Controller) CategoryAdd(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// CategoryDelete godoc
+//
+//	@Summary	Delete a category
+//	@Tags		category
+//	@Param		id	path	string	true	"Category ID"
+//	@Success	200
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/category/{id} [delete]
 func (c *Controller) CategoryDelete(g *gin.Context) {
 	// get category id from path
 	id := g.Param("id")

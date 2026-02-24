@@ -15,6 +15,15 @@ import (
 
 const errFileEmpty = "file name cannot be empty"
 
+// UploadImport godoc
+//
+//	@Summary	Import file from triage as video
+//	@Tags		upload
+//	@Accept		json
+//	@Param		body	body	object	true	"JSON with path, import_as"
+//	@Success	201	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Router		/upload/import [post]
 func (c *Controller) UploadImport(g *gin.Context) {
 	var body struct {
 		Path     string `json:"path"`
@@ -38,6 +47,14 @@ func (c *Controller) UploadImport(g *gin.Context) {
 	g.JSON(http.StatusCreated, gin.H{"id": video.ID, "redirect": "/video/" + video.ID})
 }
 
+// UploadPreview godoc
+//
+//	@Summary	Preview file from triage folder
+//	@Tags		upload
+//	@Param		filepath	path	string	true	"URL-encoded file path"
+//	@Success	200	file	bytes
+//	@Failure	500	{object}	map[string]interface{}
+//	@Router		/upload/preview/{filepath} [get]
 func (c *Controller) UploadPreview(g *gin.Context) {
 	filePathEncoded := g.Param("filepath")
 	filePath, err := url.QueryUnescape(filePathEncoded)
@@ -55,6 +72,15 @@ func (c *Controller) UploadPreview(g *gin.Context) {
 	g.File(targetPath)
 }
 
+// UploadTriageFolder godoc
+//
+//	@Summary	List folders in triage path with file counts
+//	@Tags		upload
+//	@Accept		x-www-form-urlencoded
+//	@Param		path	formData	string	true	"Path in triage"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	500	{object}	map[string]interface{}
+//	@Router		/upload/triage/folder [post]
 func (c *Controller) UploadTriageFolder(g *gin.Context) {
 	// get requested path
 	path := g.PostForm("path")
@@ -123,6 +149,15 @@ type FileInfo struct {
 	LastModification time.Time
 }
 
+// UploadTriageFile godoc
+//
+//	@Summary	List files in triage path
+//	@Tags		upload
+//	@Accept		x-www-form-urlencoded
+//	@Param		path	formData	string	true	"Path in triage"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	500	{object}	map[string]interface{}
+//	@Router		/upload/triage/file [post]
 func (c *Controller) UploadTriageFile(g *gin.Context) {
 	// get requested path
 	path := g.PostForm("path")
@@ -170,6 +205,16 @@ func (c *Controller) UploadTriageFile(g *gin.Context) {
 	})
 }
 
+// UploadFile godoc
+//
+//	@Summary	Upload file to triage folder
+//	@Tags		upload
+//	@Accept		multipart/form-data
+//	@Param		file	formData	file	true	"File to upload"
+//	@Param		path	formData	string	true	"Destination path"
+//	@Success	200
+//	@Failure	500	{object}	map[string]interface{}
+//	@Router		/upload/file [post]
 func (c *Controller) UploadFile(g *gin.Context) {
 	// get file
 	file, err := g.FormFile("file")
@@ -196,6 +241,14 @@ func (c *Controller) UploadFile(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// UploadDeleteFile godoc
+//
+//	@Summary	Delete file from triage
+//	@Tags		upload
+//	@Param		File	formData	string	true	"File path in triage"
+//	@Success	200
+//	@Failure	400	{object}	map[string]interface{}
+//	@Router		/upload/file [delete]
 func (c *Controller) UploadDeleteFile(g *gin.Context) {
 	// get file from request
 	type fileDeleteForm struct {
@@ -235,6 +288,15 @@ func (c *Controller) UploadDeleteFile(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// UploadMassDelete godoc
+//
+//	@Summary	Delete multiple files from triage
+//	@Tags		upload
+//	@Accept		json
+//	@Param		body	body	object	true	"JSON with files array"
+//	@Success	200
+//	@Failure	400	{object}	map[string]interface{}
+//	@Router		/upload/triage/mass-action [delete]
 func (c *Controller) UploadMassDelete(g *gin.Context) {
 	// get file list from request
 	type fileDeleteForm struct {
@@ -283,6 +345,15 @@ func (c *Controller) UploadMassDelete(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// UploadMassImport godoc
+//
+//	@Summary	Mass import files from triage as videos
+//	@Tags		upload
+//	@Accept		json
+//	@Param		body	body	object	true	"JSON with files, type, actors, categories, channel"
+//	@Success	200
+//	@Failure	400	{object}	map[string]interface{}
+//	@Router		/upload/triage/mass-action [post]
 func (c *Controller) UploadMassImport(g *gin.Context) {
 	// get file list from request
 	type fileImportForm struct {
@@ -452,6 +523,15 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// UploadFolderCreate godoc
+//
+//	@Summary	Create folder in triage
+//	@Tags		upload
+//	@Accept		x-www-form-urlencoded
+//	@Param		name	formData	string	true	"Folder name"
+//	@Success	200
+//	@Failure	409	{object}	map[string]interface{}
+//	@Router		/upload/folder [post]
 func (c *Controller) UploadFolderCreate(g *gin.Context) {
 	// get new folder name
 	name := g.PostForm("name")

@@ -11,6 +11,16 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
+// CategorySubAdd godoc
+//
+//	@Summary	Create a new category sub
+//	@Tags		category
+//	@Accept		x-www-form-urlencoded
+//	@Param		Name	formData	string	true	"Sub-category name"
+//	@Param		Parent	formData	string	true	"Parent category ID"
+//	@Success	200
+//	@Failure	500	{object}	map[string]interface{}
+//	@Router		/category-sub [post]
 func (c *Controller) CategorySubAdd(g *gin.Context) {
 	var err error
 	if g.Request.Method == "POST" {
@@ -38,6 +48,16 @@ func (c *Controller) CategorySubAdd(g *gin.Context) {
 	})
 }
 
+// CategorySubThumbSet godoc
+//
+//	@Summary	Set category sub thumbnail
+//	@Tags		category
+//	@Accept		multipart/form-data
+//	@Param		id	path	string	true	"Category sub ID"
+//	@Param		pp	formData	file	true	"Thumbnail image"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/category-sub/{id}/thumb [post]
 func (c *Controller) CategorySubThumbSet(g *gin.Context) {
 	// get item from ID
 	category := &model.CategorySub{
@@ -90,6 +110,14 @@ func (c *Controller) CategorySubThumbSet(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// CategorySubThumbRemove godoc
+//
+//	@Summary	Remove category sub thumbnail
+//	@Tags		category
+//	@Param		id	path	string	true	"Category sub ID"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/category-sub/{id}/thumb [delete]
 func (c *Controller) CategorySubThumbRemove(g *gin.Context) {
 	// get item from ID
 	category := &model.CategorySub{
@@ -142,6 +170,16 @@ func (c *Controller) CategorySubThumbRemove(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// CategorySubRename godoc
+//
+//	@Summary	Rename category sub
+//	@Tags		category
+//	@Accept		x-www-form-urlencoded
+//	@Param		id	path	string	true	"Category sub ID"
+//	@Param		title	formData	string	true	"New name"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/category-sub/{id}/rename [post]
 func (c *Controller) CategorySubRename(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -183,6 +221,14 @@ func (c *Controller) CategorySubRename(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// CategorySubThumb godoc
+//
+//	@Summary	Get category sub thumbnail image
+//	@Tags		category
+//	@Param		id	path	string	true	"Category sub ID"
+//	@Success	200	file	bytes
+//	@Failure	404
+//	@Router		/category-sub/{id}/thumb [get]
 func (c *Controller) CategorySubThumb(g *gin.Context) {
 	id := g.Param("id")
 	category := &model.CategorySub{ID: id}

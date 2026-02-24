@@ -81,6 +81,13 @@ func (c *Controller) AuthLogin(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// AuthMe godoc
+//
+//	@Summary	Get current authenticated user
+//	@Tags		auth
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/auth/me [get]
 func (c *Controller) AuthMe(g *gin.Context) {
 	user := g.MustGet("user").(*model.User)
 	g.JSON(200, gin.H{
@@ -90,6 +97,13 @@ func (c *Controller) AuthMe(g *gin.Context) {
 	})
 }
 
+// AuthLogout godoc
+//
+//	@Summary	Log out current user
+//	@Tags		auth
+//	@Produce	json
+//	@Success	204
+//	@Router		/auth/logout [post]
 func (c *Controller) AuthLogout(g *gin.Context) {
 	cookie, err := g.Cookie(cookieName)
 	if err != nil {

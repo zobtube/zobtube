@@ -9,6 +9,7 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 	"github.com/zobtube/zobtube/internal/provider"
 	"github.com/zobtube/zobtube/internal/runner"
+	"github.com/zobtube/zobtube/internal/swagger"
 )
 
 type AbstractController interface {
@@ -206,6 +207,8 @@ func (c *Controller) BuildDetailsRegister(version, commit, buildDate string) {
 		Commit:    commit,
 		BuildDate: buildDate,
 	}
+
+	swagger.SwaggerInfo.Version = version
 }
 
 func (c *Controller) RegisterError(err string) {

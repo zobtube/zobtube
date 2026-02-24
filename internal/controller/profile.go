@@ -13,6 +13,13 @@ type profileActorViewResult struct {
 	Count int         `json:"count"`
 }
 
+// ProfileView godoc
+//
+//	@Summary	Get user profile with top video views and actor stats
+//	@Tags		profile
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/profile [get]
 func (c *Controller) ProfileView(g *gin.Context) {
 	// get user
 	user := g.MustGet("user").(*model.User)

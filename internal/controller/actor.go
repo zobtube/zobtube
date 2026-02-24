@@ -13,6 +13,13 @@ import (
 
 const errHumanProviderNotFound = "Unable to retrieve provider"
 
+// ActorList godoc
+//
+//	@Summary	List all actors
+//	@Tags		actor
+//	@Produce	json
+//	@Success	200	{object}	map[string]model.Actor[]
+//	@Router		/actor [get]
 func (c *Controller) ActorList(g *gin.Context) {
 	var actors []model.Actor
 	c.datastore.Preload("Videos").Preload("Links").Order("name").Find(&actors)
@@ -22,6 +29,15 @@ func (c *Controller) ActorList(g *gin.Context) {
 	})
 }
 
+// ActorGet godoc
+//
+//	@Summary	Get actor by ID
+//	@Tags		actor
+//	@Produce	json
+//	@Param		id	path		string	true	"Actor ID"
+//	@Success	200	{object}	model.Actor
+//	@Failure	404
+//	@Router		/actor/{id} [get]
 func (c *Controller) ActorGet(g *gin.Context) {
 	id := g.Param("id")
 	actor := &model.Actor{ID: id}
@@ -33,6 +49,14 @@ func (c *Controller) ActorGet(g *gin.Context) {
 	g.JSON(http.StatusOK, actor)
 }
 
+// ActorDelete godoc
+//
+//	@Summary	Delete an actor
+//	@Tags		actor
+//	@Param		id	path	string	true	"Actor ID"
+//	@Success	204
+//	@Failure	404
+//	@Router		/actor/{id} [delete]
 func (c *Controller) ActorDelete(g *gin.Context) {
 	id := g.Param("id")
 	actor := &model.Actor{ID: id}
@@ -56,6 +80,14 @@ func (c *Controller) ActorDelete(g *gin.Context) {
 	g.JSON(http.StatusNoContent, gin.H{})
 }
 
+// ActorThumb godoc
+//
+//	@Summary	Get actor thumbnail image
+//	@Tags		actor
+//	@Param		id	path	string	true	"Actor ID"
+//	@Success	200	file	bytes
+//	@Failure	404
+//	@Router		/actor/{id}/thumb [get]
 func (c *Controller) ActorThumb(g *gin.Context) {
 	id := g.Param("id")
 	actor := &model.Actor{ID: id}
@@ -72,6 +104,17 @@ func (c *Controller) ActorThumb(g *gin.Context) {
 	g.File(targetPath)
 }
 
+// ActorNew godoc
+//
+//	@Summary	Create a new actor
+//	@Tags		actor
+//	@Accept		multipart/form-data
+//	@Param		id		formData	string	true	"Actor ID"
+//	@Param		name	formData	string	true	"Actor name"
+//	@Param		sex		formData	string	false	"Sex (m/f)"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	500	{object}	map[string]interface{}
+//	@Router		/actor [post]
 func (c *Controller) ActorNew(g *gin.Context) {
 	var err error
 	form := struct {
@@ -105,6 +148,15 @@ func (c *Controller) ActorNew(g *gin.Context) {
 	})
 }
 
+// ActorProviderSearch godoc
+//
+//	@Summary	Search actor in external provider and create link
+//	@Tags		actor
+//	@Param		id	path	string	true	"Actor ID"
+//	@Param		provider_slug	path	string	true	"Provider slug (babesdirectory, babepedia, etc.)"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/actor/{id}/provider/{provider_slug} [get]
 func (c *Controller) ActorProviderSearch(g *gin.Context) {
 	// get actor id from path
 	id := g.Param("id")
@@ -174,6 +226,14 @@ func (c *Controller) ActorProviderSearch(g *gin.Context) {
 	})
 }
 
+// ActorLinkThumbGet godoc
+//
+//	@Summary	Get thumbnail from actor link (provider)
+//	@Tags		actor
+//	@Param		id	path	string	true	"Link ID"
+//	@Success	200	file	bytes
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/actor/link/{id}/thumb [get]
 func (c *Controller) ActorLinkThumbGet(g *gin.Context) {
 	// get actor id from path
 	id := g.Param("id")
@@ -224,6 +284,14 @@ func (c *Controller) ActorLinkThumbGet(g *gin.Context) {
 	g.Data(200, "image/png", thumb)
 }
 
+// ActorLinkThumbDelete godoc
+//
+//	@Summary	Delete actor link
+//	@Tags		actor
+//	@Param		id	path	string	true	"Link ID"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/actor/link/{id} [delete]
 func (c *Controller) ActorLinkThumbDelete(g *gin.Context) {
 	// get actor id from path
 	id := g.Param("id")
@@ -252,6 +320,16 @@ func (c *Controller) ActorLinkThumbDelete(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// ActorUploadThumb godoc
+//
+//	@Summary	Upload actor thumbnail
+//	@Tags		actor
+//	@Accept		multipart/form-data
+//	@Param		id	path	string	true	"Actor ID"
+//	@Param		pp	formData	file	true	"Thumbnail image"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/actor/{id}/thumb [post]
 func (c *Controller) ActorUploadThumb(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -304,6 +382,17 @@ func (c *Controller) ActorUploadThumb(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// ActorLinkCreate godoc
+//
+//	@Summary	Create actor link to provider profile
+//	@Tags		actor
+//	@Accept		x-www-form-urlencoded
+//	@Param		id	path	string	true	"Actor ID"
+//	@Param		url	formData	string	true	"Provider profile URL"
+//	@Param		provider	formData	string	true	"Provider slug"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/actor/{id}/link [post]
 func (c *Controller) ActorLinkCreate(g *gin.Context) {
 	var err error
 
@@ -365,6 +454,16 @@ func (c *Controller) ActorLinkCreate(g *gin.Context) {
 	})
 }
 
+// ActorAliasCreate godoc
+//
+//	@Summary	Add alias to actor
+//	@Tags		actor
+//	@Accept		x-www-form-urlencoded
+//	@Param		id	path	string	true	"Actor ID"
+//	@Param		alias	formData	string	true	"Alias name"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Router		/actor/{id}/alias [post]
 func (c *Controller) ActorAliasCreate(g *gin.Context) {
 	var err error
 
@@ -400,6 +499,14 @@ func (c *Controller) ActorAliasCreate(g *gin.Context) {
 	})
 }
 
+// ActorAliasRemove godoc
+//
+//	@Summary	Remove actor alias
+//	@Tags		actor
+//	@Param		id	path	string	true	"Alias ID"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/actor/alias/{id} [delete]
 func (c *Controller) ActorAliasRemove(g *gin.Context) {
 	var err error
 
@@ -428,6 +535,16 @@ func (c *Controller) ActorAliasRemove(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// ActorCategories godoc
+//
+//	@Summary	Add or remove category from actor (PUT=add, DELETE=remove)
+//	@Tags		actor
+//	@Param		id	path	string	true	"Actor ID"
+//	@Param		category_id	path	string	true	"Category (sub) ID"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/actor/{id}/category/{category_id} [put]
+//	@Router		/actor/{id}/category/{category_id} [delete]
 func (c *Controller) ActorCategories(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -477,6 +594,17 @@ func (c *Controller) ActorCategories(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// ActorRename godoc
+//
+//	@Summary	Rename actor
+//	@Tags		actor
+//	@Accept		x-www-form-urlencoded
+//	@Param		id	path	string	true	"Actor ID"
+//	@Param		name	formData	string	true	"New name"
+//	@Success	200
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/actor/{id}/rename [post]
 func (c *Controller) ActorRename(g *gin.Context) {
 	var err error
 
@@ -525,6 +653,17 @@ func (c *Controller) ActorRename(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// ActorDescription godoc
+//
+//	@Summary	Set actor description
+//	@Tags		actor
+//	@Accept		x-www-form-urlencoded
+//	@Param		id	path	string	true	"Actor ID"
+//	@Param		description	formData	string	false	"Description text"
+//	@Success	200
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/actor/{id}/description [post]
 func (c *Controller) ActorDescription(g *gin.Context) {
 	var err error
 
@@ -566,6 +705,17 @@ func (c *Controller) ActorDescription(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// ActorMerge godoc
+//
+//	@Summary	Merge source actor into target actor
+//	@Tags		actor
+//	@Accept		json
+//	@Param		id	path	string	true	"Source actor ID"
+//	@Param		body	body	object	true	"JSON with target_id"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/actor/{id}/merge [post]
 func (c *Controller) ActorMerge(g *gin.Context) {
 	sourceID := g.Param("id")
 	form := struct {

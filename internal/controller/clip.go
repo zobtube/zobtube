@@ -8,8 +8,15 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
-// ClipView returns a single clip's video with Actors/Categories preloaded,
-// plus a randomized list of all clip IDs with the current clip first.
+// ClipView godoc
+//
+//	@Summary	Get clip view data with video, actors, categories and clip list
+//	@Tags		video
+//	@Produce	json
+//	@Param		id	path	string	true	"Clip ID"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/clip/{id} [get]
 func (c *Controller) ClipView(g *gin.Context) {
 	id := g.Param("id")
 	video := &model.Video{ID: id}

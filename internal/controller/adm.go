@@ -12,6 +12,13 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
+// AdmHome godoc
+//
+//	@Summary	Admin dashboard overview
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/adm [get]
 func (c *Controller) AdmHome(g *gin.Context) {
 	var videoCount, actorCount, channelCount, userCount, categoryCount int64
 	c.datastore.Table("videos").Where(NOT_DELETED).Count(&videoCount)
@@ -36,24 +43,52 @@ func (c *Controller) AdmHome(g *gin.Context) {
 	})
 }
 
+// AdmVideoList godoc
+//
+//	@Summary	List all videos (admin)
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/adm/video [get]
 func (c *Controller) AdmVideoList(g *gin.Context) {
 	var videos []model.Video
 	c.datastore.Find(&videos)
 	g.JSON(http.StatusOK, gin.H{"items": videos, "total": len(videos)})
 }
 
+// AdmActorList godoc
+//
+//	@Summary	List all actors (admin)
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/adm/actor [get]
 func (c *Controller) AdmActorList(g *gin.Context) {
 	var actors []model.Actor
 	c.datastore.Find(&actors)
 	g.JSON(http.StatusOK, gin.H{"items": actors, "total": len(actors)})
 }
 
+// AdmChannelList godoc
+//
+//	@Summary	List all channels (admin)
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/adm/channel [get]
 func (c *Controller) AdmChannelList(g *gin.Context) {
 	var channels []model.Channel
 	c.datastore.Find(&channels)
 	g.JSON(http.StatusOK, gin.H{"items": channels, "total": len(channels)})
 }
 
+// AdmCategory godoc
+//
+//	@Summary	List all categories with sub (admin)
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/adm/category [get]
 func (c *Controller) AdmCategory(g *gin.Context) {
 	var categories []model.Category
 	result := c.datastore.Preload("Sub").Find(&categories)
@@ -64,18 +99,41 @@ func (c *Controller) AdmCategory(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{"items": categories, "total": len(categories)})
 }
 
+// AdmTaskList godoc
+//
+//	@Summary	List all tasks
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/adm/task [get]
 func (c *Controller) AdmTaskList(g *gin.Context) {
 	var tasks []model.Task
 	c.datastore.Find(&tasks)
 	g.JSON(http.StatusOK, gin.H{"items": tasks, "total": len(tasks)})
 }
 
+// AdmTaskHome godoc
+//
+//	@Summary	Get recent tasks for admin dashboard
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/adm/task/home [get]
 func (c *Controller) AdmTaskHome(g *gin.Context) {
 	var tasks []model.Task
 	c.datastore.Limit(5).Order("created_at DESC").Find(&tasks)
 	g.JSON(http.StatusOK, gin.H{"items": tasks, "total": len(tasks)})
 }
 
+// AdmTaskView godoc
+//
+//	@Summary	Get task by ID
+//	@Tags		admin
+//	@Produce	json
+//	@Param		id	path	string	true	"Task ID"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/adm/task/{id} [get]
 func (c *Controller) AdmTaskView(g *gin.Context) {
 	id := g.Param("id")
 	task := &model.Task{ID: id}
@@ -86,6 +144,14 @@ func (c *Controller) AdmTaskView(g *gin.Context) {
 	g.JSON(http.StatusOK, task)
 }
 
+// AdmTaskRetry godoc
+//
+//	@Summary	Retry failed task
+//	@Tags		admin
+//	@Param		id	path	string	true	"Task ID"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/adm/task/{id}/retry [post]
 func (c *Controller) AdmTaskRetry(g *gin.Context) {
 	id := g.Param("id")
 	task := &model.Task{ID: id}
@@ -102,12 +168,29 @@ func (c *Controller) AdmTaskRetry(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{"redirect": "/adm/task/" + task.ID})
 }
 
+// AdmUserList godoc
+//
+//	@Summary	List all users
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/adm/user [get]
 func (c *Controller) AdmUserList(g *gin.Context) {
 	var users []model.User
 	c.datastore.Find(&users)
 	g.JSON(http.StatusOK, gin.H{"items": users, "total": len(users)})
 }
 
+// AdmUserNew godoc
+//
+//	@Summary	Create new user
+//	@Tags		admin
+//	@Accept		json
+//	@Param		body	body	object	true	"JSON with username, password, admin"
+//	@Success	201	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	409	{object}	map[string]interface{}
+//	@Router		/adm/user [post]
 func (c *Controller) AdmUserNew(g *gin.Context) {
 	var body struct {
 		Username string `json:"username"`
@@ -142,6 +225,14 @@ func (c *Controller) AdmUserNew(g *gin.Context) {
 	g.JSON(http.StatusCreated, gin.H{"id": newUser.ID, "redirect": "/adm/users"})
 }
 
+// AdmUserDelete godoc
+//
+//	@Summary	Delete user
+//	@Tags		admin
+//	@Param		id	path	string	true	"User ID"
+//	@Success	204
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/adm/user/{id} [delete]
 func (c *Controller) AdmUserDelete(g *gin.Context) {
 	id := g.Param("id")
 	user := model.User{ID: id}
@@ -156,6 +247,14 @@ func (c *Controller) AdmUserDelete(g *gin.Context) {
 	g.JSON(http.StatusNoContent, gin.H{})
 }
 
+// AdmConfigAuth godoc
+//
+//	@Summary	Get auth configuration
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	500	{object}	map[string]interface{}
+//	@Router		/adm/config/auth [get]
 func (c *Controller) AdmConfigAuth(g *gin.Context) {
 	dbconfig := &model.Configuration{}
 	if result := c.datastore.First(dbconfig); result.RowsAffected < 1 {
@@ -165,6 +264,14 @@ func (c *Controller) AdmConfigAuth(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{"authentication_enabled": dbconfig.UserAuthentication})
 }
 
+// AdmConfigAuthUpdate godoc
+//
+//	@Summary	Enable or disable authentication
+//	@Tags		admin
+//	@Param		action	path	string	true	"enable or disable"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Router		/adm/config/auth/{action} [get]
 func (c *Controller) AdmConfigAuthUpdate(g *gin.Context) {
 	action := g.Param("action")
 	if action != "enable" && action != "disable" {
@@ -185,6 +292,14 @@ func (c *Controller) AdmConfigAuthUpdate(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{"redirect": "/adm/config/auth"})
 }
 
+// AdmConfigProvider godoc
+//
+//	@Summary	Get provider configuration
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	500	{object}	map[string]interface{}
+//	@Router		/adm/config/provider [get]
 func (c *Controller) AdmConfigProvider(g *gin.Context) {
 	var providers []model.Provider
 	c.datastore.Find(&providers)
@@ -204,6 +319,14 @@ func (c *Controller) AdmConfigProvider(g *gin.Context) {
 	})
 }
 
+// AdmConfigProviderSwitch godoc
+//
+//	@Summary	Toggle provider enabled/disabled
+//	@Tags		admin
+//	@Param		id	path	string	true	"Provider ID"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/adm/config/provider/{id}/switch [get]
 func (c *Controller) AdmConfigProviderSwitch(g *gin.Context) {
 	providerID := g.Param("id")
 	provider := model.Provider{ID: providerID}
@@ -219,6 +342,14 @@ func (c *Controller) AdmConfigProviderSwitch(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{"redirect": "/adm/config/provider"})
 }
 
+// AdmConfigOfflineMode godoc
+//
+//	@Summary	Get offline mode configuration
+//	@Tags		admin
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	500	{object}	map[string]interface{}
+//	@Router		/adm/config/offline [get]
 func (c *Controller) AdmConfigOfflineMode(g *gin.Context) {
 	dbconfig := &model.Configuration{}
 	if result := c.datastore.First(dbconfig); result.RowsAffected < 1 {
@@ -228,6 +359,14 @@ func (c *Controller) AdmConfigOfflineMode(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{"offline_mode": dbconfig.OfflineMode})
 }
 
+// AdmConfigOfflineModeUpdate godoc
+//
+//	@Summary	Enable or disable offline mode
+//	@Tags		admin
+//	@Param		action	path	string	true	"enable or disable"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Router		/adm/config/offline/{action} [get]
 func (c *Controller) AdmConfigOfflineModeUpdate(g *gin.Context) {
 	action := g.Param("action")
 	if action != "enable" && action != "disable" {

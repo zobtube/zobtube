@@ -6,6 +6,14 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
+// VideoViewIncrement godoc
+//
+//	@Summary	Increment view count for video
+//	@Tags		video
+//	@Param		id	path	string	true	"Video ID"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id}/count-view [post]
 func (c *Controller) VideoViewIncrement(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")

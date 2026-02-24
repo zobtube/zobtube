@@ -12,24 +12,54 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 )
 
+// VideoList godoc
+//
+//	@Summary	List all videos
+//	@Tags		video
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/video [get]
 func (c *Controller) VideoList(g *gin.Context) {
 	var videos []model.Video
 	c.datastore.Where("type = ?", "v").Order("created_at desc").Find(&videos)
 	g.JSON(http.StatusOK, gin.H{"items": videos, "total": len(videos)})
 }
 
+// ClipList godoc
+//
+//	@Summary	List all clips
+//	@Tags		video
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/clip [get]
 func (c *Controller) ClipList(g *gin.Context) {
 	var videos []model.Video
 	c.datastore.Where("type = ?", "c").Order("created_at desc").Preload(clause.Associations).Find(&videos)
 	g.JSON(http.StatusOK, gin.H{"items": videos, "total": len(videos)})
 }
 
+// MovieList godoc
+//
+//	@Summary	List all movies
+//	@Tags		video
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/movie [get]
 func (c *Controller) MovieList(g *gin.Context) {
 	var videos []model.Video
 	c.datastore.Where("type = ?", "m").Order("created_at desc").Preload(clause.Associations).Find(&videos)
 	g.JSON(http.StatusOK, gin.H{"items": videos, "total": len(videos)})
 }
 
+// VideoView godoc
+//
+//	@Summary	Get video view page data
+//	@Tags		video
+//	@Produce	json
+//	@Param		id	path	string	true	"Video ID"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id} [get]
 func (c *Controller) VideoView(g *gin.Context) {
 	id := g.Param("id")
 	video := &model.Video{ID: id}
@@ -67,6 +97,15 @@ func (c *Controller) VideoView(g *gin.Context) {
 	})
 }
 
+// VideoEdit godoc
+//
+//	@Summary	Get video edit form data (admin)
+//	@Tags		video
+//	@Produce	json
+//	@Param		id	path	string	true	"Video ID"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id}/edit [get]
 func (c *Controller) VideoEdit(g *gin.Context) {
 	id := g.Param("id")
 	video := &model.Video{ID: id}
@@ -86,6 +125,16 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 	})
 }
 
+// VideoActors godoc
+//
+//	@Summary	Add or remove actor from video (PUT=add, DELETE=remove)
+//	@Tags		video
+//	@Param		id	path	string	true	"Video ID"
+//	@Param		actor_id	path	string	true	"Actor ID"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id}/actor/{actor_id} [put]
+//	@Router		/video/{id}/actor/{actor_id} [delete]
 func (c *Controller) VideoActors(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -129,6 +178,16 @@ func (c *Controller) VideoActors(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// VideoCategories godoc
+//
+//	@Summary	Add or remove category from video (PUT=add, DELETE=remove)
+//	@Tags		video
+//	@Param		id	path	string	true	"Video ID"
+//	@Param		category_id	path	string	true	"Category (sub) ID"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id}/category/{category_id} [put]
+//	@Router		/video/{id}/category/{category_id} [delete]
 func (c *Controller) VideoCategories(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -178,6 +237,14 @@ func (c *Controller) VideoCategories(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// VideoStreamInfo godoc
+//
+//	@Summary	Get video stream info (HEAD request)
+//	@Tags		video
+//	@Param		id	path	string	true	"Video ID"
+//	@Success	200
+//	@Failure	404
+//	@Router		/video/{id} [head]
 func (c *Controller) VideoStreamInfo(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -216,6 +283,16 @@ type VideoRenameForm struct {
 	Name string `form:"name"`
 }
 
+// VideoRename godoc
+//
+//	@Summary	Rename video
+//	@Tags		video
+//	@Accept		x-www-form-urlencoded
+//	@Param		id	path	string	true	"Video ID"
+//	@Param		name	formData	string	true	"New name"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id}/rename [post]
 func (c *Controller) VideoRename(g *gin.Context) {
 	if g.Request.Method != "POST" {
 		// method not allowed
@@ -259,6 +336,18 @@ func (c *Controller) VideoRename(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// VideoCreate godoc
+//
+//	@Summary	Create a new video
+//	@Tags		video
+//	@Accept		multipart/form-data
+//	@Param		name	formData	string	true	"Video name"
+//	@Param		filename	formData	string	true	"Filename in triage"
+//	@Param		type	formData	string	true	"Type: c (clip), m (movie), v (video)"
+//	@Param		actors	formData	array	false	"Actor IDs"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	500	{object}	map[string]interface{}
+//	@Router		/video [post]
 func (c *Controller) VideoCreate(g *gin.Context) {
 	var err error
 
@@ -334,6 +423,16 @@ func (c *Controller) VideoCreate(g *gin.Context) {
 	})
 }
 
+// VideoUploadThumb godoc
+//
+//	@Summary	Upload video thumbnail
+//	@Tags		video
+//	@Accept		multipart/form-data
+//	@Param		id	path	string	true	"Video ID"
+//	@Param		thumbnail	formData	file	true	"Thumbnail image"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id}/thumb [post]
 func (c *Controller) VideoUploadThumb(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -405,6 +504,16 @@ func (c *Controller) VideoUploadThumb(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// VideoUpload godoc
+//
+//	@Summary	Upload video file
+//	@Tags		video
+//	@Accept		multipart/form-data
+//	@Param		id	path	string	true	"Video ID"
+//	@Param		file	formData	file	true	"Video file"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id}/upload [post]
 func (c *Controller) VideoUpload(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -470,6 +579,14 @@ func (c *Controller) VideoUpload(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// VideoDelete godoc
+//
+//	@Summary	Delete a video
+//	@Tags		video
+//	@Param		id	path	string	true	"Video ID"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id} [delete]
 func (c *Controller) VideoDelete(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -508,6 +625,16 @@ func (c *Controller) VideoDelete(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// VideoMigrate godoc
+//
+//	@Summary	Migrate video to different type (c/m/v)
+//	@Tags		video
+//	@Accept		x-www-form-urlencoded
+//	@Param		id	path	string	true	"Video ID"
+//	@Param		new_type	formData	string	true	"New type: c, m, or v"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id}/migrate [post]
 func (c *Controller) VideoMigrate(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -554,6 +681,16 @@ func (c *Controller) VideoMigrate(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// VideoGenerateThumbnail godoc
+//
+//	@Summary	Generate video thumbnail at given timing
+//	@Tags		video
+//	@Param		id	path	string	true	"Video ID"
+//	@Param		timing	path	string	true	"Timing in seconds"
+//	@Success	200
+//	@Failure	404	{object}	map[string]interface{}
+//	@Failure	409	{object}	map[string]interface{}
+//	@Router		/video/{id}/generate-thumbnail/{timing} [post]
 func (c *Controller) VideoGenerateThumbnail(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -651,6 +788,15 @@ func (c *Controller) VideoEditChannel(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// VideoGet godoc
+//
+//	@Summary	Get video summary (title, actors, categories)
+//	@Tags		video
+//	@Produce	json
+//	@Param		id	path	string	true	"Video ID"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	404
+//	@Router		/video/{id}/summary [get]
 func (c *Controller) VideoGet(g *gin.Context) {
 	// get id from path
 	id := g.Param("id")
@@ -688,6 +834,14 @@ func (c *Controller) VideoGet(g *gin.Context) {
 	})
 }
 
+// VideoStream godoc
+//
+//	@Summary	Stream video file
+//	@Tags		video
+//	@Param		id	path	string	true	"Video ID"
+//	@Success	200	file	bytes
+//	@Failure	404
+//	@Router		/video/{id}/stream [get]
 func (c *Controller) VideoStream(g *gin.Context) {
 	id := g.Param("id")
 	video := &model.Video{ID: id}
@@ -705,6 +859,14 @@ func (c *Controller) VideoStream(g *gin.Context) {
 	g.File(targetPath)
 }
 
+// VideoThumb godoc
+//
+//	@Summary	Get video thumbnail image
+//	@Tags		video
+//	@Param		id	path	string	true	"Video ID"
+//	@Success	200	file	bytes
+//	@Failure	404
+//	@Router		/video/{id}/thumb [get]
 func (c *Controller) VideoThumb(g *gin.Context) {
 	id := g.Param("id")
 	video := &model.Video{ID: id}
@@ -721,6 +883,14 @@ func (c *Controller) VideoThumb(g *gin.Context) {
 	g.File(targetPath)
 }
 
+// VideoThumbXS godoc
+//
+//	@Summary	Get video extra-small thumbnail
+//	@Tags		video
+//	@Param		id	path	string	true	"Video ID"
+//	@Success	200	file	bytes
+//	@Failure	404
+//	@Router		/video/{id}/thumb_xs [get]
 func (c *Controller) VideoThumbXS(g *gin.Context) {
 	id := g.Param("id")
 	video := &model.Video{ID: id}

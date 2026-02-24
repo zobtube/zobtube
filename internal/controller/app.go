@@ -10,6 +10,14 @@ import (
 )
 
 // Bootstrap returns auth_enabled and current user (or nil) without requiring authentication.
+//
+// Bootstrap godoc
+//
+//	@Summary	Get bootstrap data (auth status, current user)
+//	@Tags		bootstrap
+//	@Produce	json
+//	@Success	200	{object}	map[string]interface{}
+//	@Router		/bootstrap [get]
 func (c *Controller) Bootstrap(g *gin.Context) {
 	user := &model.User{}
 	if c.config.Authentication {

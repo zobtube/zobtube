@@ -31,6 +31,14 @@ var (
 // global logger
 var logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339})
 
+// @title        ZobTube
+// @description  ZobTube is a video management system.
+// @contact.name ZobTube Issues
+// @contact.url  https://github.com/zobtube/zobtube/issues
+// @license.name MIT
+// @license.url  https://github.com/zobtube/zobtube?tab=MIT-1-ov-file#readme
+// @BasePath     /api
+// @schemes      http https
 func main() {
 	var configurationFile string
 
