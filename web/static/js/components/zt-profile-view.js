@@ -16,7 +16,7 @@ ZtProfileView.prototype.connectedCallback = function() {
     .then(function(data) {
       var videoViews = data.video_views || [];
       var actorViews = data.actor_views || [];
-      var html = '<div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-user"></i></span><h3>Your account</h3><hr /></div>';
+      var html = '<div class="row"><div class="col-12"><zt-profile-tabs data-active="most-viewed"></zt-profile-tabs></div></div>';
       html += '<div class="row"><div class="col-md-12"><h3>Most viewed videos</h3><div class="row">';
       if (videoViews.length === 0) {
         html += '<div class="col-md-12"><div class="alert alert-warning" role="alert">No trending videos so far!</div></div>';

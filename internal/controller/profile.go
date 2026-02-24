@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 	"sort"
 
@@ -69,4 +71,42 @@ func (c *Controller) ProfileView(g *gin.Context) {
 		"video_views": videoViewsTop,
 		"actor_views": actorViews,
 	})
+}
+
+// ProfileChangePassword godoc
+//
+//	@Summary	Change password for the authenticated user
+//	@Tags		profile
+//	@Accept		json
+//	@Param		body	body	object	true	"JSON with current_password, new_password"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Router		/profile/password [post]
+func (c *Controller) ProfileChangePassword(g *gin.Context) {
+	user := g.MustGet("user").(*model.User)
+	var body struct {
+		CurrentPassword string `json:"current_password"`
+		NewPassword     string `json:"new_password"`
+	}
+	if err := g.ShouldBindJSON(&body); err != nil {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
+	currentSum := sha256.Sum256([]byte(body.CurrentPassword))
+	currentHash := hex.EncodeToString(currentSum[:])
+	if currentHash != user.Password {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "wrong current password"})
+		return
+	}
+	if body.NewPassword == "" {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "new password cannot be empty"})
+		return
+	}
+	newSum := sha256.Sum256([]byte(body.NewPassword))
+	user.Password = hex.EncodeToString(newSum[:])
+	if err := c.datastore.Save(user).Error; err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save"})
+		return
+	}
+	g.JSON(http.StatusOK, gin.H{"ok": true})
 }

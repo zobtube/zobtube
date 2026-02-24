@@ -149,6 +149,7 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 
 	// Profile
 	authGroup.GET("/api/profile", c.ProfileView)
+	authGroup.POST("/api/profile/password", c.ProfileChangePassword)
 
 	// Error
 	authGroup.Any("/api/error/unauthorized", c.ErrUnauthorized)

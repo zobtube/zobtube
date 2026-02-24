@@ -129,6 +129,7 @@ type AbstractController interface {
 
 	// Profile
 	ProfileView(*gin.Context)
+	ProfileChangePassword(*gin.Context)
 
 	// Error pages
 	ErrNotFound(*gin.Context)
