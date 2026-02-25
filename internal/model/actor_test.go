@@ -3,8 +3,8 @@ package model
 import (
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/glebarez/sqlite"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -86,9 +86,9 @@ func TestActor_SexTypeAsString(t *testing.T) {
 
 func TestActor_AliasesAsNiceString(t *testing.T) {
 	tests := []struct {
-		name   string
+		name    string
 		aliases []ActorAlias
-		want   string
+		want    string
 	}{
 		{"empty", nil, ""},
 		{"one", []ActorAlias{{Name: "Alias1"}}, "Alias1"},

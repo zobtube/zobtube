@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/glebarez/sqlite"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -68,7 +68,7 @@ func TestVideo_BeforeCreate_KeepsIDWhenSet(t *testing.T) {
 func TestVideo_TypeAsString(t *testing.T) {
 	tests := []struct {
 		typeChar string
-		want    string
+		want     string
 	}{
 		{"c", "clip"},
 		{"v", "video"},
