@@ -20,7 +20,7 @@ ZtAdmTaskHome.prototype.connectedCallback = function() {
         if (v === "error") return "danger";
         return "secondary";
       }
-      var html = '<div class="row"><div class="col-12"><zt-adm-tabs data-active="tasks"></zt-adm-tabs></div><div class="col-md-12"><h2 style="display:inline-block">Latest tasks</h2> <a href="/adm/tasks" style="margin-left:0;font-size:14px">View all tasks →</a><table class="table table-striped"><thead><tr><th>Task ID</th><th>Task</th><th>Status</th></tr></thead><tbody>';
+      var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="tasks"></zt-adm-tabs></div><div class="col-md-9 col-lg-9"><div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-tasks"></i></span><h3>Task list</h3> <a href="/adm/tasks" style="margin-left:0;font-size:14px">View all tasks →</a><hr /></div><table class="table table-striped"><thead><tr><th>Task ID</th><th>Task</th><th>Status</th></tr></thead><tbody>';
       items.forEach(function(t) {
         var id = t.ID || t.id;
         var name = esc(t.Name || t.name || "");

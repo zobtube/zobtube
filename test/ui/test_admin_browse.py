@@ -34,9 +34,9 @@ def test_admin_adm_tab_navigation(page: Page):
         ("/adm/actors", "heading", "Actors"),
         ("/adm/channels", "heading", "Channels"),
         ("/adm/categories", "heading", "Categories"),
-        ("/adm/users", "text", "User list"),  # zt-adm-user-list renders "Administration - User list"
-        ("/adm/task/home", "heading", "Latest tasks"),
-        ("/adm/tasks", "text", "task"),  # "Task list" or "No tasks run so far"
+        ("/adm/users", "text", "User list"),
+        ("/adm/task/home", "heading", "Task list"),
+        ("/adm/tasks", "heading", "Task list"),
     ]
     for path, role, name in adm_paths:
         page.goto(BASE_URL + path)

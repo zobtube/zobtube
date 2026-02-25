@@ -31,15 +31,15 @@ ZtAdmHome.prototype.connectedCallback = function() {
       var startupDir = esc(d.startup_directory || d.StartupDirectory || "");
       var commitShort = commit === "none" ? "none" : String(commit).substring(0, 6);
 
-      var html = '<style>'+admHomeStyles+'</style><div class="row"><div class="col-12"><zt-adm-tabs data-active="overview"></zt-adm-tabs></div>';
-      html += '<div class="col-md-12"><h4 class="first-h4">Overview</h4><hr/><div class="row">';
+      var html = '<style>'+admHomeStyles+'</style><div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="overview"></zt-adm-tabs></div><div class="col-md-9 col-lg-9">';
+      html += '<div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-home"></i></span><h3>Overview</h3><hr /></div>';
+      html += '<div class="col-12"><div class="row">';
       html += '<div class="col-md-4 mb-3"><div class="card"><div class="card-body card-adm"><span><div class="d-flex align-items-center"><i class="fas fa-video s16"></i><h3 class="gl-m-0 gl-ml-3">'+vc+'</h3></div><div class="gl-mt-3 text-uppercase">Videos</div></span><div class="card-adm-btn"><a class="btn btn-primary" href="/adm/videos">View</a></div></div></div></div>';
       html += '<div class="col-md-4 mb-3"><div class="card"><div class="card-body card-adm"><span><div class="d-flex align-items-center"><i class="far fa-user s16"></i><h3 class="gl-m-0 gl-ml-3">'+ac+'</h3></div><div class="gl-mt-3 text-uppercase">Actors</div></span><div class="card-adm-btn"><a class="btn btn-primary" href="/adm/actors">View</a></div></div></div></div>';
       html += '<div class="col-md-4 mb-3"><div class="card"><div class="card-body card-adm"><span><div class="d-flex align-items-center"><i class="fas fa-podcast s16"></i><h3 class="gl-m-0 gl-ml-3">'+cc+'</h3></div><div class="gl-mt-3 text-uppercase">Channels</div></span><div class="card-adm-btn"><a class="btn btn-primary" href="/adm/channels">View</a></div></div></div></div>';
       html += '<div class="col-md-4 mb-3"><div class="card"><div class="card-body card-adm"><span><div class="d-flex align-items-center"><i class="fas fa-user-circle s16"></i><h3 class="gl-m-0 gl-ml-3">'+uc+'</h3></div><div class="gl-mt-3 text-uppercase">Users</div></span><div class="card-adm-btn"><a class="btn btn-primary" href="/adm/users">View</a></div></div></div></div>';
       html += '<div class="col-md-4 mb-3"><div class="card"><div class="card-body card-adm"><span><div class="d-flex align-items-center"><i class="fas fa-certificate s16"></i><h3 class="gl-m-0 gl-ml-3">'+catc+'</h3></div><div class="gl-mt-3 text-uppercase">Categories</div></span><div class="card-adm-btn"><a class="btn btn-primary" href="/adm/categories">View</a></div></div></div></div>';
       html += '</div></div>';
-
       html += '<div class="col-md-12"><h4>Health</h4><hr/>';
       if (healthErrors.length === 0) {
         html += '<div class="alert alert-success">No issues found in your configuration.</div>';
@@ -53,7 +53,7 @@ ZtAdmHome.prototype.connectedCallback = function() {
       html += '<div class="col-md-12"><h4>About</h4><hr/><dl><dt>Version</dt><dd>'+esc(version)+' (commit <code>'+esc(commitShort)+'</code>)</dd><dt>Built at</dt><dd>'+esc(buildDate)+'</dd><dt>Golang</dt><dd>'+esc(golang)+'</dd><dt>Database</dt><dd>'+esc(dbDriver)+'</dd><dt>Binary Path</dt><dd>'+binaryPath+'</dd><dt>Working Path</dt><dd>'+startupDir+'</dd></dl></div>';
 
       html += '<div class="col-md-12"><h4>More Info</h4><hr/><dl><dt>Home Page</dt><dd><a href="https://zobtube.com">zobtube.com</a></dd><dt>Reddit</dt><dd><a href="https://www.reddit.com/r/zobtube/">www.reddit.com/r/zobtube</a></dd><dt>Source</dt><dd><a href="https://github.com/zobtube/zobtube">github.com/zobtube/zobtube</a></dd><dt>Feature Requests</dt><dd><a href="https://github.com/zobtube/zobtube/issues">github.com/zobtube/zobtube/issues</a></dd></dl></div>';
-      html += '</div>';
+      html += '</div></div>';
 
       self.innerHTML = html;
       if (window.zt && window.zt.pageReady) window.zt.pageReady(self);

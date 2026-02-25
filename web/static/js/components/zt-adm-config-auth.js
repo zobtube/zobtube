@@ -14,7 +14,8 @@ ZtAdmConfigAuth.prototype.connectedCallback = function() {
     })
     .then(function(d) {
       var enabled = d.authentication_enabled === true;
-      var html = '<zt-adm-tabs data-active="authentication"></zt-adm-tabs>';
+      var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="authentication"></zt-adm-tabs></div><div class="col-md-9 col-lg-9">';
+      html += '<div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-lock"></i></span><h3>General</h3><hr /></div>';
       html += '<div class="row"><div class="col-md-12 mb-4"><h4 class="mb-4">Authentication settings</h4>';
       html += 'The authentication is currently: ';
       html += enabled ? '<span class="badge text-bg-success">Enabled</span>' : '<span class="badge text-bg-warning">Disabled</span>';
@@ -28,6 +29,7 @@ ZtAdmConfigAuth.prototype.connectedCallback = function() {
         html += '<div class="alert alert-warning" role="alert">Once authentication is enabled, login will be required at all time. If your account does not have a password yet, you can run the password reset command. <code>zobtube password-reset</code></div>';
         html += '<button class="btn btn-xl btn-danger" id="zt-auth-enable">Enable authentication</button>';
       }
+      html += '</div></div>';
       html += '</div></div>';
       self.innerHTML = html;
       var btn = self.querySelector(enabled ? "#zt-auth-disable" : "#zt-auth-enable");

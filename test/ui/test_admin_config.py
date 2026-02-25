@@ -24,7 +24,7 @@ def test_admin_config_provider_page_loads(page: Page):
     login_admin(page)
     page.goto(BASE_URL + "/adm/config/provider")
     page.wait_for_load_state("networkidle")
-    expect(page.get_by_text("Provider settings")).to_be_visible()
+    expect(page.get_by_role("heading", name="Providers")).to_be_visible()
 
 
 def test_admin_config_provider_api(page: Page):
@@ -41,7 +41,7 @@ def test_admin_config_offline_page_loads(page: Page):
     login_admin(page)
     page.goto(BASE_URL + "/adm/config/offline")
     page.wait_for_load_state("networkidle")
-    expect(page.get_by_text("Offline mode setting")).to_be_visible()
+    expect(page.get_by_role("heading", name="Offline mode").first).to_be_visible()
 
 
 def test_admin_config_offline_api(page: Page):

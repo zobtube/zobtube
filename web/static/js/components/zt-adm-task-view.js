@@ -34,9 +34,9 @@ ZtAdmTaskView.prototype.connectedCallback = function() {
         retryBtn = ' <button class="btn btn-warning btn-sm" style="float:right" type="button" data-zt-retry><i class="fas fa-sync-alt"></i> Restart task in error</button>';
       }
 
-      var html = '<div class="row"><div class="col-12"><zt-adm-tabs data-active="tasks"></zt-adm-tabs></div><div class="col-md-12">';
-      html += '<div class="themeix-section-h"><span class="heading-icon"><i class="far fa-check-square"></i></span><h3>Administration - View task details</h3><hr /></div>';
-      html += '<div class="row"><div class="col-md-12"><h2>Task view</h2><table class="table"><tbody>';
+      var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="tasks"></zt-adm-tabs></div><div class="col-md-9 col-lg-9">';
+      html += '<div class="themeix-section-h"><span class="heading-icon"><i class="far fa-check-square"></i></span><h3>Task details</h3><hr /></div>';
+      html += '<div class="row"><div class="col-md-12"><table class="table"><tbody>';
       html += '<tr><td>Task ID</td><td><code>' + esc(t.ID || t.id) + '</code></td></tr>';
       html += '<tr><td>Status</td><td><span class="badge text-bg-' + bc + '">' + esc(status) + '</span>' + retryBtn + '</td></tr>';
       html += '<tr><td>Task type</td><td>' + esc(t.Name || t.name) + '</td></tr>';
@@ -45,7 +45,7 @@ ZtAdmTaskView.prototype.connectedCallback = function() {
       html += '<tr><td>Last update</td><td>' + updatedAt + '</td></tr>';
       html += '<tr><td>Done at</td><td>' + doneAt + '</td></tr>';
       html += '<tr><td>Parameters</td><td><pre>' + paramsHtml.replace(/\n/g, "<br>") + '</pre></td></tr>';
-      html += '</tbody></table></div></div></div>';
+      html += '</tbody></table></div></div></div></div>';
       self.innerHTML = html;
 
       var retryEl = self.querySelector("[data-zt-retry]");

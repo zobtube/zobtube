@@ -20,7 +20,7 @@ ZtAdmTaskList.prototype.connectedCallback = function() {
         if (v === "error") return "danger";
         return "secondary";
       }
-      var html = '<div class="row"><div class="col-12"><zt-adm-tabs data-active="tasks"></zt-adm-tabs></div><div class="col-md-12"><div class="themeix-section-h"><span class="heading-icon"><i class="fas fa-list-ul"></i></span><h3>Task list</h3><hr /></div>';
+      var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="tasks"></zt-adm-tabs></div><div class="col-md-9 col-lg-9"><div class="themeix-section-h"><span class="heading-icon"><i class="fas fa-list-ul"></i></span><h3>Task list</h3><hr /></div>';
       if (items.length === 0) {
         html += '<div class="alert alert-success">No tasks run so far</div>';
       } else {

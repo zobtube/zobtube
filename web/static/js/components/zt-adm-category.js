@@ -19,8 +19,9 @@ ZtAdmCategory.prototype.connectedCallback = function() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var items = data.items || [];
-      var html = '<style>' + categoryStyles + '</style>';
-      html += '<h1>Categories</h1><hr /><div style="display:flex;justify-content:space-between;"><h5>Action</h5><div>';
+      var html = '<style>' + categoryStyles + '</style><div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="categories"></zt-adm-tabs></div><div class="col-md-9 col-lg-9">';
+      html += '<div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-certificate"></i></span><h3>Categories</h3><hr /></div>';
+      html += '<div style="display:flex;justify-content:space-between;"><h5>Action</h5><div>';
       html += '<button class="btn btn-primary" id="zt-add-category-btn">Add category</button>';
       html += '</div></div><hr /><div class="row"><div class="col-12" id="zt-adm-categories-container">';
       items.forEach(function(c) {
@@ -37,7 +38,7 @@ ZtAdmCategory.prototype.connectedCallback = function() {
         html += '<a class="category-new" data-parent-id="' + catId + '" style="cursor:pointer"><img src="/static/images/category-add.svg" alt=""><div class="category-value-header"><h5>New</h5></div></a>';
         html += '</div></section>';
       });
-      html += "</div></div>";
+      html += "</div></div></div></div>";
       self.innerHTML = html;
 
       self.querySelectorAll("a.category-new").forEach(function(link) {

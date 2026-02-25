@@ -17,10 +17,9 @@ ZtAdmConfigProvider.prototype.connectedCallback = function() {
       var providers = d.providers || [];
       var loaded = d.provider_loaded || {};
       var offline = d.offline_mode === true;
-      var html = '<style>.center{text-align:center}</style>';
-      html += '<zt-adm-tabs data-active="providers"></zt-adm-tabs>';
-      html += '<div class="row"><div class="col-md-12 mb-4"><h4 class="mb-4">Provider settings</h4>';
-      html += '<p>Providers are used to retrieve information and pictures of actors</p></div>';
+      var html = '<style>.center{text-align:center}</style><div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="providers"></zt-adm-tabs></div><div class="col-md-9 col-lg-9">';
+      html += '<div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-plug"></i></span><h3>Providers</h3><hr /></div>';
+      html += '<div class="row"><div class="col-md-12 mb-4"><p>Providers are used to retrieve information and pictures of actors</p></div>';
       html += '<div class="col-md-12 mb-4"><table class="table"><thead><tr>';
       html += '<th scope="col">Provider</th><th class="center" scope="col">Status</th><th class="center" scope="col">Loaded</th>';
       html += '<th class="center" scope="col">Able to search actor</th><th class="center" scope="col">Able to scrape actor\'s picture</th></tr></thead><tbody>';
@@ -43,6 +42,7 @@ ZtAdmConfigProvider.prototype.connectedCallback = function() {
         html += '</td></tr>';
       });
       html += '</tbody></table></div></div>';
+      html += '</div></div>';
       self.innerHTML = html;
       self.querySelectorAll(".zt-provider-switch").forEach(function(a) {
         a.addEventListener("click", function(e) {
