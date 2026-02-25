@@ -15,6 +15,7 @@ ZtProfileTabs.prototype.connectedCallback = function() {
     '<div class="col-md-12 mb-4"><ul class="nav nav-tabs">' +
     link("Most viewed", "/profile", "most-viewed") +
     link("Settings", "/profile/settings", "settings") +
+    link("API tokens", "/profile/tokens", "tokens") +
     '</ul></div>';
 };
 customElements.define("zt-profile-tabs", ZtProfileTabs);

@@ -27,6 +27,31 @@ func apiUnauthorized(g *gin.Context) {
 	g.Abort()
 }
 
+// tryCookieAuth attempts to authenticate via session cookie. Returns the user if successful, nil otherwise.
+func tryCookieAuth(g *gin.Context, c controller.AbstractController) *model.User {
+	cookie, err := g.Cookie(cookieName)
+	if err != nil {
+		return nil
+	}
+	session := &model.UserSession{ID: cookie}
+	result := c.GetSession(session)
+	if result.RowsAffected < 1 {
+		return nil
+	}
+	if session.ValidUntil.Before(time.Now()) {
+		return nil
+	}
+	if session.UserID == nil || *session.UserID == "" {
+		return nil
+	}
+	user := &model.User{ID: *session.UserID}
+	result = c.GetUser(user)
+	if result.RowsAffected < 1 {
+		return nil
+	}
+	return user
+}
+
 func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 	return func(g *gin.Context) {
 		isAPI := strings.HasPrefix(g.Request.URL.Path, "/api")
@@ -54,69 +79,33 @@ func UserIsAuthenticated(c controller.AbstractController) gin.HandlerFunc {
 			return
 		}
 
-		cookie, err := g.Cookie(cookieName)
-		if err != nil {
-			if isAPI {
-				apiUnauthorized(g)
-				return
+		user := tryCookieAuth(g, c)
+		if user != nil {
+			g.Set("user", user)
+			g.Next()
+			return
+		}
+
+		// For API requests, try Bearer token
+		if isAPI {
+			authz := g.GetHeader("Authorization")
+			if strings.HasPrefix(authz, "Bearer ") {
+				token := strings.TrimSpace(authz[7:])
+				if token != "" {
+					if bearerUser, ok := c.ResolveUserByApiTokenHash(token); ok {
+						g.Set("user", bearerUser)
+						g.Next()
+						return
+					}
+				}
 			}
-			g.Redirect(http.StatusFound, authRedirectURL(g))
-			g.Abort()
+		}
+
+		if isAPI {
+			apiUnauthorized(g)
 			return
 		}
-
-		// get session
-		session := &model.UserSession{
-			ID: cookie,
-		}
-		result := c.GetSession(session)
-
-		// check result
-		if result.RowsAffected < 1 {
-			g.Redirect(http.StatusFound, authRedirectURL(g))
-			g.Abort()
-			return
-		}
-
-		// check validity
-		if session.ValidUntil.Before(time.Now()) {
-			if isAPI {
-				apiUnauthorized(g)
-				return
-			}
-			g.Redirect(http.StatusFound, authRedirectURL(g))
-			g.Abort()
-			return
-		}
-
-		// check if user is authenticated
-		if session.UserID == nil || *session.UserID == "" {
-			if isAPI {
-				apiUnauthorized(g)
-				return
-			}
-			g.Redirect(http.StatusFound, authRedirectURL(g))
-			g.Abort()
-			return
-		}
-
-		// get user
-		user := &model.User{
-			ID: *session.UserID,
-		}
-		result = c.GetUser(user)
-		if result.RowsAffected < 1 {
-			if isAPI {
-				apiUnauthorized(g)
-				return
-			}
-			g.Redirect(http.StatusFound, authRedirectURL(g))
-			g.Abort()
-			return
-		}
-
-		// set meta in context
-		g.Set("user", user)
-		g.Next()
+		g.Redirect(http.StatusFound, authRedirectURL(g))
+		g.Abort()
 	}
 }

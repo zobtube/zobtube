@@ -130,6 +130,10 @@ type AbstractController interface {
 	// Profile
 	ProfileView(*gin.Context)
 	ProfileChangePassword(*gin.Context)
+	ResolveUserByApiTokenHash(string) (*model.User, bool)
+	ProfileTokenList(*gin.Context)
+	ProfileTokenCreate(*gin.Context)
+	ProfileTokenDelete(*gin.Context)
 
 	// Error pages
 	ErrNotFound(*gin.Context)

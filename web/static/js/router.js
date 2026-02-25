@@ -19,6 +19,7 @@ var routes = [
   { pattern: /^\/video\/([^\/]+)\/edit\/?$/, component: "zt-video-edit", param: "id" },
   { pattern: /^\/video\/([^\/]+)\/?$/, component: "zt-video-view", param: "id" },
   { pattern: /^\/clip\/([^\/]+)\/?$/, component: "zt-clip-view", param: "id" },
+  { pattern: /^\/profile\/tokens\/?$/, component: "zt-profile-tokens" },
   { pattern: /^\/profile\/settings\/?$/, component: "zt-profile-settings" },
   { pattern: /^\/profile\/?$/, component: "zt-profile-view" },
   { pattern: /^\/upload\/?$/, component: "zt-upload-home" },

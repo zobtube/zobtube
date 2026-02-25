@@ -25,6 +25,7 @@ var modelToMigrate = []any{
 	Task{},
 	User{},
 	UserSession{},
+	ApiToken{},
 }
 
 func New(cfg *config.Config) (db *gorm.DB, err error) {

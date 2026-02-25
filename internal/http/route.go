@@ -150,6 +150,9 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 	// Profile
 	authGroup.GET("/api/profile", c.ProfileView)
 	authGroup.POST("/api/profile/password", c.ProfileChangePassword)
+	authGroup.GET("/api/profile/tokens", c.ProfileTokenList)
+	authGroup.POST("/api/profile/tokens", c.ProfileTokenCreate)
+	authGroup.DELETE("/api/profile/tokens/:id", c.ProfileTokenDelete)
 
 	// Error
 	authGroup.Any("/api/error/unauthorized", c.ErrUnauthorized)
