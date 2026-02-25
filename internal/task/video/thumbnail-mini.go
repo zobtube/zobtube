@@ -117,7 +117,7 @@ func generateSameRatioMiniThumnail(ctx *common.Context, video *model.Video) (str
 	var dst *image.RGBA
 
 	if h <= targetH {
-		// resizing will not be usefull, just copy the source
+		// resizing will not be useful, just copy the source
 		dst = image.NewRGBA(image.Rect(0, 0, h, v))
 		draw.NearestNeighbor.Scale(dst, dst.Bounds(), src, src.Bounds(), draw.Over, nil)
 	} else {
