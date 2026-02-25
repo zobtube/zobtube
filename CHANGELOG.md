@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 0.4.2
+### Features
+* [0dcf7a3](https://github.com/zobtube/zobtube/commit/0dcf7a31305eb4319505d73030e1e76fd98d92c9) feat: add swagger on api
+* [1a632d3](https://github.com/zobtube/zobtube/commit/1a632d39bd8b8d37ea69e296080b184eccad580d) feat: revamp admin panel
+* [2ce3c61](https://github.com/zobtube/zobtube/commit/2ce3c61d4c9a4ee13c1177ddc67a6ceed96134c9) feat: add administration api token management
+* [56b6c90](https://github.com/zobtube/zobtube/commit/56b6c902d2a25518b6f38f1ec755736060153eff) feat: add api token authentication
+* [b7e2524](https://github.com/zobtube/zobtube/commit/b7e25244a473017e45d1628252787216b2d96d04) feat: add password reset through ui and api
+### Chores
+* [14c8522](https://github.com/zobtube/zobtube/commit/14c8522dcf81dd33db7e1d40162206b9c1249efa) chore: fix comment typo
+* [1fd44cb](https://github.com/zobtube/zobtube/commit/1fd44cbe3f1ca6f47762b207d129bd35f220c4fc) chore: add model unit testing
+* [ce1bce6](https://github.com/zobtube/zobtube/commit/ce1bce633d395f77ac2b8180178b78fcd14c3890) chore(deps): update goreleaser/goreleaser-action action to v7
+### Fixes
+* [da861d4](https://github.com/zobtube/zobtube/commit/da861d4f31796f9088a0f1250cf69b1797f702b2) fix(deps): update module github.com/swaggo/files to v2
+
 ## Version 0.4.1
 ### Fixes
 * [0a9c944](https://github.com/zobtube/zobtube/commit/0a9c9449a246bc9f8d3c2af5ffc69c4eb2499431) fix(profile): add missing thumbnail for actors without thumbnail
