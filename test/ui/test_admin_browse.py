@@ -35,6 +35,7 @@ def test_admin_adm_tab_navigation(page: Page):
         ("/adm/channels", "heading", "Channels"),
         ("/adm/categories", "heading", "Categories"),
         ("/adm/users", "text", "User list"),
+        ("/adm/tokens", "heading", "API tokens"),
         ("/adm/task/home", "heading", "Task list"),
         ("/adm/tasks", "heading", "Task list"),
     ]

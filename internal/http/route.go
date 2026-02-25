@@ -146,6 +146,8 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 	admGroup.GET("/api/adm/user", c.AdmUserList)
 	admGroup.POST("/api/adm/user", c.AdmUserNew)
 	admGroup.DELETE("/api/adm/user/:id", c.AdmUserDelete)
+	admGroup.GET("/api/adm/tokens", c.AdmTokenList)
+	admGroup.DELETE("/api/adm/tokens/:id", c.AdmTokenDelete)
 
 	// Profile
 	authGroup.GET("/api/profile", c.ProfileView)

@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
@@ -30,6 +31,7 @@ func setupAdmController(t *testing.T) *Controller {
 	if err := db.AutoMigrate(
 		&model.Video{}, &model.Actor{}, &model.Channel{}, &model.Category{},
 		&model.User{}, &model.Task{}, &model.Provider{}, &model.Configuration{},
+		&model.ApiToken{},
 	); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
@@ -274,5 +276,107 @@ func TestController_AdmCategory(t *testing.T) {
 
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d", w.Code)
+	}
+}
+
+func TestController_AdmTokenList_Empty(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupAdmController(t)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/api/adm/tokens", nil)
+
+	ctrl.AdmTokenList(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var body map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	tokens, _ := body["tokens"].([]any)
+	if len(tokens) != 0 {
+		t.Errorf("expected 0 tokens, got %d", len(tokens))
+	}
+}
+
+func TestController_AdmTokenList_WithTokens(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupAdmController(t)
+	u1 := &model.User{Username: "user1"}
+	u2 := &model.User{Username: "user2"}
+	ctrl.datastore.Create(u1)
+	ctrl.datastore.Create(u2)
+	ctrl.datastore.Create(&model.ApiToken{UserID: u1.ID, Name: "Token A", TokenHash: "h1", CreatedAt: time.Now()})
+	ctrl.datastore.Create(&model.ApiToken{UserID: u2.ID, Name: "Token B", TokenHash: "h2", CreatedAt: time.Now()})
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/api/adm/tokens", nil)
+
+	ctrl.AdmTokenList(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var body map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	tokens, _ := body["tokens"].([]any)
+	if len(tokens) != 2 {
+		t.Fatalf("expected 2 tokens, got %d", len(tokens))
+	}
+	for i, raw := range tokens {
+		tok, _ := raw.(map[string]any)
+		if tok["id"] == nil || tok["name"] == nil || tok["username"] == nil {
+			t.Errorf("token %d: missing id, name, or username", i)
+		}
+		if tok["token_hash"] != nil {
+			t.Error("response must not contain token_hash")
+		}
+	}
+}
+
+func TestController_AdmTokenDelete_Success(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupAdmController(t)
+	user := &model.User{Username: "u"}
+	ctrl.datastore.Create(user)
+	tok := &model.ApiToken{UserID: user.ID, Name: "T", TokenHash: "h", CreatedAt: time.Now()}
+	ctrl.datastore.Create(tok)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Params = gin.Params{{Key: "id", Value: tok.ID}}
+	c.Request = httptest.NewRequest("DELETE", "/api/adm/tokens/"+tok.ID, nil)
+
+	ctrl.AdmTokenDelete(c)
+
+	if w.Code != http.StatusNoContent {
+		t.Fatalf("expected 204, got %d", w.Code)
+	}
+	var count int64
+	ctrl.datastore.Model(&model.ApiToken{}).Where("id = ?", tok.ID).Count(&count)
+	if count != 0 {
+		t.Error("token should be deleted")
+	}
+}
+
+func TestController_AdmTokenDelete_NotFound(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupAdmController(t)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Params = gin.Params{{Key: "id", Value: "00000000-0000-0000-0000-000000000000"}}
+	c.Request = httptest.NewRequest("DELETE", "/api/adm/tokens/00000000-0000-0000-0000-000000000000", nil)
+
+	ctrl.AdmTokenDelete(c)
+
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("expected 404, got %d", w.Code)
 	}
 }

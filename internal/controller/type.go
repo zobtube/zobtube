@@ -32,6 +32,8 @@ type AbstractController interface {
 	AdmUserList(*gin.Context)
 	AdmUserNew(*gin.Context)
 	AdmUserDelete(*gin.Context)
+	AdmTokenList(*gin.Context)
+	AdmTokenDelete(*gin.Context)
 
 	// Home
 	Home(*gin.Context)

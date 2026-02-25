@@ -1,6 +1,6 @@
 (function() {
 "use strict";
-var sidebarStyles = "#zt-adm-sidebar{position:sticky;top:70px;padding:1rem 0;background:#f7f7f7;border-radius:8px}#zt-adm-sidebar .zt-adm-sidebar-title{margin:0 0 0.75rem;padding:0 1rem;font-size:1.1rem;font-weight:600}#zt-adm-sidebar .zt-adm-sidebar-group{margin:1rem 0 0.25rem;padding:0 1rem;font-size:0.7rem;font-weight:600;text-transform:uppercase;color:#6c757d}#zt-adm-sidebar .zt-adm-sidebar-group:first-of-type{margin-top:0}#zt-adm-sidebar .nav{flex-direction:column}#zt-adm-sidebar .nav-link{padding:0.5rem 1rem;border-radius:4px;border-left:3px solid transparent}#zt-adm-sidebar .nav-link:hover{background:rgba(0,0,0,0.05)}#zt-adm-sidebar .nav-link.active{font-weight:600;background:rgba(22,122,198,0.1);border-left-color:#167ac6;color:#167ac6}";
+var sidebarStyles = "#zt-adm-sidebar{position:sticky;top:70px;padding:1rem 0;background:#f7f7f7;border-radius:8px}#zt-adm-sidebar .zt-adm-sidebar-title{margin:0 0 0.75rem;padding:0 1rem;font-size:1.1rem;font-weight:600}#zt-adm-sidebar .zt-adm-sidebar-group{margin:1rem 0 0.25rem;padding:0 1rem;font-size:0.7rem;font-weight:600;text-transform:uppercase;color:#6c757d}#zt-adm-sidebar .zt-adm-sidebar-group:first-of-type{margin-top:0}#zt-adm-sidebar .nav{flex-direction:column}#zt-adm-sidebar .nav-link{padding:0.5rem 1rem;border-radius:4px;border-left:3px solid transparent}#zt-adm-sidebar .nav-link:hover{background:rgba(0,0,0,0.05)}#zt-adm-sidebar .nav-link.active{background:rgba(22,122,198,0.1);border-left-color:#167ac6;color:#167ac6}";
 function ZtAdmTabs() {
   var el = Reflect.construct(HTMLElement, [], ZtAdmTabs);
   return el;
@@ -25,6 +25,7 @@ ZtAdmTabs.prototype.connectedCallback = function() {
     group("Authentication") +
     link("General", "/adm/config/auth", "authentication") +
     link("Users", "/adm/users", "users") +
+    link("API tokens", "/adm/tokens", "tokens") +
     group("External") +
     link("Offline mode", "/adm/config/offline", "offline") +
     link("Providers", "/adm/config/provider", "providers") +

@@ -106,3 +106,57 @@ func (c *Controller) ProfileTokenDelete(g *gin.Context) {
 	}
 	g.AbortWithStatus(http.StatusNoContent)
 }
+
+// AdmTokenList returns all API tokens (admin only) with id, name, created_at, user_id, username.
+func (c *Controller) AdmTokenList(g *gin.Context) {
+	var tokens []model.ApiToken
+	c.datastore.Order("created_at desc").Find(&tokens)
+	if len(tokens) == 0 {
+		g.JSON(http.StatusOK, gin.H{"tokens": []gin.H{}})
+		return
+	}
+	userIDs := make([]string, 0, len(tokens))
+	seen := make(map[string]struct{})
+	for _, t := range tokens {
+		if _, ok := seen[t.UserID]; !ok {
+			seen[t.UserID] = struct{}{}
+			userIDs = append(userIDs, t.UserID)
+		}
+	}
+	var users []model.User
+	c.datastore.Where("id IN ?", userIDs).Find(&users)
+	userMap := make(map[string]string)
+	for _, u := range users {
+		userMap[u.ID] = u.Username
+	}
+	list := make([]gin.H, 0, len(tokens))
+	for _, t := range tokens {
+		list = append(list, gin.H{
+			"id":         t.ID,
+			"name":       t.Name,
+			"created_at": t.CreatedAt,
+			"user_id":    t.UserID,
+			"username":   userMap[t.UserID],
+		})
+	}
+	g.JSON(http.StatusOK, gin.H{"tokens": list})
+}
+
+// AdmTokenDelete deletes an API token by ID (admin only). Returns 204 on success, 404 if not found.
+func (c *Controller) AdmTokenDelete(g *gin.Context) {
+	id := g.Param("id")
+	if id == "" {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "id required"})
+		return
+	}
+	var apiToken model.ApiToken
+	if c.datastore.Where("id = ?", id).First(&apiToken).RowsAffected < 1 {
+		g.JSON(http.StatusNotFound, gin.H{"error": "token not found"})
+		return
+	}
+	if c.datastore.Delete(&apiToken).Error != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete"})
+		return
+	}
+	g.AbortWithStatus(http.StatusNoContent)
+}

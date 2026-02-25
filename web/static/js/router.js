@@ -33,6 +33,7 @@ var routes = [
   { pattern: /^\/adm\/task\/([^\/]+)\/?$/, component: "zt-adm-task-view", param: "id" },
   { pattern: /^\/adm\/user\/?$/, component: "zt-adm-user-new" },
   { pattern: /^\/adm\/users\/?$/, component: "zt-adm-user-list" },
+  { pattern: /^\/adm\/tokens\/?$/, component: "zt-adm-token-list" },
   { pattern: /^\/adm\/config\/auth\/?$/, component: "zt-adm-config-auth" },
   { pattern: /^\/adm\/config\/provider\/?$/, component: "zt-adm-config-provider" },
   { pattern: /^\/adm\/config\/offline\/?$/, component: "zt-adm-config-offline" }
