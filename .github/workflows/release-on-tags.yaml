@@ -29,10 +29,9 @@ jobs:
           go-version: stable
           cache: false
       - name: Generate swagger docs
-        run:
-          - |
-            go install github.com/swaggo/swag/v2/cmd/swag@latest
-            swag init --parseDependency --parseInternal --output internal/swagger --outputTypes go
+        run: |
+          go install github.com/swaggo/swag/v2/cmd/swag@latest
+          swag init --parseDependency --parseInternal --output internal/swagger --outputTypes go
       - name: Extract release note
         run: cat CHANGELOG.md |awk '{if ($0~/^## /) {++count} if (count>1) {exit} print $0}' |head -n-1 > /tmp/CHANGELOG.md
       - name: Run GoReleaser
