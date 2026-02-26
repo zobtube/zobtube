@@ -34,7 +34,7 @@ jobs:
         run: |
           source .venv/bin/activate
           ./tools/e2e-run.sh
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-traces
