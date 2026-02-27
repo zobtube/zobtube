@@ -77,6 +77,17 @@ func TestBabepedia_ActorGetThumb_OfflineMode(t *testing.T) {
 	}
 }
 
+func TestBabepedia_ActorGetThumb_EmptyURL(t *testing.T) {
+	p := &Babepedia{}
+	_, err := p.ActorGetThumb(false, "Jane Doe", "")
+	if err == nil {
+		t.Fatal("expected error for empty url")
+	}
+	if err != nil && !strings.Contains(err.Error(), "actor name not found in url") {
+		t.Errorf("expected 'actor name not found in url', got %v", err)
+	}
+}
+
 func TestBabepedia_ActorGetThumb_Success(t *testing.T) {
 	wantData := []byte("fake_image_data")
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +99,7 @@ func TestBabepedia_ActorGetThumb_Success(t *testing.T) {
 
 	p := &Babepedia{}
 	testHTTPTransports(server, nil, []string{"www.babepedia.com"}, nil, func() {
-		got, err := p.ActorGetThumb(false, "Jane Doe", "")
+		got, err := p.ActorGetThumb(false, "Jane Doe", "https://www.babepedia.com/babe/Jane_Doe")
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
@@ -105,8 +116,8 @@ func TestBabepedia_ActorGetThumb_HTTPError(t *testing.T) {
 	defer server.Close()
 
 	p := &Babepedia{}
-	testHTTPTransports(server, nil, nil, nil, func() {
-		_, err := p.ActorGetThumb(false, "Missing Person", "")
+	testHTTPTransports(server, nil, []string{"www.babepedia.com"}, nil, func() {
+		_, err := p.ActorGetThumb(false, "Missing Person", "https://www.babepedia.com/babe/Missing_Person")
 		if err == nil {
 			t.Fatal("expected error, got nil")
 		}

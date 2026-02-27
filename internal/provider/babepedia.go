@@ -73,8 +73,13 @@ func (p *Babepedia) ActorGetThumb(offlineMode bool, actorName, url string) (thum
 			return http.ErrUseLastResponse
 		},
 	}
-	caser := cases.Title(language.English)
-	_url := "https://www.babepedia.com/pics/" + caser.String(actorName) + ".jpg"
+
+	_actorName := strings.Split(url, "/")[len(strings.Split(url, "/"))-1]
+	if _actorName == "" {
+		return thumb, errors.New("actor name not found in url")
+	}
+
+	_url := "https://www.babepedia.com/pics/" + actorName + ".jpg"
 	req, err := http.NewRequest("GET", _url, nil)
 	if err != nil {
 		return thumb, err

@@ -89,7 +89,7 @@ func (p *Boobpedia) ActorGetThumb(offlineMode bool, actorName, url string) (thum
 	}
 
 	// try default avatar position of legacy profiles
-	rLegacy := regexp.MustCompile("<a.*class=\"mw-file-description\">\n*\\s*<img src=\"([^\"]*)")
+	rLegacy := regexp.MustCompile(`class=\"mw-file-description\"[\s\w="<>]* src=\"([^\"]*)`)
 	thumbURLMatches := rLegacy.FindStringSubmatch(string(pageData))
 
 	if len(thumbURLMatches) != 2 || thumbURLMatches[1] == "" {
