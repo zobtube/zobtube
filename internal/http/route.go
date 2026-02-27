@@ -111,6 +111,7 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 		videoGroup.POST("/:id/rename", c.VideoRename)
 		videoGroup.POST("/:id/count-view", c.VideoViewIncrement)
 		videoGroup.POST("/:id/channel", c.VideoEditChannel)
+		videoGroup.POST("/:id/library", c.VideoEditLibrary)
 	}
 
 	// Uploads
@@ -148,6 +149,10 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 	admGroup.DELETE("/api/adm/user/:id", c.AdmUserDelete)
 	admGroup.GET("/api/adm/tokens", c.AdmTokenList)
 	admGroup.DELETE("/api/adm/tokens/:id", c.AdmTokenDelete)
+	admGroup.GET("/api/adm/libraries", c.AdmLibraryList)
+	admGroup.POST("/api/adm/libraries", c.AdmLibraryCreate)
+	admGroup.PUT("/api/adm/libraries/:id", c.AdmLibraryUpdate)
+	admGroup.DELETE("/api/adm/libraries/:id", c.AdmLibraryDelete)
 
 	// Profile
 	authGroup.GET("/api/profile", c.ProfileView)

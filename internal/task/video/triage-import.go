@@ -2,7 +2,7 @@ package video
 
 import (
 	"errors"
-	"os"
+	"io"
 	"path/filepath"
 
 	"github.com/zobtube/zobtube/internal/model"
@@ -10,49 +10,46 @@ import (
 )
 
 func importFromTriage(ctx *common.Context, params common.Parameters) (string, error) {
-	// get id from path
 	id := params["videoID"]
-
-	// get item from ID
-	video := &model.Video{
-		ID: id,
-	}
+	video := &model.Video{ID: id}
 	result := ctx.DB.First(video)
-
-	// check result
 	if result.RowsAffected < 1 {
 		return "video does not exist", errors.New("id not in db")
 	}
-
-	// prepare paths
-	previousPath := filepath.Join(ctx.Config.Media.Path, "/triage", video.Filename)
-	newFolderPath := filepath.Join(ctx.Config.Media.Path, video.FolderRelativePath())
-	newPath := filepath.Join(ctx.Config.Media.Path, video.RelativePath())
-
-	// ensure folder exists
-	_, err := os.Stat(newFolderPath)
-	if os.IsNotExist(err) {
-		// do not exists, create it
-		err = os.Mkdir(newFolderPath, 0o750)
-		if err != nil {
-			return "unable to create new video folder", err
-		}
-	} else if err != nil {
-		return "unable to read new video folder", err
-	}
-
-	// move
-	err = os.Rename(previousPath, newPath)
+	libID := videoLibraryID(ctx, video)
+	store, err := ctx.StorageResolver.Storage(libID)
 	if err != nil {
-		return "unable to move new video into its folder", err
+		return "unable to resolve storage", err
 	}
-
-	// commit the update on database
+	triagePath := filepath.Join("triage", video.Filename)
+	newPath := video.RelativePath()
+	if err := store.MkdirAll(filepath.Dir(newPath)); err != nil {
+		return "unable to create new video folder", err
+	}
+	rc, err := store.Open(triagePath)
+	if err != nil {
+		return "unable to open triage file", err
+	}
+	defer rc.Close()
+	wc, err := store.Create(newPath)
+	if err != nil {
+		return "unable to create video file", err
+	}
+	defer wc.Close()
+	if _, err := io.Copy(wc, rc); err != nil {
+		return "unable to copy video", err
+	}
+	_ = store.Delete(triagePath)
 	video.Imported = true
-	err = ctx.DB.Save(video).Error
-	if err != nil {
+	if err := ctx.DB.Save(video).Error; err != nil {
 		return "unable to update database", err
 	}
-
 	return "", nil
+}
+
+func videoLibraryID(ctx *common.Context, video *model.Video) string {
+	if video.LibraryID != nil && *video.LibraryID != "" {
+		return *video.LibraryID
+	}
+	return ctx.Config.DefaultLibraryID
 }

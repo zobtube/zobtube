@@ -21,7 +21,7 @@ ZtClipView.prototype.connectedCallback = function() {
     .then(function(data) {
       var v = data.video || data;
       var clipIds = data.clip_ids || [id];
-      var streamUrl = "/api/video/"+id+"/stream";
+      var streamUrl = data.stream_url || "/api/video/"+id+"/stream";
       var thumbUrl = "/api/video/"+id+"/thumb";
       var name = (v.Name||v.name||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
       var actors = v.Actors || v.actors || [];
@@ -115,6 +115,10 @@ ZtClipView.prototype.connectedCallback = function() {
           .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
           .then(function(data){
             var v = data.video || data;
+            if (data.stream_url) {
+              video.src = data.stream_url;
+              video.load();
+            }
             var name = (v.Name||v.name||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
             var actors = v.Actors || v.actors || [];
             var categories = v.Categories || v.categories || [];

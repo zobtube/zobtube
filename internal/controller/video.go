@@ -1,9 +1,8 @@
 package controller
 
 import (
-	"errors"
+	"io"
 	"net/http"
-	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -89,12 +88,16 @@ func (c *Controller) VideoView(g *gin.Context) {
 	}
 	var randomVideos []model.Video
 	c.datastore.Limit(8).Where("type = ? and id != ?", video.Type, video.ID).Order("RANDOM()").Find(&randomVideos)
-	g.JSON(http.StatusOK, gin.H{
+	resp := gin.H{
 		"video":         video,
 		"view_count":    viewCount,
 		"categories":    categories,
 		"random_videos": randomVideos,
-	})
+	}
+	if u := c.videoStreamURL(g, video); u != "" {
+		resp["stream_url"] = u
+	}
+	g.JSON(http.StatusOK, resp)
 }
 
 // VideoEdit godoc
@@ -118,11 +121,18 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 	c.datastore.Find(&actors)
 	var categories []model.Category
 	c.datastore.Preload("Sub").Find(&categories)
-	g.JSON(http.StatusOK, gin.H{
+	var libraries []model.Library
+	c.datastore.Order("created_at").Find(&libraries)
+	resp := gin.H{
 		"video":      video,
 		"actors":     actors,
 		"categories": categories,
-	})
+		"libraries":  libraries,
+	}
+	if u := c.videoStreamURL(g, video); u != "" {
+		resp["stream_url"] = u
+	}
+	g.JSON(http.StatusOK, resp)
 }
 
 // VideoActors godoc
@@ -266,16 +276,22 @@ func (c *Controller) VideoStreamInfo(g *gin.Context) {
 		return
 	}
 
-	path := filepath.Join(c.config.Media.Path, video.RelativePath())
-	_, err := os.Stat(path)
-	if err == nil {
+	libID := c.videoLibraryID(video)
+	store, err := c.storageResolver.Storage(libID)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	path := video.RelativePath()
+	exists, err := store.Exists(path)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if exists {
 		g.JSON(200, gin.H{})
-	} else if errors.Is(err, os.ErrNotExist) {
-		g.JSON(404, gin.H{})
 	} else {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(404, gin.H{})
 	}
 }
 
@@ -352,10 +368,11 @@ func (c *Controller) VideoCreate(g *gin.Context) {
 	var err error
 
 	form := struct {
-		Name     string   `form:"name"`
-		Filename string   `form:"filename"`
-		Actors   []string `form:"actors"`
-		TypeEnum string   `form:"type"`
+		Name      string   `form:"name"`
+		Filename  string   `form:"filename"`
+		Actors    []string `form:"actors"`
+		TypeEnum  string   `form:"type"`
+		LibraryID string   `form:"library_id"`
 	}{}
 	err = g.ShouldBind(&form)
 	if err != nil {
@@ -372,12 +389,14 @@ func (c *Controller) VideoCreate(g *gin.Context) {
 		return
 	}
 
+	libID := c.uploadLibraryID(form.LibraryID)
 	video := &model.Video{
 		Name:      form.Name,
 		Filename:  form.Filename,
 		Type:      form.TypeEnum,
 		Imported:  false,
 		Thumbnail: false,
+		LibraryID: &libID,
 	}
 
 	// save object in db
@@ -434,73 +453,52 @@ func (c *Controller) VideoCreate(g *gin.Context) {
 //	@Failure	404	{object}	map[string]interface{}
 //	@Router		/video/{id}/thumb [post]
 func (c *Controller) VideoUploadThumb(g *gin.Context) {
-	// get id from path
 	id := g.Param("id")
-
-	// get item from ID
-	video := &model.Video{
-		ID: id,
-	}
+	video := &model.Video{ID: id}
 	result := c.datastore.First(video)
-
-	// check result
 	if result.RowsAffected < 1 {
 		g.JSON(404, gin.H{})
 		return
 	}
-
-	// ensure folder exists
-	videoFolder := filepath.Join(c.config.Media.Path, video.FolderRelativePath())
-	_, err := os.Stat(videoFolder)
-	if os.IsNotExist(err) {
-		// do not exists, create it
-		err = os.Mkdir(videoFolder, 0o750)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-	} else if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	// save thumbnail
-	thumbnailPath := video.ThumbnailRelativePath()
-	thumbnail, err := g.FormFile("thumbnail")
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	err = g.SaveUploadedFile(thumbnail, thumbnailPath)
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	// commit the update on database
-	video.Thumbnail = true
-	err = c.datastore.Save(video).Error
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	err = c.runner.NewTask("video/mini-thumb", map[string]string{"videoID": video.ID})
+	store, err := c.storageResolver.Storage(c.videoLibraryID(video))
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
+	if err := store.MkdirAll(video.FolderRelativePath()); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	thumbnail, err := g.FormFile("thumbnail")
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	src, err := thumbnail.Open()
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer src.Close()
+	dst, err := store.Create(video.ThumbnailRelativePath())
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer dst.Close()
+	if _, err := io.Copy(dst, src); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	video.Thumbnail = true
+	if err := c.datastore.Save(video).Error; err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if err := c.runner.NewTask("video/mini-thumb", map[string]string{"videoID": video.ID}); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	g.JSON(200, gin.H{})
 }
 
@@ -515,67 +513,48 @@ func (c *Controller) VideoUploadThumb(g *gin.Context) {
 //	@Failure	404	{object}	map[string]interface{}
 //	@Router		/video/{id}/upload [post]
 func (c *Controller) VideoUpload(g *gin.Context) {
-	// get id from path
 	id := g.Param("id")
-
-	// get item from ID
-	video := &model.Video{
-		ID: id,
-	}
+	video := &model.Video{ID: id}
 	result := c.datastore.First(video)
-
-	// check result
 	if result.RowsAffected < 1 {
 		g.JSON(404, gin.H{})
 		return
 	}
-
-	// ensure folder exists
-	videoFolder := filepath.Join(c.config.Media.Path, video.FolderRelativePath())
-	_, err := os.Stat(videoFolder)
-	if os.IsNotExist(err) {
-		// do not exists, create it
-		err = os.Mkdir(videoFolder, 0o750)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-	} else if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+	store, err := c.storageResolver.Storage(c.videoLibraryID(video))
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
-	// save video
-	videoPath := filepath.Join(videoFolder, "video.mp4")
+	if err := store.MkdirAll(video.FolderRelativePath()); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	videoData, err := g.FormFile("file")
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	err = g.SaveUploadedFile(videoData, videoPath)
+	src, err := videoData.Open()
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
-	// commit the update on database
+	defer src.Close()
+	dst, err := store.Create(video.RelativePath())
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer dst.Close()
+	if _, err := io.Copy(dst, src); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	video.Imported = true
-	err = c.datastore.Save(video).Error
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+	if err := c.datastore.Save(video).Error; err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
 	g.JSON(200, gin.H{})
 }
 
@@ -652,32 +631,48 @@ func (c *Controller) VideoMigrate(g *gin.Context) {
 	}
 
 	newType := g.PostForm("new_type")
-
-	previousPath := filepath.Join(c.config.Media.Path, video.FolderRelativePath())
-
-	// change object in db
+	oldFolder := video.FolderRelativePathForType(video.Type)
 	video.Type = newType
+	newFolder := video.FolderRelativePath()
 
-	newPath := filepath.Join(c.config.Media.Path, video.FolderRelativePath())
-
-	// move
-	err := os.Rename(previousPath, newPath)
+	store, err := c.storageResolver.Storage(c.videoLibraryID(video))
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
-	// commit
-	err = c.datastore.Save(video).Error
-	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
+	// Copy known files from old folder to new folder
+	for _, name := range []string{"video.mp4", "thumb.jpg", "thumb-xs.jpg"} {
+		oldPath := filepath.Join(oldFolder, name)
+		newPath := filepath.Join(newFolder, name)
+		exists, _ := store.Exists(oldPath)
+		if !exists {
+			continue
+		}
+		rc, err := store.Open(oldPath)
+		if err != nil {
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		wc, err := store.Create(newPath)
+		if err != nil {
+			rc.Close()
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		_, err = io.Copy(wc, rc)
+		rc.Close()
+		wc.Close()
+		if err != nil {
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		_ = store.Delete(oldPath)
 	}
 
+	if err := c.datastore.Save(video).Error; err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	g.JSON(200, gin.H{})
 }
 
@@ -788,6 +783,53 @@ func (c *Controller) VideoEditChannel(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// VideoEditLibrary godoc
+//
+//	@Summary	Change video library (admin)
+//	@Tags		video
+//	@Accept		json
+//	@Param		id	path	string	true	"Video ID"
+//	@Param		body	body	object	true	"JSON with library_id"
+//	@Success	200
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id}/library [post]
+func (c *Controller) VideoEditLibrary(g *gin.Context) {
+	id := g.Param("id")
+	var body struct {
+		LibraryID string `json:"library_id" binding:"required"`
+	}
+	if err := g.ShouldBindJSON(&body); err != nil {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "library_id required"})
+		return
+	}
+	video := &model.Video{ID: id}
+	if c.datastore.First(video).RowsAffected < 1 {
+		g.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		return
+	}
+	var lib model.Library
+	if c.datastore.First(&lib, "id = ?", body.LibraryID).RowsAffected < 1 {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "library not found"})
+		return
+	}
+	sourceLibID := c.videoLibraryID(video)
+	if sourceLibID == lib.ID {
+		g.JSON(http.StatusOK, gin.H{})
+		return
+	}
+	params := map[string]string{
+		"videoID":         video.ID,
+		"targetLibraryID": lib.ID,
+		"sourceLibraryID": sourceLibID,
+	}
+	if err := c.runner.NewTask("video/move-library", params); err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	g.JSON(http.StatusOK, gin.H{})
+}
+
 // VideoGet godoc
 //
 //	@Summary	Get video summary (title, actors, categories)
@@ -850,13 +892,19 @@ func (c *Controller) VideoStream(g *gin.Context) {
 		g.JSON(404, gin.H{})
 		return
 	}
-	var targetPath string
-	if video.Imported {
-		targetPath = filepath.Join(c.config.Media.Path, video.RelativePath())
-	} else {
-		targetPath = filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, video.Filename)
+	libID := c.videoLibraryID(video)
+	store, err := c.storageResolver.Storage(libID)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
 	}
-	g.File(targetPath)
+	var path string
+	if video.Imported {
+		path = video.RelativePath()
+	} else {
+		path = filepath.Join("triage", video.Filename)
+	}
+	c.serveFromStorage(g, store, path)
 }
 
 // VideoThumb godoc
@@ -879,8 +927,13 @@ func (c *Controller) VideoThumb(g *gin.Context) {
 		g.JSON(404, gin.H{})
 		return
 	}
-	targetPath := filepath.Join(c.config.Media.Path, video.ThumbnailRelativePath())
-	g.File(targetPath)
+	store, err := c.storageResolver.Storage(c.videoLibraryID(video))
+	if err != nil {
+		c.logger.Error().Err(err).Str("video_id", video.ID).Str("library_id", c.videoLibraryID(video)).Msg("error resolving storage")
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.serveFromStorage(g, store, video.ThumbnailRelativePath())
 }
 
 // VideoThumbXS godoc
@@ -903,6 +956,10 @@ func (c *Controller) VideoThumbXS(g *gin.Context) {
 		g.Redirect(http.StatusFound, VIDEO_THUMB_NOT_GENERATED)
 		return
 	}
-	targetPath := filepath.Join(c.config.Media.Path, video.ThumbnailXSRelativePath())
-	g.File(targetPath)
+	store, err := c.storageResolver.Storage(c.videoLibraryID(video))
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.serveFromStorage(g, store, video.ThumbnailXSRelativePath())
 }

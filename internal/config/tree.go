@@ -5,20 +5,24 @@ import (
 	"path/filepath"
 )
 
-func (cfg *Config) EnsureTreePresent() error {
-	folders := []string{
-		"clips",
-		"movies",
-		"videos",
-		"actors",
-		"triage",
-	}
+var defaultLibraryFolders = []string{
+	"clips",
+	"movies",
+	"videos",
+	"actors",
+	"triage",
+}
 
-	// ensure library folder exists
-	path := cfg.Media.Path
+// EnsureTreePresent ensures the library folder and default subfolders exist at path.
+// Used for the single configured media path (backward compat) or for each filesystem library path.
+func (cfg *Config) EnsureTreePresent() error {
+	return EnsureTreePresentForPath(cfg.Media.Path)
+}
+
+// EnsureTreePresentForPath ensures the library folder and default subfolders exist at the given path.
+func EnsureTreePresentForPath(path string) error {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
-		// do not exists, create it
 		err = os.Mkdir(path, 0o750)
 		if err != nil {
 			return err
@@ -26,15 +30,11 @@ func (cfg *Config) EnsureTreePresent() error {
 	} else if err != nil {
 		return err
 	}
-
-	// ensure folders inside the library exist
-	for _, folder := range folders {
-		path := filepath.Join(cfg.Media.Path, folder)
-		// ensure folder exists
-		_, err := os.Stat(path)
+	for _, folder := range defaultLibraryFolders {
+		dir := filepath.Join(path, folder)
+		_, err := os.Stat(dir)
 		if os.IsNotExist(err) {
-			// do not exists, create it
-			err = os.Mkdir(path, 0o750)
+			err = os.Mkdir(dir, 0o750)
 			if err != nil {
 				return err
 			}
@@ -42,6 +42,5 @@ func (cfg *Config) EnsureTreePresent() error {
 			return err
 		}
 	}
-
 	return nil
 }

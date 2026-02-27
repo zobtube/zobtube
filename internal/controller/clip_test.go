@@ -14,6 +14,7 @@ import (
 
 	"github.com/zobtube/zobtube/internal/config"
 	"github.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/storage"
 )
 
 func setupClipController(t *testing.T) *Controller {
@@ -23,8 +24,12 @@ func setupClipController(t *testing.T) *Controller {
 	if err != nil {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
-	if err := db.AutoMigrate(&model.Video{}, &model.Actor{}, &model.CategorySub{}); err != nil {
+	if err := db.AutoMigrate(&model.Video{}, &model.Actor{}, &model.CategorySub{}, &model.Library{}); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
+	}
+	defaultLibID, err := model.EnsureDefaultLibrary(db, "/tmp")
+	if err != nil {
+		t.Fatalf("failed to ensure default library: %v", err)
 	}
 
 	logger := zerolog.Nop()
@@ -32,7 +37,11 @@ func setupClipController(t *testing.T) *Controller {
 	ctrl := New(shutdown).(*Controller)
 	ctrl.LoggerRegister(&logger)
 	ctrl.DatabaseRegister(db)
-	ctrl.ConfigurationRegister(&config.Config{})
+	cfg := &config.Config{}
+	cfg.DefaultLibraryID = defaultLibID
+	ctrl.ConfigurationRegister(cfg)
+	storageResolver := storage.NewResolver(db)
+	ctrl.StorageResolverRegister(storageResolver)
 
 	return ctrl
 }

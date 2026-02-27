@@ -1,0 +1,22 @@
+{{ define "web/page/failsafe/error.html" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ZobTube – Startup Error</title>
+    <style>
+        body { font-family: system-ui, sans-serif; font-size: 16px; color: #252525; margin: 2rem; max-width: 640px; }
+        h1 { color: #c00; }
+        pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>ZobTube could not start</h1>
+    <p>An error occurred during startup. Fix the issue and restart the server.</p>
+    {{ if .Error }}
+    <pre>{{ .Error }}</pre>
+    {{ end }}
+</body>
+</html>
+{{ end }}

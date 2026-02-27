@@ -27,10 +27,44 @@ ZtUploadHome.prototype.connectedCallback = function() {
   var massActionModal = null;
   var massImportModal = null;
   var videoImportModal = null;
+  var libraries = [];
+  var selectedLibraryId = "";
 
+  fetch("/api/adm/libraries", { credentials: "same-origin" })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      libraries = d.items || [];
+      var defaultLib = libraries.find(function(l) { return l.is_default || l.IsDefault; });
+      selectedLibraryId = defaultLib ? (defaultLib.id || defaultLib.ID) : (libraries[0] && (libraries[0].id || libraries[0].ID)) || "";
+      try {
+        var saved = sessionStorage.getItem("zt-upload-library");
+        if (saved && libraries.some(function(l) { return (l.id || l.ID) === saved; })) selectedLibraryId = saved;
+      } catch (e) {}
+      return Promise.resolve();
+    })
+    .catch(function() { libraries = []; selectedLibraryId = ""; return Promise.resolve(); })
+    .then(function() {
   function updateView() {
+    var sidebarStyles = "#zt-upload-sidebar{position:sticky;top:70px;padding:1rem 0;background:#f7f7f7;border-radius:8px;min-width:180px}#zt-upload-sidebar .zt-upload-sidebar-title{margin:0 0 0.75rem;padding:0 1rem;font-size:1.1rem;font-weight:600}#zt-upload-sidebar .nav{flex-direction:column}#zt-upload-sidebar .nav-link{padding:0.5rem 1rem;border-radius:4px;border-left:3px solid transparent;cursor:pointer;color:inherit;text-decoration:none;display:block}#zt-upload-sidebar .nav-link:hover{background:rgba(0,0,0,0.05)}#zt-upload-sidebar .nav-link.active{background:rgba(22,122,198,0.1);border-left-color:#167ac6;color:#167ac6}";
     var styles = ".br-link{color:#0d6efd;text-decoration:underline;cursor:pointer}.triage-listing-table{width:100%;table-layout:fixed;font-size:medium}.triage-listing-table tr{user-select:none}.triage-listing-table tr:hover td{background-color:#efefef}.checks{color:grey;cursor:pointer}";
-    var html = '<style>'+styles+'</style>';
+    var html = '<style>'+sidebarStyles+'</style><style>'+styles+'</style>';
+    html += '<div class="zt-upload-wrap" style="display:flex;gap:1rem;align-items:flex-start">';
+    html += '<div id="zt-upload-sidebar" class="zt-upload-sidebar">';
+    html += '<h3 class="zt-upload-sidebar-title"><i class="fa fa-folder-open"></i> Library</h3><nav class="nav flex-column">';
+    if (libraries.length === 0) {
+      html += '<span class="text-muted small px-2">No libraries</span>';
+    } else {
+      libraries.forEach(function(lib) {
+        var id = lib.id || lib.ID;
+        var name = (lib.name || lib.Name || id).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+        var isDefault = !!(lib.is_default || lib.IsDefault);
+        var badge = isDefault ? ' <span class="badge bg-primary">default</span>' : '';
+        var active = id === selectedLibraryId ? " nav-link active" : " nav-link";
+        html += '<a class="' + active + '" href="#" data-library-id="' + id.replace(/"/g,"&quot;") + '">' + name + badge + '</a>';
+      });
+    }
+    html += '</nav></div>';
+    html += '<div class="zt-upload-main" style="flex:1;min-width:0">';
     html += '<div style="display:flex;justify-content:space-between;"><h4>Upload and triage folder</h4><div>';
     html += '<button class="btn btn-outline-success" id="zt-upload-file-btn">Upload file</button>';
     html += ' <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#newFolderModal">New folder</button>';
@@ -56,7 +90,20 @@ ZtUploadHome.prototype.connectedCallback = function() {
 
     html += '<div class="modal fade" id="newFolderModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Create new folder</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="form-floating"><input type="text" class="form-control" id="folder-new" placeholder="Name"><label for="folder-new">New folder name</label></div></div><div class="modal-footer"><button type="button" class="btn btn-success" id="zt-folder-create-btn">Create</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
 
+    html += '</div></div>';
     self.innerHTML = html;
+
+    self.querySelectorAll("#zt-upload-sidebar .nav-link[data-library-id]").forEach(function(a) {
+      a.onclick = function(e) {
+        e.preventDefault();
+        var id = a.getAttribute("data-library-id");
+        if (id) {
+          selectedLibraryId = id;
+          try { sessionStorage.setItem("zt-upload-library", id); } catch (e) {}
+          loadListing();
+        }
+      };
+    });
 
     var pathEl = self.querySelector("#zt-path");
     var pathArr = currentPath.split("/").filter(Boolean);
@@ -74,6 +121,12 @@ ZtUploadHome.prototype.connectedCallback = function() {
     });
 
     self.querySelector("#zt-upload-input-path").value = currentPath;
+
+    function previewUrl(filePath) {
+      var p = filePath.replace(/^\//, "");
+      var q = selectedLibraryId ? "?library_id=" + encodeURIComponent(selectedLibraryId) : "";
+      return "/api/upload/preview/" + encodeURIComponent(p) + q;
+    }
 
     function getSelectedFiles() {
       var list = [];
@@ -129,15 +182,15 @@ ZtUploadHome.prototype.connectedCallback = function() {
       content += '<p><b>Size</b><br/>' + fileSize + '</p>';
       content += '<p><b>Last modified</b><br/>' + fileDate + '</p>';
       if (fileType === "video") {
-        content += '<h6 class="mt-3">Preview</h6><hr /><video controls class="w-100" src="/api/upload/preview/' + encodeURIComponent(filePath.replace(/^\//, "")) + '"></video>';
+        content += '<h6 class="mt-3">Preview</h6><hr /><video controls class="w-100" src="' + previewUrl(filePath) + '"></video>';
       } else if (fileType === "image") {
-        content += '<h6 class="mt-3">Preview</h6><hr /><img class="w-100" src="/api/upload/preview/' + encodeURIComponent(filePath.replace(/^\//, "")) + '" alt="">';
+        content += '<h6 class="mt-3">Preview</h6><hr /><img class="w-100" src="' + previewUrl(filePath) + '" alt="">';
       }
       content += '<h6 class="mt-3">Actions</h6><hr />';
       if (fileType === "video") {
         content += '<button class="btn btn-outline-primary me-2" id="zt-single-import-btn"><i class="fas fa-file-import"></i> Import</button>';
       }
-      content += '<a class="btn btn-outline-primary me-2" href="/api/upload/preview/' + encodeURIComponent(filePath.replace(/^\//, "")) + '" target="_blank"><i class="fas fa-download"></i> Download</a>';
+      content += '<a class="btn btn-outline-primary me-2" href="' + previewUrl(filePath) + '" target="_blank"><i class="fas fa-download"></i> Download</a>';
       content += '<button class="btn btn-outline-danger" id="zt-file-delete-btn"><i class="far fa-trash-alt"></i> Delete</button>';
       self.querySelector("#zt-item-details-content").innerHTML = content;
 
@@ -153,7 +206,9 @@ ZtUploadHome.prototype.connectedCallback = function() {
         };
       }
       detailContent.querySelector("#zt-file-delete-btn").onclick = function() {
-        fetch("/api/upload/file", { method: "DELETE", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ File: filePath.replace(/^\//, "") }) })
+        var body = { File: filePath.replace(/^\//, "") };
+        if (selectedLibraryId) body.library_id = selectedLibraryId;
+        fetch("/api/upload/file", { method: "DELETE", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
           .then(function(r) {
             if (r.ok) { detailOffcanvas.hide(); loadListing(); if (typeof sendToast === "function") sendToast("Delete a file", "", "bg-success", "File deleted successfully"); }
             else r.json().catch(function(){return{};}).then(function(d){ if (typeof sendToast === "function") sendToast("Unable to delete file", "", "bg-warning", (d && d.error) || "Failed"); });
@@ -216,7 +271,9 @@ ZtUploadHome.prototype.connectedCallback = function() {
         self.querySelectorAll("#zt-mass-actors .zt-mass-actor:checked").forEach(function(cb) { actors.push(cb.value); });
         var categories = [];
         self.querySelectorAll("#zt-mass-categories .zt-mass-cat:checked").forEach(function(cb) { categories.push(cb.value); });
-        fetch("/api/upload/triage/mass-action", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ files: files, type: type, channel: channel || "", actors: actors, categories: categories }) })
+        var payload = { files: files, type: type, channel: channel || "", actors: actors, categories: categories };
+        if (selectedLibraryId) payload.library_id = selectedLibraryId;
+        fetch("/api/upload/triage/mass-action", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
           .then(function(r) {
             if (r.ok) { massImportModal.hide(); loadListing(); if (typeof sendToast === "function") sendToast("Import successful", "", "bg-success", "Import tasks will run in background"); }
             else { massImportModal.hide(); loadListing(); r.json().catch(function(){return{};}).then(function(d){ if (typeof sendToast === "function") sendToast("Unable to import selected files", "", "bg-warning", (d && d.error) || "Failed"); }); }
@@ -227,7 +284,9 @@ ZtUploadHome.prototype.connectedCallback = function() {
     self.querySelector("#zt-mass-delete-btn").onclick = function() {
       var rows = getSelectedFiles();
       var files = rows.map(function(tr) { return tr.dataset.filepath || ""; });
-      fetch("/api/upload/triage/mass-action", { method: "DELETE", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ files: files }) })
+      var payload = { files: files };
+      if (selectedLibraryId) payload.library_id = selectedLibraryId;
+      fetch("/api/upload/triage/mass-action", { method: "DELETE", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
         .then(function(r) {
           if (r.ok) { massActionModal.hide(); loadListing(); if (typeof sendToast === "function") sendToast("Deletion successful", "", "bg-success", "This folder should feel lighter now"); }
           else r.json().catch(function(){return{};}).then(function(d){ if (typeof sendToast === "function") sendToast("Unable to delete selected files", "", "bg-warning", (d && d.error) || "Failed"); });
@@ -244,6 +303,7 @@ ZtUploadHome.prototype.connectedCallback = function() {
         fd.set("name", filename);
         fd.set("filename", filepath);
         fd.set("type", type);
+        if (selectedLibraryId) fd.set("library_id", selectedLibraryId);
         fetch("/api/video", { method: "POST", credentials: "same-origin", body: fd })
           .then(function(r) {
             if (r.ok) {
@@ -268,6 +328,7 @@ ZtUploadHome.prototype.connectedCallback = function() {
         var fd = new FormData();
         fd.set("path", currentPath);
         fd.set("file", e.target.files[0]);
+        if (selectedLibraryId) fd.set("library_id", selectedLibraryId);
         fetch("/api/upload/file", { method: "POST", credentials: "same-origin", body: fd }).then(function(r) { if (r.ok) loadListing(); });
         input.value = "";
       };
@@ -278,7 +339,9 @@ ZtUploadHome.prototype.connectedCallback = function() {
       var name = self.querySelector("#folder-new").value;
       if (!name) return;
       var fullPath = currentPath === "/" ? "/" + name : currentPath + "/" + name;
-      fetch("/api/upload/folder", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: "name=" + encodeURIComponent(fullPath) })
+      var body = "name=" + encodeURIComponent(fullPath);
+      if (selectedLibraryId) body += "&library_id=" + encodeURIComponent(selectedLibraryId);
+      fetch("/api/upload/folder", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body })
         .then(function(r) {
           if (r.ok) {
             bootstrap.Modal.getInstance(self.querySelector("#newFolderModal")).hide();
@@ -290,8 +353,16 @@ ZtUploadHome.prototype.connectedCallback = function() {
     };
 
     Promise.all([
-      fetch("/api/upload/triage/folder", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: "path=" + encodeURIComponent(currentPath) }).then(function(r) { return r.json(); }),
-      fetch("/api/upload/triage/file", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: "path=" + encodeURIComponent(currentPath) }).then(function(r) { return r.json(); })
+      (function() {
+        var body = "path=" + encodeURIComponent(currentPath);
+        if (selectedLibraryId) body += "&library_id=" + encodeURIComponent(selectedLibraryId);
+        return fetch("/api/upload/triage/folder", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body }).then(function(r) { return r.json(); });
+      })(),
+      (function() {
+        var body = "path=" + encodeURIComponent(currentPath);
+        if (selectedLibraryId) body += "&library_id=" + encodeURIComponent(selectedLibraryId);
+        return fetch("/api/upload/triage/file", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body }).then(function(r) { return r.json(); });
+      })()
     ]).then(function(results) {
       var folderData = results[0].folders || {};
       var filesData = results[1].files || {};
@@ -362,6 +433,7 @@ ZtUploadHome.prototype.connectedCallback = function() {
     updateView();
   }
   loadListing();
+  });
 };
 customElements.define("zt-upload-home", ZtUploadHome);
 })();

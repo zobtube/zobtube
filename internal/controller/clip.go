@@ -43,8 +43,12 @@ func (c *Controller) ClipView(g *gin.Context) {
 		clipList[i], clipList[j] = clipList[j], clipList[i]
 	}
 	clipList = append([]string{id}, clipList...)
-	g.JSON(http.StatusOK, gin.H{
+	resp := gin.H{
 		"video":    video,
 		"clip_ids": clipList,
-	})
+	}
+	if u := c.videoStreamURL(g, video); u != "" {
+		resp["stream_url"] = u
+	}
+	g.JSON(http.StatusOK, resp)
 }

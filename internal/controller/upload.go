@@ -2,9 +2,9 @@ package controller
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -15,7 +15,18 @@ import (
 
 const errFileEmpty = "file name cannot be empty"
 
-// UploadImport godoc
+// uploadLibraryID returns the library ID to use for upload/triage: if formLibraryID is non-empty
+// and a library with that ID exists, returns it; otherwise returns the default library ID.
+func (c *Controller) uploadLibraryID(formLibraryID string) string {
+	if formLibraryID == "" {
+		return c.config.DefaultLibraryID
+	}
+	var lib model.Library
+	if c.datastore.First(&lib, "id = ?", formLibraryID).RowsAffected < 1 {
+		return c.config.DefaultLibraryID
+	}
+	return lib.ID
+}
 //
 //	@Summary	Import file from triage as video
 //	@Tags		upload
@@ -26,19 +37,22 @@ const errFileEmpty = "file name cannot be empty"
 //	@Router		/upload/import [post]
 func (c *Controller) UploadImport(g *gin.Context) {
 	var body struct {
-		Path     string `json:"path"`
-		ImportAs string `json:"import_as"`
+		Path      string `json:"path"`
+		ImportAs  string `json:"import_as"`
+		LibraryID string `json:"library_id"`
 	}
 	if err := g.ShouldBindJSON(&body); err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	libID := c.uploadLibraryID(body.LibraryID)
 	video := &model.Video{
 		Name:          body.Path,
 		Filename:      body.Path,
 		Thumbnail:     false,
 		ThumbnailMini: false,
 		Type:          body.ImportAs,
+		LibraryID:     &libID,
 	}
 	if err := c.datastore.Create(video).Error; err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -59,17 +73,17 @@ func (c *Controller) UploadPreview(g *gin.Context) {
 	filePathEncoded := g.Param("filepath")
 	filePath, err := url.QueryUnescape(filePathEncoded)
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
-	// construct file path
-	targetPath := filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, filePath)
-
-	// give file path
-	g.File(targetPath)
+	libID := c.uploadLibraryID(g.Query("library_id"))
+	store, err := c.storageResolver.Storage(libID)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	path := filepath.Join("triage", filePath)
+	c.serveFromStorage(g, store, path)
 }
 
 // UploadTriageFolder godoc
@@ -82,66 +96,38 @@ func (c *Controller) UploadPreview(g *gin.Context) {
 //	@Failure	500	{object}	map[string]interface{}
 //	@Router		/upload/triage/folder [post]
 func (c *Controller) UploadTriageFolder(g *gin.Context) {
-	// get requested path
 	path := g.PostForm("path")
-
-	// list folders in triage path
-	folders, err := os.ReadDir(
-		filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, path),
-	)
+	libID := c.uploadLibraryID(g.PostForm("library_id"))
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
+	prefix := filepath.Join("triage", path)
+	entries, err := store.List(prefix)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	items := make(map[string]int)
-
-	for _, folder := range folders {
-		// check type
-		entryPath := filepath.Join(
-			c.config.Media.Path,
-			TRIAGE_FILEPATH,
-			path,
-			folder.Name(),
-		)
-		stat, err := os.Stat(entryPath)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		if !stat.IsDir() {
+	for _, e := range entries {
+		if !e.IsDir {
 			continue
 		}
-
-		// #nosec G304
-		dir, err := os.Open(entryPath)
+		subPrefix := filepath.Join(prefix, e.Name)
+		sub, err := store.List(subPrefix)
 		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
+			continue
 		}
-		defer dir.Close()
-
-		// list files
-		files, err := dir.Readdir(-1)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
+		count := 0
+		for _, s := range sub {
+			if !s.IsDir {
+				count++
+			}
 		}
-
-		items[folder.Name()] = len(files)
+		items[e.Name] = count
 	}
-
-	g.JSON(http.StatusOK, gin.H{
-		"folders": items,
-	})
+	g.JSON(http.StatusOK, gin.H{"folders": items})
 }
 
 type FileInfo struct {
@@ -159,50 +145,30 @@ type FileInfo struct {
 //	@Failure	500	{object}	map[string]interface{}
 //	@Router		/upload/triage/file [post]
 func (c *Controller) UploadTriageFile(g *gin.Context) {
-	// get requested path
 	path := g.PostForm("path")
-
-	// list folders in triage path
-	entries, err := os.ReadDir(
-		filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, path),
-	)
+	libID := c.uploadLibraryID(g.PostForm("library_id"))
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
+	prefix := filepath.Join("triage", path)
+	entries, err := store.List(prefix)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	items := make(map[string]FileInfo)
-
-	for _, entry := range entries {
-		// check type
-		entryPath := filepath.Join(
-			c.config.Media.Path,
-			TRIAGE_FILEPATH,
-			path,
-			entry.Name(),
-		)
-		stat, err := os.Stat(entryPath)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		if stat.IsDir() {
+	for _, e := range entries {
+		if e.IsDir {
 			continue
 		}
-
-		items[entry.Name()] = FileInfo{
-			Size:             stat.Size(),
-			LastModification: stat.ModTime(),
+		items[e.Name] = FileInfo{
+			Size:             e.Size,
+			LastModification: e.ModTime,
 		}
 	}
-
-	g.JSON(http.StatusOK, gin.H{
-		"files": items,
-	})
+	g.JSON(http.StatusOK, gin.H{"files": items})
 }
 
 // UploadFile godoc
@@ -216,28 +182,39 @@ func (c *Controller) UploadTriageFile(g *gin.Context) {
 //	@Failure	500	{object}	map[string]interface{}
 //	@Router		/upload/file [post]
 func (c *Controller) UploadFile(g *gin.Context) {
-	// get file
 	file, err := g.FormFile("file")
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
-	// get path
 	_path := g.PostForm("path")
-	path := filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, _path, file.Filename)
-
-	// save file
-	err = g.SaveUploadedFile(file, path)
+	path := filepath.Join("triage", _path, file.Filename)
+	libID := c.uploadLibraryID(g.PostForm("library_id"))
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
+	if err := store.MkdirAll(filepath.Dir(path)); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	src, err := file.Open()
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer src.Close()
+	dst, err := store.Create(path)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer dst.Close()
+	if _, err := io.Copy(dst, src); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	g.JSON(200, gin.H{})
 }
 
@@ -250,41 +227,30 @@ func (c *Controller) UploadFile(g *gin.Context) {
 //	@Failure	400	{object}	map[string]interface{}
 //	@Router		/upload/file [delete]
 func (c *Controller) UploadDeleteFile(g *gin.Context) {
-	// get file from request
 	type fileDeleteForm struct {
-		File string
+		File      string `json:"File"`
+		LibraryID string `json:"library_id"`
 	}
-
 	form := fileDeleteForm{}
-	err := g.ShouldBind(&form)
+	if err := g.ShouldBindJSON(&form); err != nil {
+		g.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	if form.File == "" {
+		g.JSON(400, gin.H{"error": errFileEmpty})
+		return
+	}
+	libID := c.uploadLibraryID(form.LibraryID)
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
-		g.JSON(400, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
-	// ensure not empty
-	file := form.File
-	if file == "" {
-		g.JSON(400, gin.H{
-			"error": errFileEmpty,
-		})
+	path := filepath.Join("triage", form.File)
+	if err := store.Delete(path); err != nil {
+		g.JSON(422, gin.H{"error": err.Error()})
 		return
 	}
-
-	// assemble with triage path
-	file = filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, file)
-
-	// remove file
-	err = os.Remove(file)
-	if err != nil {
-		g.JSON(422, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
 	g.JSON(200, gin.H{})
 }
 
@@ -300,7 +266,8 @@ func (c *Controller) UploadDeleteFile(g *gin.Context) {
 func (c *Controller) UploadMassDelete(g *gin.Context) {
 	// get file list from request
 	type fileDeleteForm struct {
-		Files []string `json:"files" binding:"required"`
+		Files      []string `json:"files" binding:"required"`
+		LibraryID  string   `json:"library_id"`
 	}
 
 	form := fileDeleteForm{}
@@ -320,28 +287,24 @@ func (c *Controller) UploadMassDelete(g *gin.Context) {
 		})
 		return
 	}
+	libID := c.uploadLibraryID(form.LibraryID)
 	for _, file := range files {
 		c.logger.Debug().Str("file", file).Send()
 		if file == "" {
-			g.JSON(400, gin.H{
-				"error": errFileEmpty,
-			})
+			g.JSON(400, gin.H{"error": errFileEmpty})
 			return
 		}
-
-		// assemble with triage path
-		file = filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, file)
-
-		// remove file
-		err = os.Remove(file)
+		store, err := c.storageResolver.Storage(libID)
 		if err != nil {
-			g.JSON(422, gin.H{
-				"error": err.Error(),
-			})
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		path := filepath.Join("triage", file)
+		if err := store.Delete(path); err != nil {
+			g.JSON(422, gin.H{"error": err.Error()})
 			return
 		}
 	}
-
 	g.JSON(200, gin.H{})
 }
 
@@ -362,6 +325,7 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 		Categories []string `json:"categories"`
 		TypeEnum   string   `json:"type" binding:"required"`
 		Channel    string   `json:"channel"`
+		LibraryID  string   `json:"library_id"`
 	}
 
 	form := fileImportForm{}
@@ -459,6 +423,7 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 	// prepare transaction for the whole import
 	tx := c.datastore.Begin()
 	var videos []*model.Video
+	libID := c.uploadLibraryID(form.LibraryID)
 
 	// now perform file import
 	for _, file := range files {
@@ -468,6 +433,7 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 			Type:      form.TypeEnum,
 			Imported:  false,
 			Thumbnail: false,
+			LibraryID: &libID,
 		}
 
 		if channel != nil {
@@ -533,29 +499,26 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 //	@Failure	409	{object}	map[string]interface{}
 //	@Router		/upload/folder [post]
 func (c *Controller) UploadFolderCreate(g *gin.Context) {
-	// get new folder name
 	name := g.PostForm("name")
-
-	// construct absolute path
-	path := filepath.Join(c.config.Media.Path, TRIAGE_FILEPATH, name)
-
-	// check if folder already exists
-	_, err := os.Stat(path)
-	if !os.IsNotExist(err) {
-		g.JSON(409, gin.H{
-			"error": "Folder already exists",
-		})
-		return
-	}
-
-	// do not exists, create it
-	err = os.Mkdir(path, 0o750)
+	libID := c.uploadLibraryID(g.PostForm("library_id"))
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
+	path := filepath.Join("triage", name)
+	exists, err := store.Exists(path)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	if exists {
+		g.JSON(409, gin.H{"error": "Folder already exists"})
+		return
+	}
+	if err := store.MkdirAll(path); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	g.JSON(200, gin.H{})
 }

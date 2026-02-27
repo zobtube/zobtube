@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"io"
 	"net/http"
-	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -65,14 +65,13 @@ func (c *Controller) ActorDelete(g *gin.Context) {
 		g.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 		return
 	}
-	thumbPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, actor.ID, "thumb.jpg")
-	if _, err := os.Stat(thumbPath); err == nil {
-		_ = os.Remove(thumbPath)
+	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
-	folderPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, actor.ID)
-	if _, err := os.Stat(folderPath); err == nil {
-		_ = os.Remove(folderPath)
-	}
+	thumbPath := filepath.Join("actors", actor.ID, "thumb.jpg")
+	_ = store.Delete(thumbPath)
 	if err := c.datastore.Delete(actor).Error; err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -100,8 +99,13 @@ func (c *Controller) ActorThumb(g *gin.Context) {
 		g.Redirect(http.StatusFound, ACTOR_PROFILE_PICTURE_MISSING)
 		return
 	}
-	targetPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id, "thumb.jpg")
-	g.File(targetPath)
+	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	path := filepath.Join("actors", id, "thumb.jpg")
+	c.serveFromStorage(g, store, path)
 }
 
 // ActorNew godoc
@@ -348,21 +352,33 @@ func (c *Controller) ActorUploadThumb(g *gin.Context) {
 
 	file, err := g.FormFile("pp")
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-
-	// construct file path
-	targetPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, id, "thumb.jpg")
-
-	// save thumb on disk
-	err = g.SaveUploadedFile(file, targetPath)
+	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error": err.Error(),
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	path := filepath.Join("actors", id, "thumb.jpg")
+	if err := store.MkdirAll(filepath.Dir(path)); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	src, err := file.Open()
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer src.Close()
+	dst, err := store.Create(path)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer dst.Close()
+	if _, err := io.Copy(dst, src); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -839,13 +855,10 @@ func (c *Controller) ActorMerge(g *gin.Context) {
 		return
 	}
 
-	thumbPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, source.ID, "thumb.jpg")
-	if _, err := os.Stat(thumbPath); err == nil {
-		_ = os.Remove(thumbPath)
-	}
-	folderPath := filepath.Join(c.config.Media.Path, ACTOR_FILEPATH, source.ID)
-	if _, err := os.Stat(folderPath); err == nil {
-		_ = os.RemoveAll(folderPath)
+	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	if err == nil {
+		thumbPath := filepath.Join("actors", source.ID, "thumb.jpg")
+		_ = store.Delete(thumbPath)
 	}
 
 	g.JSON(200, gin.H{"redirect": "/actor/" + target.ID + "/edit"})
