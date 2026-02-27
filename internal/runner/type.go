@@ -28,10 +28,11 @@ func (r *Runner) RegisterTask(t *common.Task) {
 	r.tasksChannel[t.Name] = make(chan RunnerEvent, 1000)
 }
 
-func (r *Runner) Start(cfg *config.Config, db *gorm.DB) {
+func (r *Runner) Start(cfg *config.Config, db *gorm.DB, storageResolver common.StorageResolver) {
 	r.ctx = &common.Context{
-		DB:     db,
-		Config: cfg,
+		DB:              db,
+		Config:          cfg,
+		StorageResolver: storageResolver,
 	}
 	for _, task := range r.tasks {
 		go func() {

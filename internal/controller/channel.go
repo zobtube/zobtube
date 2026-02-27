@@ -148,6 +148,11 @@ func (c *Controller) ChannelThumb(g *gin.Context) {
 		g.Redirect(http.StatusFound, ACTOR_PROFILE_PICTURE_MISSING)
 		return
 	}
-	targetPath := filepath.Join(c.config.Media.Path, CHANNEL_FILEPATH, id, "thumb.jpg")
-	g.File(targetPath)
+	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	path := filepath.Join("channels", id, "thumb.jpg")
+	c.serveFromStorage(g, store, path)
 }

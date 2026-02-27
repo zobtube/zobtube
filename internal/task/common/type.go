@@ -6,14 +6,21 @@ import (
 
 	"github.com/zobtube/zobtube/internal/config"
 	"github.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/storage"
 	"gorm.io/gorm"
 )
 
 type Parameters map[string]string
 
 type Context struct {
-	DB     *gorm.DB
-	Config *config.Config
+	DB               *gorm.DB
+	Config           *config.Config
+	StorageResolver  StorageResolver
+}
+
+// StorageResolver resolves storage by library ID (optional in context for tasks that need it).
+type StorageResolver interface {
+	Storage(libraryID string) (storage.Storage, error)
 }
 
 type Step struct {

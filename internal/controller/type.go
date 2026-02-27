@@ -9,8 +9,15 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 	"github.com/zobtube/zobtube/internal/provider"
 	"github.com/zobtube/zobtube/internal/runner"
+	"github.com/zobtube/zobtube/internal/storage"
 	"github.com/zobtube/zobtube/internal/swagger"
 )
+
+// StorageResolver is the minimal interface for resolving storage by library ID (used by controller and tests).
+type StorageResolver interface {
+	Storage(libraryID string) (storage.Storage, error)
+	Invalidate(libraryID string)
+}
 
 type AbstractController interface {
 	// Back office
@@ -34,6 +41,10 @@ type AbstractController interface {
 	AdmUserDelete(*gin.Context)
 	AdmTokenList(*gin.Context)
 	AdmTokenDelete(*gin.Context)
+	AdmLibraryList(*gin.Context)
+	AdmLibraryCreate(*gin.Context)
+	AdmLibraryUpdate(*gin.Context)
+	AdmLibraryDelete(*gin.Context)
 
 	// Home
 	Home(*gin.Context)
@@ -154,6 +165,7 @@ type AbstractController interface {
 	ConfigurationFromDBApply(*model.Configuration)
 	BuildDetailsRegister(string, string, string)
 	RegisterError(string)
+	StorageResolverRegister(StorageResolver)
 
 	// Cleanup
 	CleanupRoutine()
@@ -170,14 +182,15 @@ type buildDetails struct {
 }
 
 type Controller struct {
-	config          *config.Config
-	datastore       *gorm.DB
-	providers       map[string]provider.Provider
-	shutdownChannel chan<- int
-	runner          *runner.Runner
-	build           *buildDetails
-	logger          *zerolog.Logger
-	healthError     []string
+	config           *config.Config
+	datastore        *gorm.DB
+	storageResolver  StorageResolver
+	providers        map[string]provider.Provider
+	shutdownChannel  chan<- int
+	runner           *runner.Runner
+	build            *buildDetails
+	logger           *zerolog.Logger
+	healthError      []string
 }
 
 func New(shutdownChannel chan int) AbstractController {
@@ -220,4 +233,8 @@ func (c *Controller) BuildDetailsRegister(version, commit, buildDate string) {
 
 func (c *Controller) RegisterError(err string) {
 	c.healthError = append(c.healthError, err)
+}
+
+func (c *Controller) StorageResolverRegister(r StorageResolver) {
+	c.storageResolver = r
 }

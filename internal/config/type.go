@@ -17,7 +17,9 @@ type Config struct {
 	Media struct {
 		Path string
 	}
-	Authentication bool
+	// DefaultLibraryID is set after bootstrap; used for actor/channel/category assets and default upload target.
+	DefaultLibraryID string
+	Authentication   bool
 }
 
 func New(logger *zerolog.Logger, serverBind, dbDriver, dbConnstring, mediaPath string) (*Config, error) {

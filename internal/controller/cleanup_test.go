@@ -12,6 +12,7 @@ import (
 	"github.com/zobtube/zobtube/internal/config"
 	"github.com/zobtube/zobtube/internal/model"
 	"github.com/zobtube/zobtube/internal/runner"
+	"github.com/zobtube/zobtube/internal/storage"
 	"github.com/zobtube/zobtube/internal/task/common"
 )
 
@@ -25,10 +26,11 @@ func setupCleanupTestController(t *testing.T) *Controller {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
 
-	if err := db.AutoMigrate(&model.UserSession{}, &model.Task{}); err != nil {
+	if err := db.AutoMigrate(&model.UserSession{}, &model.Task{}, &model.Library{}); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
-
+	// Ensure default library exists so StorageResolver works if a task needs it
+	_, _ = model.EnsureDefaultLibrary(db, "/tmp")
 	logger := zerolog.Nop()
 	shutdown := make(chan int, 1)
 
@@ -111,7 +113,7 @@ func TestController_TaskRestart_RetriesTodoTasks(t *testing.T) {
 		Name:  "T1",
 		Steps: []common.Step{step},
 	})
-	r.Start(&config.Config{}, ctrl.datastore)
+	r.Start(&config.Config{}, ctrl.datastore, storage.NewResolver(ctrl.datastore))
 	ctrl.RunnerRegister(r)
 
 	// Call taskRestart (should trigger TaskRetry)

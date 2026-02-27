@@ -4,206 +4,131 @@ import (
 	"errors"
 	"image"
 	"image/jpeg"
-	"os"
 	"path/filepath"
 
 	"github.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/storage"
 	"github.com/zobtube/zobtube/internal/task/common"
 	"golang.org/x/image/draw"
 )
 
-func generateHorizontalMiniThumnail(ctx *common.Context, video *model.Video) (string, error) {
-	// construct paths
-	thumbPath := filepath.Join(ctx.Config.Media.Path, video.ThumbnailRelativePath())
-	thumbPath, err := filepath.Abs(thumbPath)
+func generateHorizontalMiniThumnail(ctx *common.Context, video *model.Video, store storage.Storage) (string, error) {
+	thumbPath := video.ThumbnailRelativePath()
+	thumbXSPath := video.ThumbnailXSRelativePath()
+	rc, err := store.Open(thumbPath)
 	if err != nil {
-		return "Unable to get absolute path of the thumbnail", err
+		return "unable to open thumbnail", err
 	}
-
-	thumbXSPath := filepath.Join(ctx.Config.Media.Path, video.ThumbnailXSRelativePath())
-	thumbXSPath, err = filepath.Abs(thumbXSPath)
-	if err != nil {
-		return "Unable to get absolute path of the new mini thumbnail", err
-	}
-
-	// open files
-	// #nosec G304
-	input, _ := os.Open(thumbPath)
-	defer input.Close()
-
-	// #nosec G304
-	output, _ := os.Create(thumbXSPath)
-	defer output.Close()
-
-	// decode the image from jpeg to image.Image
-	src, err := jpeg.Decode(input)
+	defer rc.Close()
+	src, err := jpeg.Decode(rc)
 	if err != nil {
 		return "unable to read the jpg file", err
 	}
-
-	targetH := 320
-	targetV := 180
-
+	targetH, targetV := 320, 180
 	h := src.Bounds().Dx()
 	v := src.Bounds().Dy()
-
 	originalImageRGBA := image.NewRGBA(image.Rect(0, 0, h, v))
 	draw.Draw(originalImageRGBA, originalImageRGBA.Bounds(), src, src.Bounds().Min, draw.Src)
-
 	ratioH := float32(h) / float32(targetH)
 	ratioV := float32(v) / float32(targetV)
 	ratio := max(ratioH, ratioV)
-
 	h = int(float32(h) / ratio)
 	v = int(float32(v) / ratio)
-
-	// set new size
 	dst := image.NewRGBA(image.Rect(0, 0, targetH, targetV))
-
-	// draw outer
 	outerImg := gaussianBlur(originalImageRGBA, 15)
 	draw.NearestNeighbor.Scale(dst, dst.Bounds(), outerImg, outerImg.Bounds(), draw.Over, nil)
-
-	// draw inner
 	innerH := (targetH - h) / 2
 	innerV := (targetV - v) / 2
 	draw.NearestNeighbor.Scale(dst, image.Rect(innerH, innerV, innerH+h, innerV+v), src, src.Bounds(), draw.Over, nil)
-
-	// encode to jpeg
-	err = jpeg.Encode(output, dst, &jpeg.Options{Quality: 90})
+	if err := store.MkdirAll(filepath.Dir(thumbXSPath)); err != nil {
+		return "unable to create thumbnail folder", err
+	}
+	w, err := store.Create(thumbXSPath)
 	if err != nil {
+		return "unable to create mini thumbnail file", err
+	}
+	defer w.Close()
+	if err := jpeg.Encode(w, dst, &jpeg.Options{Quality: 90}); err != nil {
 		return "unable to encode new thumbnail", err
 	}
-
 	return "", nil
 }
 
-func generateSameRatioMiniThumnail(ctx *common.Context, video *model.Video) (string, error) {
-	// construct paths
-	thumbPath := filepath.Join(ctx.Config.Media.Path, video.ThumbnailRelativePath())
-	thumbPath, err := filepath.Abs(thumbPath)
+func generateSameRatioMiniThumnail(ctx *common.Context, video *model.Video, store storage.Storage) (string, error) {
+	thumbPath := video.ThumbnailRelativePath()
+	thumbXSPath := video.ThumbnailXSRelativePath()
+	rc, err := store.Open(thumbPath)
 	if err != nil {
-		return "Unable to get absolute path of the thumbnail", err
+		return "unable to open thumbnail", err
 	}
-
-	thumbXSPath := filepath.Join(ctx.Config.Media.Path, video.ThumbnailXSRelativePath())
-	thumbXSPath, err = filepath.Abs(thumbXSPath)
-	if err != nil {
-		return "Unable to get absolute path of the new mini thumbnail", err
-	}
-
-	// open files
-	// #nosec G304
-	input, _ := os.Open(thumbPath)
-	defer input.Close()
-
-	// #nosec G304
-	output, _ := os.Create(thumbXSPath)
-	defer output.Close()
-
-	// decode the image from jpeg to image.Image
-	src, err := jpeg.Decode(input)
+	defer rc.Close()
+	src, err := jpeg.Decode(rc)
 	if err != nil {
 		return "unable to read the jpg file", err
 	}
-
 	targetH := 320
-
-	// store image size
 	h := src.Bounds().Dx()
 	v := src.Bounds().Dy()
-
-	// create final image object
 	var dst *image.RGBA
-
 	if h <= targetH {
-		// resizing will not be useful, just copy the source
 		dst = image.NewRGBA(image.Rect(0, 0, h, v))
 		draw.NearestNeighbor.Scale(dst, dst.Bounds(), src, src.Bounds(), draw.Over, nil)
 	} else {
-		// downscale the image
-
-		// compute downscaling ratio
 		ratio := float32(h) / float32(targetH)
-
 		v = int(float32(v) / ratio)
-
-		// set new size
 		dst = image.NewRGBA(image.Rect(0, 0, targetH, v))
-
-		// render the image
 		draw.NearestNeighbor.Scale(dst, dst.Bounds(), src, src.Bounds(), draw.Over, nil)
 	}
-
-	// encode to jpeg
-	err = jpeg.Encode(output, dst, &jpeg.Options{Quality: 90})
+	if err := store.MkdirAll(filepath.Dir(thumbXSPath)); err != nil {
+		return "unable to create thumbnail folder", err
+	}
+	w, err := store.Create(thumbXSPath)
 	if err != nil {
+		return "unable to create mini thumbnail file", err
+	}
+	defer w.Close()
+	if err := jpeg.Encode(w, dst, &jpeg.Options{Quality: 90}); err != nil {
 		return "unable to encode new thumbnail", err
 	}
-
 	return "", nil
 }
 
 func generateThumbnailMini(ctx *common.Context, params common.Parameters) (string, error) {
 	videoID := params["videoID"]
-
-	// get item from ID
-	video := &model.Video{
-		ID: videoID,
-	}
+	video := &model.Video{ID: videoID}
 	result := ctx.DB.First(video)
-
-	// check result
 	if result.RowsAffected < 1 {
 		return "video does not exist", errors.New("id not in db")
 	}
-
-	var err error
+	store, err := ctx.StorageResolver.Storage(videoLibraryID(ctx, video))
+	if err != nil {
+		return "unable to resolve storage", err
+	}
 	var errMsg string
 	if video.Type == "c" {
-		errMsg, err = generateSameRatioMiniThumnail(ctx, video)
+		errMsg, err = generateSameRatioMiniThumnail(ctx, video, store)
 	} else {
-		errMsg, err = generateHorizontalMiniThumnail(ctx, video)
+		errMsg, err = generateHorizontalMiniThumnail(ctx, video, store)
 	}
 	if err != nil {
 		return errMsg, err
 	}
-
-	// save on db
 	video.ThumbnailMini = true
 	ctx.DB.Save(&video)
-
-	// ret
 	return "", nil
 }
 
 func deleteThumbnailMini(ctx *common.Context, params common.Parameters) (string, error) {
 	videoID := params["videoID"]
-
-	// get item from ID
-	video := &model.Video{
-		ID: videoID,
-	}
+	video := &model.Video{ID: videoID}
 	result := ctx.DB.First(video)
-
-	// check result
 	if result.RowsAffected < 1 {
 		return "video does not exist", errors.New("id not in db")
 	}
-
-	// check thumb-xs presence
-	thumbXsPath := filepath.Join(ctx.Config.Media.Path, video.ThumbnailXSRelativePath())
-	_, err := os.Stat(thumbXsPath)
-	if err != nil && !os.IsNotExist(err) {
-		return "unable to check mini thumbnail presence", err
+	store, err := ctx.StorageResolver.Storage(videoLibraryID(ctx, video))
+	if err != nil {
+		return "unable to resolve storage", err
 	}
-	if !os.IsNotExist(err) {
-		// exist, deleting it
-		err = os.Remove(thumbXsPath)
-		if err != nil {
-			return "unable to delete mini thumbnail", err
-		}
-	}
-
+	_ = store.Delete(video.ThumbnailXSRelativePath())
 	return "", nil
 }

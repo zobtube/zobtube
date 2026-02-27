@@ -59,7 +59,7 @@ func (server *Server) ControllerSetupFailsafeError(c controller.AbstractControll
 
 	// server the error page
 	server.Router.GET("", func(g *gin.Context) {
-		g.HTML(http.StatusOK, "failsafe/error.html", gin.H{
+		g.HTML(http.StatusOK, "web/page/failsafe/error.html", gin.H{
 			"Error": faultyError,
 		})
 	})

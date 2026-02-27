@@ -2,8 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"io"
 	"net/http"
-	"os"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -73,24 +73,30 @@ func (c *Controller) CategorySubThumbSet(g *gin.Context) {
 
 	file, err := g.FormFile("pp")
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error":       err.Error(),
-			"human_error": "unable to retrieve thumbnail from form",
-		})
+		g.JSON(500, gin.H{"error": err.Error(), "human_error": "unable to retrieve thumbnail from form"})
 		return
 	}
-
-	// construct file path
-	filename := fmt.Sprintf("%s.jpg", category.ID)
-	targetPath := filepath.Join(c.config.Media.Path, CATEGORY_FILEPATH, filename)
-
-	// save thumb on disk
-	err = g.SaveUploadedFile(file, targetPath)
+	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
 	if err != nil {
-		g.JSON(500, gin.H{
-			"error":       err.Error(),
-			"human_error": "unable to save uploaded thumbnail",
-		})
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	filename := fmt.Sprintf("%s.jpg", category.ID)
+	path := filepath.Join("categories", filename)
+	src, err := file.Open()
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer src.Close()
+	dst, err := store.Create(path)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	defer dst.Close()
+	if _, err := io.Copy(dst, src); err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -133,26 +139,13 @@ func (c *Controller) CategorySubThumbRemove(g *gin.Context) {
 
 	// construct file path
 	filename := fmt.Sprintf("%s.jpg", category.ID)
-	targetPath := filepath.Join(c.config.Media.Path, CATEGORY_FILEPATH, filename)
-
-	_, err := os.Stat(targetPath)
-	if err != nil && !os.IsNotExist(err) {
-		g.JSON(500, gin.H{
-			"error":       err,
-			"human_error": "unable to check video presence on disk",
-		})
+	path := filepath.Join("categories", filename)
+	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	if !os.IsNotExist(err) {
-		// exist, deleting it
-		err = os.Remove(targetPath)
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error":       err,
-				"human_error": "unable to delete video on disk",
-			})
-		}
-	}
+	_ = store.Delete(path)
 
 	// check if thumbnail exists
 	if category.Thumbnail {
@@ -241,7 +234,12 @@ func (c *Controller) CategorySubThumb(g *gin.Context) {
 		g.Redirect(http.StatusFound, CATEGORY_PROFILE_PICTURE_MISSING)
 		return
 	}
+	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 	filename := fmt.Sprintf("%s.jpg", id)
-	targetPath := filepath.Join(c.config.Media.Path, CATEGORY_FILEPATH, filename)
-	g.File(targetPath)
+	path := filepath.Join("categories", filename)
+	c.serveFromStorage(g, store, path)
 }

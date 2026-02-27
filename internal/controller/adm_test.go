@@ -18,6 +18,7 @@ import (
 	"github.com/zobtube/zobtube/internal/config"
 	"github.com/zobtube/zobtube/internal/model"
 	"github.com/zobtube/zobtube/internal/runner"
+	"github.com/zobtube/zobtube/internal/storage"
 	"github.com/zobtube/zobtube/internal/task/common"
 )
 
@@ -31,11 +32,14 @@ func setupAdmController(t *testing.T) *Controller {
 	if err := db.AutoMigrate(
 		&model.Video{}, &model.Actor{}, &model.Channel{}, &model.Category{},
 		&model.User{}, &model.Task{}, &model.Provider{}, &model.Configuration{},
-		&model.ApiToken{},
+		&model.ApiToken{}, &model.Library{},
 	); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
-
+	defaultLibID, err := model.EnsureDefaultLibrary(db, "/tmp")
+	if err != nil {
+		t.Fatalf("failed to ensure default library: %v", err)
+	}
 	logger := zerolog.Nop()
 	shutdown := make(chan int, 1)
 	ctrl := New(shutdown).(*Controller)
@@ -44,8 +48,11 @@ func setupAdmController(t *testing.T) *Controller {
 	cfg := &config.Config{}
 	cfg.DB.Driver = "sqlite"
 	cfg.DB.Connstring = ":memory:"
+	cfg.DefaultLibraryID = defaultLibID
 	ctrl.ConfigurationRegister(cfg)
 	ctrl.BuildDetailsRegister("0.0.0", "abc123", "2024-01-01")
+	storageResolver := storage.NewResolver(db)
+	ctrl.StorageResolverRegister(storageResolver)
 
 	// Runner for AdmTaskRetry
 	r := &runner.Runner{}
@@ -53,7 +60,7 @@ func setupAdmController(t *testing.T) *Controller {
 		Name:  "adm-test-task",
 		Steps: []common.Step{{Name: "noop", NiceName: "No-op", Func: func(*common.Context, common.Parameters) (string, error) { return "", nil }}},
 	})
-	r.Start(&config.Config{}, db)
+	r.Start(cfg, db, storageResolver)
 	ctrl.RunnerRegister(r)
 
 	return ctrl

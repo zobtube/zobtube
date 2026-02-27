@@ -14,6 +14,7 @@ import (
 	"github.com/zobtube/zobtube/internal/model"
 	"github.com/zobtube/zobtube/internal/provider"
 	"github.com/zobtube/zobtube/internal/runner"
+	"github.com/zobtube/zobtube/internal/storage"
 	"github.com/zobtube/zobtube/internal/task/video"
 )
 
@@ -72,11 +73,6 @@ func Start(params *Parameters) error {
 	}
 
 	params.Logger.Debug().Str("kind", "system").Msg("ensure library folders are present")
-	err = cfg.EnsureTreePresent()
-	if err != nil {
-		startFailsafeWebServer(httpServer, err, c)
-		return nil
-	}
 	c.ConfigurationRegister(cfg)
 
 	params.Logger.Debug().Str("kind", "system").Msg("apply models on database")
@@ -86,6 +82,36 @@ func Start(params *Parameters) error {
 		return nil
 	}
 	c.DatabaseRegister(db)
+
+	params.Logger.Debug().Str("kind", "system").Msg("ensure default library and backfill video library_id")
+	defaultLibID, err := model.EnsureDefaultLibrary(db, cfg.Media.Path)
+	if err != nil {
+		startFailsafeWebServer(httpServer, err, c)
+		return nil
+	}
+	if err := model.BackfillVideoLibraryID(db, defaultLibID); err != nil {
+		startFailsafeWebServer(httpServer, err, c)
+		return nil
+	}
+	cfg.DefaultLibraryID = defaultLibID
+
+	params.Logger.Debug().Str("kind", "system").Msg("ensure library folders for filesystem libraries")
+	var libs []model.Library
+	if err := db.Where("type = ?", model.LibraryTypeFilesystem).Find(&libs).Error; err != nil {
+		startFailsafeWebServer(httpServer, err, c)
+		return nil
+	}
+	for _, lib := range libs {
+		if lib.Config.Filesystem != nil && lib.Config.Filesystem.Path != "" {
+			if err := config.EnsureTreePresentForPath(lib.Config.Filesystem.Path); err != nil {
+				startFailsafeWebServer(httpServer, err, c)
+				return nil
+			}
+		}
+	}
+
+	storageResolver := storage.NewResolver(db)
+	c.StorageResolverRegister(storageResolver)
 
 	params.Logger.Debug().Str("kind", "system").Msg("check if at least one user exists")
 	var count int64
@@ -193,7 +219,7 @@ func Start(params *Parameters) error {
 	runner.RegisterTask(video.NewVideoCreating())
 	runner.RegisterTask(video.NewVideoDeleting())
 	runner.RegisterTask(video.NewVideoGenerateThumbnail())
-	runner.Start(cfg, db)
+	runner.Start(cfg, db, storageResolver)
 	c.RunnerRegister(runner)
 
 	c.BuildDetailsRegister(params.Version, params.Commit, params.Date)

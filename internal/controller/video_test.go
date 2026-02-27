@@ -17,6 +17,7 @@ import (
 	"github.com/zobtube/zobtube/internal/config"
 	"github.com/zobtube/zobtube/internal/model"
 	"github.com/zobtube/zobtube/internal/runner"
+	"github.com/zobtube/zobtube/internal/storage"
 	"github.com/zobtube/zobtube/internal/task/common"
 )
 
@@ -29,17 +30,24 @@ func setupVideoController(t *testing.T) *Controller {
 	}
 	if err := db.AutoMigrate(
 		&model.Video{}, &model.Actor{}, &model.Channel{}, &model.Category{},
-		&model.CategorySub{}, &model.VideoView{}, &model.Task{},
+		&model.CategorySub{}, &model.VideoView{}, &model.Task{}, &model.Library{},
 	); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
-
+	defaultLibID, err := model.EnsureDefaultLibrary(db, "/tmp")
+	if err != nil {
+		t.Fatalf("failed to ensure default library: %v", err)
+	}
 	logger := zerolog.Nop()
 	shutdown := make(chan int, 1)
 	ctrl := New(shutdown).(*Controller)
 	ctrl.LoggerRegister(&logger)
 	ctrl.DatabaseRegister(db)
-	ctrl.ConfigurationRegister(&config.Config{})
+	cfg := &config.Config{}
+	cfg.DefaultLibraryID = defaultLibID
+	ctrl.ConfigurationRegister(cfg)
+	storageResolver := storage.NewResolver(db)
+	ctrl.StorageResolverRegister(storageResolver)
 
 	// Runner with no-op video/create task for VideoCreate handler
 	r := &runner.Runner{}
@@ -51,7 +59,7 @@ func setupVideoController(t *testing.T) *Controller {
 			Func:     func(*common.Context, common.Parameters) (string, error) { return "", nil },
 		}},
 	})
-	r.Start(&config.Config{}, db)
+	r.Start(cfg, db, storageResolver)
 	ctrl.RunnerRegister(r)
 
 	return ctrl

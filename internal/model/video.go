@@ -25,6 +25,7 @@ type Video struct {
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
 	Name          string
 	Filename      string
+	LibraryID     *string        `gorm:"type:uuid;index;default:00000000-0000-0000-0000-000000000000"` // nil = legacy, backfilled to default library
 	Actors        []Actor `gorm:"many2many:video_actors;"`
 	Channel       *Channel
 	ChannelID     *string
@@ -137,6 +138,11 @@ var videoFileTypeToPath = map[string]string{
 
 func (v *Video) FolderRelativePath() string {
 	return filepath.Join(videoFileTypeToPath[v.Type], v.ID)
+}
+
+// FolderRelativePathForType returns the folder path for the given type (used when migrating type).
+func (v *Video) FolderRelativePathForType(typeStr string) string {
+	return filepath.Join(videoFileTypeToPath[typeStr], v.ID)
 }
 
 func (v *Video) RelativePath() string {
