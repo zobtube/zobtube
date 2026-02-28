@@ -15,7 +15,18 @@ import (
 
 const errFileEmpty = "file name cannot be empty"
 
-// UploadImport godoc
+// uploadLibraryID returns the library ID to use for upload/triage: if formLibraryID is non-empty
+// and a library with that ID exists, returns it; otherwise returns the default library ID.
+func (c *Controller) uploadLibraryID(formLibraryID string) string {
+	if formLibraryID == "" {
+		return c.config.DefaultLibraryID
+	}
+	var lib model.Library
+	if c.datastore.First(&lib, "id = ?", formLibraryID).RowsAffected < 1 {
+		return c.config.DefaultLibraryID
+	}
+	return lib.ID
+}
 //
 //	@Summary	Import file from triage as video
 //	@Tags		upload
@@ -26,20 +37,22 @@ const errFileEmpty = "file name cannot be empty"
 //	@Router		/upload/import [post]
 func (c *Controller) UploadImport(g *gin.Context) {
 	var body struct {
-		Path     string `json:"path"`
-		ImportAs string `json:"import_as"`
+		Path      string `json:"path"`
+		ImportAs  string `json:"import_as"`
+		LibraryID string `json:"library_id"`
 	}
 	if err := g.ShouldBindJSON(&body); err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	libID := c.uploadLibraryID(body.LibraryID)
 	video := &model.Video{
 		Name:          body.Path,
 		Filename:      body.Path,
 		Thumbnail:     false,
 		ThumbnailMini: false,
 		Type:          body.ImportAs,
-		LibraryID:     &c.config.DefaultLibraryID,
+		LibraryID:     &libID,
 	}
 	if err := c.datastore.Create(video).Error; err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -63,7 +76,8 @@ func (c *Controller) UploadPreview(g *gin.Context) {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	libID := c.uploadLibraryID(g.Query("library_id"))
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -83,7 +97,8 @@ func (c *Controller) UploadPreview(g *gin.Context) {
 //	@Router		/upload/triage/folder [post]
 func (c *Controller) UploadTriageFolder(g *gin.Context) {
 	path := g.PostForm("path")
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	libID := c.uploadLibraryID(g.PostForm("library_id"))
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -131,7 +146,8 @@ type FileInfo struct {
 //	@Router		/upload/triage/file [post]
 func (c *Controller) UploadTriageFile(g *gin.Context) {
 	path := g.PostForm("path")
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	libID := c.uploadLibraryID(g.PostForm("library_id"))
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -173,7 +189,8 @@ func (c *Controller) UploadFile(g *gin.Context) {
 	}
 	_path := g.PostForm("path")
 	path := filepath.Join("triage", _path, file.Filename)
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	libID := c.uploadLibraryID(g.PostForm("library_id"))
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -211,10 +228,11 @@ func (c *Controller) UploadFile(g *gin.Context) {
 //	@Router		/upload/file [delete]
 func (c *Controller) UploadDeleteFile(g *gin.Context) {
 	type fileDeleteForm struct {
-		File string
+		File      string `json:"File"`
+		LibraryID string `json:"library_id"`
 	}
 	form := fileDeleteForm{}
-	if err := g.ShouldBind(&form); err != nil {
+	if err := g.ShouldBindJSON(&form); err != nil {
 		g.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
@@ -222,7 +240,8 @@ func (c *Controller) UploadDeleteFile(g *gin.Context) {
 		g.JSON(400, gin.H{"error": errFileEmpty})
 		return
 	}
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	libID := c.uploadLibraryID(form.LibraryID)
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -247,7 +266,8 @@ func (c *Controller) UploadDeleteFile(g *gin.Context) {
 func (c *Controller) UploadMassDelete(g *gin.Context) {
 	// get file list from request
 	type fileDeleteForm struct {
-		Files []string `json:"files" binding:"required"`
+		Files      []string `json:"files" binding:"required"`
+		LibraryID  string   `json:"library_id"`
 	}
 
 	form := fileDeleteForm{}
@@ -267,13 +287,14 @@ func (c *Controller) UploadMassDelete(g *gin.Context) {
 		})
 		return
 	}
+	libID := c.uploadLibraryID(form.LibraryID)
 	for _, file := range files {
 		c.logger.Debug().Str("file", file).Send()
 		if file == "" {
 			g.JSON(400, gin.H{"error": errFileEmpty})
 			return
 		}
-		store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+		store, err := c.storageResolver.Storage(libID)
 		if err != nil {
 			g.JSON(500, gin.H{"error": err.Error()})
 			return
@@ -304,6 +325,7 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 		Categories []string `json:"categories"`
 		TypeEnum   string   `json:"type" binding:"required"`
 		Channel    string   `json:"channel"`
+		LibraryID  string   `json:"library_id"`
 	}
 
 	form := fileImportForm{}
@@ -401,6 +423,7 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 	// prepare transaction for the whole import
 	tx := c.datastore.Begin()
 	var videos []*model.Video
+	libID := c.uploadLibraryID(form.LibraryID)
 
 	// now perform file import
 	for _, file := range files {
@@ -410,7 +433,7 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 			Type:      form.TypeEnum,
 			Imported:  false,
 			Thumbnail: false,
-			LibraryID: &c.config.DefaultLibraryID,
+			LibraryID: &libID,
 		}
 
 		if channel != nil {
@@ -477,7 +500,8 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 //	@Router		/upload/folder [post]
 func (c *Controller) UploadFolderCreate(g *gin.Context) {
 	name := g.PostForm("name")
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	libID := c.uploadLibraryID(g.PostForm("library_id"))
+	store, err := c.storageResolver.Storage(libID)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return

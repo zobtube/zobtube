@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"mime"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -23,7 +25,43 @@ func NewS3(client *s3.Client, bucket, prefix string) *S3 {
 	return &S3{client: client, bucket: bucket, prefix: prefix}
 }
 
-// key returns the full S3 key for the given path.
+// contentTypeByPath returns the Content-Type for S3 PutObject based on file extension.
+// Covers common image and video types; returns empty string if unknown.
+func contentTypeByPath(path string) string {
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext == "" {
+		return ""
+	}
+	// Ensure common video/image types are recognized (some systems' mime.types omit these)
+	switch ext {
+	case ".mp4":
+		return "video/mp4"
+	case ".webm":
+		return "video/webm"
+	case ".mkv":
+		return "video/x-matroska"
+	case ".mov":
+		return "video/quicktime"
+	case ".avi":
+		return "video/x-msvideo"
+	case ".m4v":
+		return "video/x-m4v"
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	case ".gif":
+		return "image/gif"
+	case ".webp":
+		return "image/webp"
+	case ".svg":
+		return "image/svg+xml"
+	case ".ico":
+		return "image/x-icon"
+	default:
+		return mime.TypeByExtension(ext)
+	}
+}
 func (s *S3) key(path string) string {
 	path = strings.TrimPrefix(path, "/")
 	if s.prefix == "" {
@@ -64,11 +102,15 @@ func (w *s3WriteCloser) Close() error {
 		return nil
 	}
 	w.closed = true
-	_, err := w.s3.client.PutObject(context.Background(), &s3.PutObjectInput{
+	input := &s3.PutObjectInput{
 		Bucket: aws.String(w.s3.bucket),
 		Key:    aws.String(w.s3.key(w.path)),
 		Body:   bytes.NewReader(w.buf.Bytes()),
-	})
+	}
+	if ct := contentTypeByPath(w.path); ct != "" {
+		input.ContentType = aws.String(ct)
+	}
+	_, err := w.s3.client.PutObject(context.Background(), input)
 	return err
 }
 
@@ -104,7 +146,7 @@ func (s *S3) MkdirAll(path string) error {
 	return nil
 }
 
-// List returns objects under prefix. Names are relative to the given prefix.
+// List returns entries under prefix. Names are relative to the given prefix.
 func (s *S3) List(prefix string) ([]Entry, error) {
 	fullPrefix := s.key(prefix)
 	if fullPrefix != "" && fullPrefix[len(fullPrefix)-1] != '/' {
@@ -135,12 +177,28 @@ func (s *S3) List(prefix string) ([]Entry, error) {
 				size = *obj.Size
 			}
 			entries = append(entries, Entry{
-				Name:   name,
-				Size:   size,
+				Name:    name,
+				Size:    size,
 				ModTime: modTime,
-				IsDir:  false,
+				IsDir:   false,
 			})
 		}
 	}
 	return entries, nil
+}
+
+// PresignGet returns a presigned GET URL for the object at path, valid for expiry.
+// Implements PreviewableStorage.
+func (s *S3) PresignGet(ctx context.Context, path string, expiry time.Duration) (string, error) {
+	presigner := s3.NewPresignClient(s.client, func(po *s3.PresignOptions) {
+		po.Expires = expiry
+	})
+	result, err := presigner.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(s.key(path)),
+	})
+	if err != nil {
+		return "", err
+	}
+	return result.URL, nil
 }

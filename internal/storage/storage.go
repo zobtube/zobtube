@@ -1,9 +1,18 @@
 package storage
 
 import (
+	"context"
 	"io"
 	"time"
 )
+
+// PreviewableStorage is implemented by storage backends that can produce a presigned GET URL
+// for direct access (e.g. S3). When not implemented, stream is served via the app.
+type PreviewableStorage interface {
+	Storage
+	// PresignGet returns a presigned GET URL for the object at path, valid for expiry.
+	PresignGet(ctx context.Context, path string, expiry time.Duration) (string, error)
+}
 
 // Entry describes a single item from List.
 type Entry struct {

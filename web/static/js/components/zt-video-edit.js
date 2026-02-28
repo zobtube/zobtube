@@ -41,7 +41,7 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       if (!v) { self.innerHTML = '<div class="alert alert-danger">Video not found</div>'; if (window.zt && window.zt.pageReady) window.zt.pageReady(self); return; }
 
       var urlView = (v.Type||v.type)==="c" ? "/clip/"+id : "/video/"+id;
-      var streamUrl = "/api/video/"+id+"/stream";
+      var streamUrl = data.stream_url || "/api/video/"+id+"/stream";
       var name = esc(v.Name||v.name||"");
       var filename = esc(v.Filename||v.filename||"");
       var imported = v.Imported||v.imported;
@@ -51,6 +51,17 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       var typeStrVal = typeStr[v.Type||v.type] || "video";
       var channel = v.Channel||v.channel;
       var channelName = channel ? (channel.Name||channel.name||"") : "None";
+      var libraries = data.libraries || data.Libraries || [];
+      var libraryId = v.LibraryID || v.library_id;
+      if (!libraryId && libraries.length) {
+        var def = libraries.filter(function(l){ return l.is_default || l.IsDefault; })[0];
+        libraryId = def ? (def.id || def.ID) : (libraries[0].id || libraries[0].ID);
+      }
+      var libraryName = "—";
+      if (libraryId && libraries.length) {
+        var lib = libraries.filter(function(l){ return (l.id || l.ID) === libraryId; })[0];
+        libraryName = lib ? (lib.Name || lib.name || libraryId) : libraryId;
+      }
       var vidActors = v.Actors||v.actors||[];
       var vidCats = v.Categories||v.categories||[];
 
@@ -211,6 +222,7 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       html += '<div class="col-6 mb-3"><div class="form-floating"><input type="text" disabled class="form-control" value="'+fmtDate(v.CreatedAt||v.created_at)+'"><label>Import date</label></div></div>';
       html += '<div class="col-6 mb-3"><div class="form-floating"><input type="text" disabled class="form-control" value="'+esc(typeStrVal)+'"><label>Video Type</label></div></div>';
       html += '<div class="col-12 mb-3"><div class="form-floating input-group"><input type="text" disabled class="form-control" id="video-channel" value="'+esc(channelName)+'"><label>Channel</label><button class="btn btn-outline-warning" type="button" id="video-channel-edit">Change</button></div></div>';
+      html += '<div class="col-12 mb-3"><div class="form-floating input-group"><input type="text" disabled class="form-control" id="video-library" value="'+esc(libraryName)+'"><label>Library</label><button class="btn btn-outline-warning" type="button" id="video-library-edit">Change</button></div></div>';
       html += '<div class="col-12 mb-3"><div class="form-floating"><div class="form-control chip-selector" style="height:unset;display:flex;"><div class="chips">'+actorChips+'<div class="chip">Add an actor<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#actorSelectionModal"><i class="fa fa-plus-circle"></i></button></div></div></div><label>Actors</label></div></div>';
       html += '<div class="col-12 mb-3"><div class="form-floating"><div class="form-control chip-selector" style="height:unset;display:flex;"><div class="chips">'+categoryChips.join('')+'<div class="chip">Add a category<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#categorySelectionModal"><i class="fa fa-plus-circle"></i></button></div></div></div><label>Categories</label></div></div>';
       html += '</div>';
@@ -218,6 +230,7 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       html += '<div class="modal fade" id="actorSelectionModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add actor in video</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="form-floating mb-3"><input type="text" class="form-control" id="actorSelectionModalInput" autocomplete="off"><label for="actorSelectionModalInput">Actor name</label></div><div class="chips">'+actorModalChips+'<div class="chip">Add a new actor<button class="btn btn-success" onclick="window.open(\'/actor/new\',\'_blank\');"><i class="fa fa-plus-circle"></i></button></div></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div></div>';
       html += '<div class="modal fade" id="categorySelectionModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add category in video</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body">'+categoryModalHtml+'</div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
       html += '<div class="modal fade" id="editChannelModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Change video channel</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="form-floating mb-3"><select class="form-select" id="channel-list"></select><label for="channel-list">Channel list</label></div></div><div class="modal-footer"><button type="button" class="btn btn-success" id="channel-send">Change</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
+      html += '<div class="modal fade" id="editLibraryModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Change video library</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="form-floating mb-3"><select class="form-select" id="library-list"></select><label for="library-list">Library</label></div></div><div class="modal-footer"><button type="button" class="btn btn-success" id="library-send">Change</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
 
       self.innerHTML = html;
 
@@ -276,6 +289,29 @@ ZtVideoEdit.prototype.connectedCallback = function() {
         var fd = new FormData(); fd.set("channelID", cid);
         fetch("/api/video/"+id+"/channel", { method: "POST", credentials: "same-origin", body: fd })
           .then(function(r){ if(r.ok) window.location.reload(); });
+      });
+
+      self.querySelector("#video-library-edit").addEventListener("click", function(){
+        var sel = self.querySelector("#library-list");
+        sel.innerHTML = libraries.map(function(l){
+          var lid = l.id || l.ID;
+          var lname = (l.Name || l.name || lid).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+          return '<option value="'+escAttr(lid)+'">'+lname+'</option>';
+        }).join("");
+        sel.value = libraryId || (libraries[0] && (libraries[0].id || libraries[0].ID));
+        new bootstrap.Modal(self.querySelector("#editLibraryModal")).show();
+      });
+      self.querySelector("#library-send").addEventListener("click", function(){
+        var lid = self.querySelector("#library-list").value;
+        fetch("/api/video/"+id+"/library", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ library_id: lid })
+        }).then(function(r){
+          if (r.ok) window.location.reload();
+          else if (typeof sendToast==="function") r.json().catch(function(){return{};}).then(function(d){ sendToast("Change library","failed","bg-danger",(d&&d.error)||"Failed"); });
+        });
       });
 
       self.querySelectorAll(".add-actor-list .add-actor-add").forEach(function(btn){

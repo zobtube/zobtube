@@ -83,12 +83,13 @@ func Start(params *Parameters) error {
 	}
 	c.DatabaseRegister(db)
 
-	params.Logger.Debug().Str("kind", "system").Msg("ensure default library and backfill video library_id")
+	params.Logger.Debug().Str("kind", "system").Msg("ensure default library")
 	defaultLibID, err := model.EnsureDefaultLibrary(db, cfg.Media.Path)
 	if err != nil {
 		startFailsafeWebServer(httpServer, err, c)
 		return nil
 	}
+	params.Logger.Debug().Str("kind", "system").Msg("backfill video library_id")
 	if err := model.BackfillVideoLibraryID(db, defaultLibID); err != nil {
 		startFailsafeWebServer(httpServer, err, c)
 		return nil

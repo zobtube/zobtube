@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -44,4 +45,28 @@ func (c *Controller) videoLibraryID(video *model.Video) string {
 		return *video.LibraryID
 	}
 	return c.config.DefaultLibraryID
+}
+
+// videoStreamURL returns a direct stream URL when the video's storage supports it (e.g. S3 presigned).
+// Otherwise returns empty string; frontend falls back to /api/video/:id/stream.
+func (c *Controller) videoStreamURL(g *gin.Context, video *model.Video) string {
+	store, err := c.storageResolver.Storage(c.videoLibraryID(video))
+	if err != nil {
+		return ""
+	}
+	ps, ok := store.(storage.PreviewableStorage)
+	if !ok {
+		return ""
+	}
+	var path string
+	if video.Imported {
+		path = video.RelativePath()
+	} else {
+		path = filepath.Join("triage", video.Filename)
+	}
+	url, err := ps.PresignGet(g.Request.Context(), path, time.Hour)
+	if err != nil || url == "" {
+		return ""
+	}
+	return url
 }

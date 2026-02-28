@@ -88,9 +88,10 @@ func (c *Controller) AdmLibraryUpdate(g *gin.Context) {
 		return
 	}
 	var body struct {
-		Name    *string             `json:"name"`
-		Config  *model.LibraryConfig `json:"config"`
-		Default *bool               `json:"default"`
+		Name    *string                `json:"name"`
+		Type    *model.LibraryType     `json:"type"`
+		Config  *model.LibraryConfig   `json:"config"`
+		Default *bool                  `json:"default"`
 	}
 	if err := g.ShouldBindJSON(&body); err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -99,8 +100,30 @@ func (c *Controller) AdmLibraryUpdate(g *gin.Context) {
 	if body.Name != nil {
 		lib.Name = *body.Name
 	}
+	if body.Type != nil {
+		t := *body.Type
+		if t != model.LibraryTypeFilesystem && t != model.LibraryTypeS3 {
+			g.JSON(http.StatusBadRequest, gin.H{"error": "invalid library type"})
+			return
+		}
+		lib.Type = t
+	}
 	if body.Config != nil {
-		lib.Config = *body.Config
+		newConfig := *body.Config
+		// Preserve S3 secret when edit form omits it (empty = keep existing)
+		if newConfig.S3 != nil && lib.Config.S3 != nil && newConfig.S3.SecretAccessKey == "" && lib.Config.S3.SecretAccessKey != "" {
+			newConfig.S3.SecretAccessKey = lib.Config.S3.SecretAccessKey
+		}
+		lib.Config = newConfig
+	}
+	// Validate config matches type
+	if lib.Type == model.LibraryTypeFilesystem && (lib.Config.Filesystem == nil || lib.Config.Filesystem.Path == "") {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "filesystem library requires config.filesystem.path"})
+		return
+	}
+	if lib.Type == model.LibraryTypeS3 && (lib.Config.S3 == nil || lib.Config.S3.Bucket == "") {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "s3 library requires config.s3 with bucket"})
+		return
 	}
 	if body.Default != nil {
 		lib.IsDefault = *body.Default

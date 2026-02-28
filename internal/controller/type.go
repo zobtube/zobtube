@@ -103,6 +103,7 @@ type AbstractController interface {
 	VideoMigrate(*gin.Context)
 	VideoGenerateThumbnail(*gin.Context)
 	VideoEditChannel(*gin.Context)
+	VideoEditLibrary(*gin.Context)
 	VideoStream(*gin.Context)
 	VideoThumb(*gin.Context)
 	VideoThumbXS(*gin.Context)

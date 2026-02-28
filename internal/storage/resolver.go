@@ -61,7 +61,11 @@ func (r *Resolver) load(libraryID string) (Storage, error) {
 			return nil, ErrS3ConfigMissing
 		}
 		cfg := lib.Config.S3
-		client, err := newS3Client(cfg.Region, cfg.Endpoint, nil)
+		var creds *struct{ AccessKey, SecretKey string }
+		if cfg.AccessKeyID != "" && cfg.SecretAccessKey != "" {
+			creds = &struct{ AccessKey, SecretKey string }{AccessKey: cfg.AccessKeyID, SecretKey: cfg.SecretAccessKey}
+		}
+		client, err := newS3Client(cfg.Region, cfg.Endpoint, creds)
 		if err != nil {
 			return nil, err
 		}

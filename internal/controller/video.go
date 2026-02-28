@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"path/filepath"
@@ -89,12 +88,16 @@ func (c *Controller) VideoView(g *gin.Context) {
 	}
 	var randomVideos []model.Video
 	c.datastore.Limit(8).Where("type = ? and id != ?", video.Type, video.ID).Order("RANDOM()").Find(&randomVideos)
-	g.JSON(http.StatusOK, gin.H{
+	resp := gin.H{
 		"video":         video,
 		"view_count":    viewCount,
 		"categories":    categories,
 		"random_videos": randomVideos,
-	})
+	}
+	if u := c.videoStreamURL(g, video); u != "" {
+		resp["stream_url"] = u
+	}
+	g.JSON(http.StatusOK, resp)
 }
 
 // VideoEdit godoc
@@ -118,11 +121,18 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 	c.datastore.Find(&actors)
 	var categories []model.Category
 	c.datastore.Preload("Sub").Find(&categories)
-	g.JSON(http.StatusOK, gin.H{
+	var libraries []model.Library
+	c.datastore.Order("created_at").Find(&libraries)
+	resp := gin.H{
 		"video":      video,
 		"actors":     actors,
 		"categories": categories,
-	})
+		"libraries":  libraries,
+	}
+	if u := c.videoStreamURL(g, video); u != "" {
+		resp["stream_url"] = u
+	}
+	g.JSON(http.StatusOK, resp)
 }
 
 // VideoActors godoc
@@ -358,10 +368,11 @@ func (c *Controller) VideoCreate(g *gin.Context) {
 	var err error
 
 	form := struct {
-		Name     string   `form:"name"`
-		Filename string   `form:"filename"`
-		Actors   []string `form:"actors"`
-		TypeEnum string   `form:"type"`
+		Name      string   `form:"name"`
+		Filename  string   `form:"filename"`
+		Actors    []string `form:"actors"`
+		TypeEnum  string   `form:"type"`
+		LibraryID string   `form:"library_id"`
 	}{}
 	err = g.ShouldBind(&form)
 	if err != nil {
@@ -378,12 +389,14 @@ func (c *Controller) VideoCreate(g *gin.Context) {
 		return
 	}
 
+	libID := c.uploadLibraryID(form.LibraryID)
 	video := &model.Video{
 		Name:      form.Name,
 		Filename:  form.Filename,
 		Type:      form.TypeEnum,
 		Imported:  false,
 		Thumbnail: false,
+		LibraryID: &libID,
 	}
 
 	// save object in db
@@ -770,6 +783,54 @@ func (c *Controller) VideoEditChannel(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// VideoEditLibrary godoc
+//
+//	@Summary	Change video library (admin)
+//	@Tags		video
+//	@Accept		json
+//	@Param		id	path	string	true	"Video ID"
+//	@Param		body	body	object	true	"JSON with library_id"
+//	@Success	200
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/video/{id}/library [post]
+func (c *Controller) VideoEditLibrary(g *gin.Context) {
+	id := g.Param("id")
+	var body struct {
+		LibraryID string `json:"library_id" binding:"required"`
+	}
+	if err := g.ShouldBindJSON(&body); err != nil {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "library_id required"})
+		return
+	}
+	video := &model.Video{ID: id}
+	if c.datastore.First(video).RowsAffected < 1 {
+		g.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		return
+	}
+	var lib model.Library
+	if c.datastore.First(&lib, "id = ?", body.LibraryID).RowsAffected < 1 {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "library not found"})
+		return
+	}
+	oldLibID := ""
+	if video.LibraryID != nil {
+		oldLibID = *video.LibraryID
+	}
+	video.LibraryID = &lib.ID
+	if err := c.datastore.Save(video).Error; err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if oldLibID != "" && c.storageResolver != nil {
+		c.storageResolver.Invalidate(oldLibID)
+	}
+	if c.storageResolver != nil {
+		c.storageResolver.Invalidate(lib.ID)
+	}
+	g.JSON(http.StatusOK, gin.H{})
+}
+
 // VideoGet godoc
 //
 //	@Summary	Get video summary (title, actors, categories)
@@ -873,7 +934,6 @@ func (c *Controller) VideoThumb(g *gin.Context) {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println("serving thumbnail from", video.ThumbnailRelativePath())
 	c.serveFromStorage(g, store, video.ThumbnailRelativePath())
 }
 

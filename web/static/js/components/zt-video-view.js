@@ -24,7 +24,7 @@ ZtVideoView.prototype.connectedCallback = function() {
       var randVideos = data.random_videos || [];
       var admin = (window.__USER__ && window.__USER__.admin);
       var name = (v.Name||v.name||v.Filename||v.filename||"Untitled").replace(/&/g,"&amp;").replace(/</g,"&lt;");
-      var streamUrl = "/api/video/"+id+"/stream";
+      var streamUrl = data.stream_url || "/api/video/"+id+"/stream";
       var thumbUrl = "/api/video/"+id+"/thumb";
       var durShort = niceDurationShort(v.Duration||v.duration);
       var catsHtml = Object.keys(cats).map(function(cid){ return '<a class="btn btn-sm btn-secondary" href="/category/'+cid+'">'+(cats[cid]||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</a>'; }).join("");

@@ -42,5 +42,5 @@ func EnsureDefaultLibrary(db *gorm.DB, mediaPath string) (string, error) {
 
 // BackfillVideoLibraryID sets library_id to defaultLibraryID for all videos where library_id is null.
 func BackfillVideoLibraryID(db *gorm.DB, defaultLibraryID string) error {
-	return db.Model(&Video{}).Where("library_id IS NULL").Updates(map[string]interface{}{"library_id": defaultLibraryID}).Error
+	return db.Model(&Video{}).Where("library_id IS NULL").Updates(map[string]any{"library_id": defaultLibraryID}).Error
 }
