@@ -14,7 +14,7 @@ require (
 	github.com/swaggo/swag/v2 v2.0.0-rc5
 	github.com/urfave/cli-altsrc/v3 v3.1.0
 	github.com/urfave/cli/v3 v3.7.0
-	golang.org/x/image v0.36.0
+	golang.org/x/image v0.37.0
 	golang.org/x/text v0.35.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
