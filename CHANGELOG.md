@@ -1,5 +1,19 @@
 # Changelog
 
+## Version 0.4.3
+### Chores
+* [0035276](https://github.com/zobtube/zobtube/commit/003527679a4a7aa9389a389d375ae12c2b4c2c03) chore(deps): update docker/login-action action to v4
+* [0a91684](https://github.com/zobtube/zobtube/commit/0a91684d4007e795fd47724296178ff0dbcc5f3a) chore(deps): update actions/upload-artifact action to v7
+* [2cd5e6b](https://github.com/zobtube/zobtube/commit/2cd5e6b0977b632679c8fbd5ba54e2e5ff4dfeaf) chore(deps): update dependency golangci/golangci-lint to v2.11.3
+* [6a248f6](https://github.com/zobtube/zobtube/commit/6a248f65b60bdf9d108a6b9a86b176405742d7b6) chore: fix missing go fmt
+### Fixes
+* [0f03ba7](https://github.com/zobtube/zobtube/commit/0f03ba7288476a473a6c8c1dd0ccf202d00127af) fix(deps): update module golang.org/x/text to v0.35.0
+* [5a0b72e](https://github.com/zobtube/zobtube/commit/5a0b72e1168d0ac49a7ba3b00f40e8aa00e54ce0) fix(deps): update module github.com/gin-gonic/gin to v1.12.0
+* [6b34677](https://github.com/zobtube/zobtube/commit/6b3467797a289d94e190f7db57544f842e51c4b2) fix(deps): update module github.com/urfave/cli/v3 to v3.7.0
+* [bc6513a](https://github.com/zobtube/zobtube/commit/bc6513a5fe018772660be3dbf595d33a4dc9047e) fix(deps): update module golang.org/x/image to v0.37.0
+* [d908677](https://github.com/zobtube/zobtube/commit/d908677e36c76d9f244961018af1a6c7fe34f2c2) fix(provider/babepedia): reuse actor name when set
+* [d908677](https://github.com/zobtube/zobtube/commit/d908677e36c76d9f244961018af1a6c7fe34f2c2) fix(provider/boobpedia): fix regexp
+
 ## Version 0.4.2
 ### Features
 * [0dcf7a3](https://github.com/zobtube/zobtube/commit/0dcf7a31305eb4319505d73030e1e76fd98d92c9) feat: add swagger on api
@@ -12,7 +26,9 @@
 * [1fd44cb](https://github.com/zobtube/zobtube/commit/1fd44cbe3f1ca6f47762b207d129bd35f220c4fc) chore: add model unit testing
 * [ce1bce6](https://github.com/zobtube/zobtube/commit/ce1bce633d395f77ac2b8180178b78fcd14c3890) chore(deps): update goreleaser/goreleaser-action action to v7
 ### Fixes
+* [d8a508e](https://github.com/zobtube/zobtube/commit/d8a508ec712a04d275b26f4016a362d8e148ad96) fix(ci): bring back release on tags
 * [da861d4](https://github.com/zobtube/zobtube/commit/da861d4f31796f9088a0f1250cf69b1797f702b2) fix(deps): update module github.com/swaggo/files to v2
+* [fa2c8b1](https://github.com/zobtube/zobtube/commit/fa2c8b171a6d4f878d44dc840dd70d337750b4c2) fix(ci): skip gorelease validation for swagger build
 
 ## Version 0.4.1
 ### Fixes
