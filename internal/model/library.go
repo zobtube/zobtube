@@ -53,8 +53,13 @@ func (c *LibraryConfig) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
-	b, ok := value.([]byte)
-	if !ok {
+	var b []byte
+	switch v := value.(type) {
+	case []byte:
+		b = v
+	case string:
+		b = []byte(v)
+	default:
 		return errors.New("library config: invalid type")
 	}
 	return json.Unmarshal(b, c)
