@@ -1,5 +1,31 @@
 # Changelog
 
+## Version 0.5.0
+### Features
+* [07f8d4c](https://github.com/zobtube/zobtube/commit/07f8d4c516a709967ec8df1ecba63c98e2e1a266) feat(video/edit): improve library change ux
+* [a37c0fb](https://github.com/zobtube/zobtube/commit/a37c0fb831b1054aae18ca33403a3329aecff883) feat: add s3 library support
+* [a37c0fb](https://github.com/zobtube/zobtube/commit/a37c0fb831b1054aae18ca33403a3329aecff883) feat: add support for multi-libraries
+### Chores
+* [012f4d3](https://github.com/zobtube/zobtube/commit/012f4d30ae8aa04c7110d30a0b09b85ccaddcc64) chore (deps): tidy dependencies
+* [1042d29](https://github.com/zobtube/zobtube/commit/1042d29e21848b2c754d2078b131b40fe57a34fa) chore(deps): update dependency playwright to v1.59.0
+* [95491b8](https://github.com/zobtube/zobtube/commit/95491b83efef460b3c01a82f35b7a1a2a6a5593a) chore(deps): update alpine docker tag to v3.23.4
+* [9eb02eb](https://github.com/zobtube/zobtube/commit/9eb02ebb5da3aebcf69c80ca4ce2a6d143824e27) chore(deps): update dependency golangci/golangci-lint to v2.11.4
+* [a6bbd9e](https://github.com/zobtube/zobtube/commit/a6bbd9e3aa1dd6bb4263a704cc2d9412a68157c0) chore(deps): update dependency golangci/golangci-lint to v2.12.2
+* [cace7b0](https://github.com/zobtube/zobtube/commit/cace7b0dcb29aaaaf625b70c3667190eaa53dbb7) chore(deps): update sonarsource/sonarqube-scan-action action to v8
+### Fixes
+* [012f4d3](https://github.com/zobtube/zobtube/commit/012f4d30ae8aa04c7110d30a0b09b85ccaddcc64) fix(deps): upgrade pgx to fix CVE-2026-33816
+* [012f4d3](https://github.com/zobtube/zobtube/commit/012f4d30ae8aa04c7110d30a0b09b85ccaddcc64) fix(deps): upgrade pgx to fix CVE-2026-41889
+* [1381ea7](https://github.com/zobtube/zobtube/commit/1381ea7533d038af84f7b7043f7f39f19785a112) fix(deps): update aws-sdk-go-v2 monorepo
+* [1fd0bb8](https://github.com/zobtube/zobtube/commit/1fd0bb816b825382452bda78716d9555f62aa926) fix(deps): update aws-sdk-go-v2 monorepo
+* [2299546](https://github.com/zobtube/zobtube/commit/22995469e84ce3aad5d0ff191c8988e55c568612) fix(deps): update module github.com/rs/zerolog to v1.35.0
+* [72469db](https://github.com/zobtube/zobtube/commit/72469dbf16fbbc4fabac4fe71c5fd22702a49f19) fix(deps): update module golang.org/x/text to v0.37.0
+* [a69c68e](https://github.com/zobtube/zobtube/commit/a69c68e8485abfa41aa87b1bcd4f1561a5218566) fix(ui): fix broken redirection on some cases
+* [b6246aa](https://github.com/zobtube/zobtube/commit/b6246aaee740985483aa02c3e6f61702df3494f4) fix(deps): update module github.com/rs/zerolog to v1.35.1
+* [cc204b2](https://github.com/zobtube/zobtube/commit/cc204b26f6d4cf823acf87c79fa358fe37049d1b) fix(deps): update module github.com/urfave/cli/v3 to v3.8.0
+* [cd6c7f9](https://github.com/zobtube/zobtube/commit/cd6c7f97a7aa8979cfee101871f15c00ceace21a) fix(deps): update module golang.org/x/image to v0.40.0
+* [dbfac0c](https://github.com/zobtube/zobtube/commit/dbfac0cfdb9ca65f0b2b169e77a55690f6ad7314) fix(deps): update module github.com/urfave/cli/v3 to v3.9.0
+* [ff1844a](https://github.com/zobtube/zobtube/commit/ff1844adb9c7ce89a8bef7f2d286d09e328726f5) fix(deps): update module golang.org/x/image to v0.38.0
+
 ## Version 0.4.3
 ### Chores
 * [0035276](https://github.com/zobtube/zobtube/commit/003527679a4a7aa9389a389d375ae12c2b4c2c03) chore(deps): update docker/login-action action to v4
