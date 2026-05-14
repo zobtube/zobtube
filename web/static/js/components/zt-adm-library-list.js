@@ -15,63 +15,109 @@ ZtAdmLibraryList.prototype.connectedCallback = function() {
       var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="libraries"></zt-adm-tabs></div><div class="col-md-9 col-lg-9"><div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-folder-open"></i></span><h3>Libraries</h3><hr /></div>';
       html += '<p class="text-muted">Libraries define where media is stored (filesystem or S3). The default library is used for actor/channel/category thumbnails and as the default upload target.</p>';
       if (items.length === 0) {
-        html += '<p class="text-muted">No libraries. Use the form below to add one.</p>';
-      } else {
-        html += '<table class="table table-striped table-hover"><thead><tr><th>Name</th><th>Type</th><th>Config</th><th>Default</th><th></th></tr></thead><tbody>';
-        items.forEach(function(lib) {
-          var id = lib.id || lib.ID;
-          var name = esc(lib.name || lib.Name);
-          var typeStr = esc(lib.type || lib.Type || "—");
-          var isDefault = !!(lib.is_default || lib.IsDefault);
-          var defaultBadge = isDefault ? '<span class="badge bg-primary">default</span>' : '';
-          var configStr = "—";
-          if (lib.config && lib.config.filesystem && lib.config.filesystem.path) {
-            configStr = esc(lib.config.filesystem.path);
-          } else if (lib.config && lib.config.s3) {
-            var s3 = lib.config.s3;
-            configStr = esc((s3.bucket || s3.Bucket) + " / " + (s3.region || s3.Region || ""));
-          }
-          var deleteBtn = isDefault
-            ? '<button type="button" class="btn btn-sm btn-danger" disabled title="The default library cannot be deleted">Delete</button>'
-            : '<button type="button" class="btn btn-sm btn-danger" data-library-id="' + esc(id) + '" data-library-name="' + name + '">Delete</button>';
-          html += '<tr><td>' + name + '</td><td>' + typeStr + '</td><td><code>' + configStr + '</code></td><td>' + defaultBadge + '</td><td style="text-align:end"><button type="button" class="btn btn-sm btn-outline-primary me-1" data-edit-library-id="' + esc(id) + '">Edit</button>' + deleteBtn + '</td></tr>';
-        });
-        html += '</tbody></table>';
+        html += '<p class="text-muted mb-3">No libraries yet. Use <strong>Add library</strong> to create one.</p>';
       }
-      html += '<hr /><h5>Add library</h5><form id="zt-adm-library-form" class="mb-4"><div class="mb-2"><label class="form-label">Name</label><input type="text" class="form-control" name="name" required placeholder="e.g. Local SSD"></div><div class="mb-2"><label class="form-label">Type</label><select class="form-select" name="type"><option value="filesystem">Filesystem</option><option value="s3">S3</option></select></div><div id="zt-adm-library-fs" class="mb-2"><label class="form-label">Path</label><input type="text" class="form-control" name="path" placeholder="/path/to/media"></div><div id="zt-adm-library-s3" class="mb-2" style="display:none"><label class="form-label">Bucket</label><input type="text" class="form-control" name="bucket" placeholder="my-bucket"><label class="form-label mt-1">Region</label><input type="text" class="form-control" name="region" placeholder="us-east-1"><label class="form-label mt-1">Prefix (optional)</label><input type="text" class="form-control" name="prefix" placeholder="media/"><label class="form-label mt-1">Endpoint (optional, for Minio)</label><input type="text" class="form-control" name="endpoint" placeholder="http://localhost:9000"><label class="form-label mt-1">Access Key ID (optional)</label><input type="text" class="form-control" name="access_key_id" placeholder="Leave empty for env/IAM"><label class="form-label mt-1">Secret Access Key (optional)</label><input type="password" class="form-control" name="secret_access_key" placeholder="Leave empty for env/IAM" autocomplete="new-password"></div><div class="mb-2"><div class="form-check"><input type="checkbox" class="form-check-input" name="default" id="zt-lib-default"><label class="form-check-label" for="zt-lib-default">Set as default library</label></div></div><button type="submit" class="btn btn-primary">Add library</button></form>';
+      html += '<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3 mb-3">';
+      items.forEach(function(lib) {
+        var id = lib.id || lib.ID;
+        var name = esc(lib.name || lib.Name);
+        var typeRaw = String(lib.type || lib.Type || "").toLowerCase();
+        var typeBadge;
+        if (typeRaw === "s3") {
+          typeBadge = '<span class="badge text-bg-info">S3</span>';
+        } else if (typeRaw === "filesystem") {
+          typeBadge = '<span class="badge text-bg-secondary">Filesystem</span>';
+        } else {
+          typeBadge = '<span class="badge text-bg-light text-dark border">' + esc(typeRaw || "—") + '</span>';
+        }
+        var isDefault = !!(lib.is_default || lib.IsDefault);
+        var defaultBadge = isDefault ? ' <span class="badge text-bg-primary">Default</span>' : "";
+        var deleteBtn = isDefault
+          ? '<button type="button" class="btn btn-sm btn-danger" disabled title="The default library cannot be deleted">Delete</button>'
+          : '<button type="button" class="btn btn-sm btn-danger" data-library-id="' + esc(id) + '" data-library-name="' + name + '">Delete</button>';
+        html += '<div class="col">' +
+          '<div class="card h-100 shadow-sm">' +
+          '<div class="card-body py-3 px-3 d-flex flex-column">' +
+          '<div class="fw-semibold text-break mb-2">' + name + '</div>' +
+          '<div class="d-flex flex-wrap align-items-center gap-1 mb-3">' + typeBadge + defaultBadge + "</div>" +
+          '<div class="mt-auto d-flex flex-wrap gap-1 justify-content-end">' +
+          '<button type="button" class="btn btn-sm btn-outline-primary" data-edit-library-id="' + esc(id) + '">Edit</button>' +
+          deleteBtn +
+          "</div></div></div></div>";
+      });
+      html += '<div class="col">' +
+        '<div class="card h-100 shadow-sm border border-2 text-secondary" id="zt-adm-library-add-card" role="button" tabindex="0" style="cursor:pointer;border-style:dashed;min-height:8.5rem">' +
+        '<div class="card-body py-3 px-3 d-flex flex-column align-items-center justify-content-center text-center flex-grow-1">' +
+        '<i class="fa fa-plus-circle fa-2x mb-2"></i>' +
+        '<div class="fw-semibold">Add library</div>' +
+        '<div class="small mt-1">Filesystem or S3</div>' +
+        "</div></div></div>";
+      html += "</div>";
       html += '</div></div>';
+      html += '<div class="modal fade" id="zt-add-library-modal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add library</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form id="zt-adm-library-form"><div class="mb-2"><label class="form-label">Name</label><input type="text" class="form-control" name="name" required placeholder="e.g. Local SSD"></div><div class="mb-2"><label class="form-label">Type</label><select class="form-select" name="type"><option value="filesystem">Filesystem</option><option value="s3">S3</option></select></div><div id="zt-adm-library-fs" class="mb-2"><label class="form-label">Path</label><input type="text" class="form-control" name="path" placeholder="/path/to/media"></div><div id="zt-adm-library-s3" class="mb-2" style="display:none"><label class="form-label">Bucket</label><input type="text" class="form-control" name="bucket" placeholder="my-bucket"><label class="form-label mt-1">Region</label><input type="text" class="form-control" name="region" placeholder="us-east-1"><label class="form-label mt-1">Prefix (optional)</label><input type="text" class="form-control" name="prefix" placeholder="media/"><label class="form-label mt-1">Endpoint (optional, for Minio)</label><input type="text" class="form-control" name="endpoint" placeholder="http://localhost:9000"><label class="form-label mt-1">Access Key ID (optional)</label><input type="text" class="form-control" name="access_key_id" placeholder="Leave empty for env/IAM"><label class="form-label mt-1">Secret Access Key (optional)</label><input type="password" class="form-control" name="secret_access_key" placeholder="Leave empty for env/IAM" autocomplete="new-password"></div><div class="mb-2"><div class="form-check"><input type="checkbox" class="form-check-input" name="default" id="zt-lib-default"><label class="form-check-label" for="zt-lib-default">Set as default library</label></div></div></form></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary" form="zt-adm-library-form">Add library</button></div></div></div></div>';
       html += '<div class="modal fade" id="zt-edit-library-modal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Edit library</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><form id="zt-adm-library-edit-form"><input type="hidden" id="zt-edit-library-id"><div class="mb-2"><label class="form-label">Name</label><input type="text" class="form-control" id="zt-edit-name" required></div><div class="mb-2"><label class="form-label">Type</label><select class="form-select" id="zt-edit-type"><option value="filesystem">Filesystem</option><option value="s3">S3</option></select></div><div id="zt-edit-fs" class="mb-2"><label class="form-label">Path</label><input type="text" class="form-control" id="zt-edit-path" placeholder="/path/to/media"></div><div id="zt-edit-s3" class="mb-2" style="display:none"><label class="form-label">Bucket</label><input type="text" class="form-control" id="zt-edit-bucket" placeholder="my-bucket"><label class="form-label mt-1">Region</label><input type="text" class="form-control" id="zt-edit-region" placeholder="us-east-1"><label class="form-label mt-1">Prefix (optional)</label><input type="text" class="form-control" id="zt-edit-prefix" placeholder="media/"><label class="form-label mt-1">Endpoint (optional, for Minio)</label><input type="text" class="form-control" id="zt-edit-endpoint" placeholder="http://localhost:9000"><label class="form-label mt-1">Access Key ID (optional)</label><input type="text" class="form-control" id="zt-edit-access-key-id" placeholder="Leave empty for env/IAM"><label class="form-label mt-1">Secret Access Key (optional)</label><input type="password" class="form-control" id="zt-edit-secret-access-key" placeholder="Leave blank to keep current" autocomplete="new-password"></div><div class="mb-2"><div class="form-check"><input type="checkbox" class="form-check-input" id="zt-edit-default"><label class="form-check-label" for="zt-edit-default">Set as default library</label></div></div></form></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="zt-edit-library-submit">Save</button></div></div></div></div>';
       self.innerHTML = html;
-      var typeSel = self.querySelector("select[name=type]");
+      var addFormEl = self.querySelector("#zt-adm-library-form");
+      var typeSel = addFormEl && addFormEl.querySelector("select[name=type]");
       var fsDiv = self.querySelector("#zt-adm-library-fs");
       var s3Div = self.querySelector("#zt-adm-library-s3");
-      function toggleConfig() {
+      function toggleAddFormConfig() {
+        if (!typeSel || !fsDiv || !s3Div) return;
         var t = typeSel.value;
         fsDiv.style.display = t === "filesystem" ? "block" : "none";
         s3Div.style.display = t === "s3" ? "block" : "none";
       }
-      typeSel.addEventListener("change", toggleConfig);
-      toggleConfig();
-      self.querySelector("#zt-adm-library-form").addEventListener("submit", function(e) {
-        e.preventDefault();
-        var form = e.target;
-        var name = form.name.value.trim();
-        var typeVal = form.type.value;
-        var payload = { name: name, type: typeVal, config: {} };
-        if (typeVal === "filesystem") {
-          payload.config = { filesystem: { path: form.path.value.trim() } };
-        } else {
-          payload.config = { s3: { bucket: form.bucket.value.trim(), region: form.region.value.trim() || "us-east-1", prefix: form.prefix.value.trim() || "", endpoint: form.endpoint.value.trim() || "", access_key_id: (form.querySelector('input[name="access_key_id"]') || {}).value.trim() || undefined, secret_access_key: (form.querySelector('input[name="secret_access_key"]') || {}).value.trim() || undefined } };
+      function openAddLibraryModal() {
+        if (addFormEl) addFormEl.reset();
+        if (typeSel) typeSel.value = "filesystem";
+        toggleAddFormConfig();
+        var addModalEl = self.querySelector("#zt-add-library-modal");
+        if (addModalEl) {
+          bootstrap.Modal.getOrCreateInstance(addModalEl).show();
+          setTimeout(function() {
+            var nameInput = addFormEl && addFormEl.querySelector('input[name="name"]');
+            if (nameInput) nameInput.focus();
+          }, 400);
         }
-        payload.default = form.querySelector("#zt-lib-default").checked;
-        fetch("/api/adm/libraries", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-          .then(function(r) { return r.json().then(function(data) { return { status: r.status, data: data }; }); })
-          .then(function(res) {
-            if (res.status === 201 && typeof loadPage === "function") loadPage("/adm/libraries");
-            else if (res.status === 201) window.location.reload();
-            else if (typeof sendToast === "function") sendToast("Error", "", "bg-danger", (res.data && res.data.error) || "Failed to add library");
-          });
-      });
+      }
+      var addCard = self.querySelector("#zt-adm-library-add-card");
+      if (addCard) {
+        addCard.addEventListener("click", openAddLibraryModal);
+        addCard.addEventListener("keydown", function(e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openAddLibraryModal();
+          }
+        });
+      }
+      if (typeSel) typeSel.addEventListener("change", toggleAddFormConfig);
+      toggleAddFormConfig();
+      if (addFormEl) {
+        addFormEl.addEventListener("submit", function(e) {
+          e.preventDefault();
+          var form = e.target;
+          var name = form.name.value.trim();
+          var typeVal = form.type.value;
+          var payload = { name: name, type: typeVal, config: {} };
+          if (typeVal === "filesystem") {
+            payload.config = { filesystem: { path: form.path.value.trim() } };
+          } else {
+            payload.config = { s3: { bucket: form.bucket.value.trim(), region: form.region.value.trim() || "us-east-1", prefix: form.prefix.value.trim() || "", endpoint: form.endpoint.value.trim() || "", access_key_id: (form.querySelector('input[name="access_key_id"]') || {}).value.trim() || undefined, secret_access_key: (form.querySelector('input[name="secret_access_key"]') || {}).value.trim() || undefined } };
+          }
+          payload.default = form.querySelector("#zt-lib-default").checked;
+          fetch("/api/adm/libraries", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+            .then(function(r) { return r.json().then(function(data) { return { status: r.status, data: data }; }); })
+            .then(function(res) {
+              if (res.status === 201) {
+                var addModalEl = self.querySelector("#zt-add-library-modal");
+                var addInst = addModalEl && bootstrap.Modal.getInstance(addModalEl);
+                if (addInst) addInst.hide();
+                if (typeof loadPage === "function") loadPage("/adm/libraries");
+                else window.location.reload();
+              } else if (typeof sendToast === "function") sendToast("Error", "", "bg-danger", (res.data && res.data.error) || "Failed to add library");
+            });
+        });
+      }
       self.querySelectorAll("button[data-library-id]").forEach(function(btn) {
         btn.onclick = function() {
           if (!confirm("Delete library \"" + btn.getAttribute("data-library-name") + "\"? This is only allowed if it has no videos and is not the default.")) return;

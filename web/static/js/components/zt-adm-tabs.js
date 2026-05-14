@@ -18,7 +18,9 @@ ZtAdmTabs.prototype.connectedCallback = function() {
   this.innerHTML = '<style>' + sidebarStyles + '</style><div id="zt-adm-sidebar"><h3 class="zt-adm-sidebar-title"><span class="heading-icon"><i class="fa fa-hammer"></i></span> Administration</h3><nav class="nav flex-column">' +
     group("Main") +
     link("Overview", "/adm", "overview") +
+    group("Storage") +
     link("Libraries", "/adm/libraries", "libraries") +
+    group("Media") +
     link("Videos", "/adm/videos", "videos") +
     link("Actors", "/adm/actors", "actors") +
     link("Channels", "/adm/channels", "channels") +
