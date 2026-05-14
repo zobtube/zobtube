@@ -207,8 +207,9 @@ zt.updateHeader = function(user) {
             if (!data.auth_enabled) {
                 app.style.display = "block";
                 if (loginForm) loginForm.style.display = "none";
-                loadPage("/");
-                history.replaceState({ path: "/" }, "", window.location.pathname || "/");
+                var pathNoAuth = window.location.pathname || "/";
+                loadPage(pathNoAuth);
+                history.replaceState({ path: pathNoAuth }, "", pathNoAuth);
                 return;
             }
             if (data.user) {
