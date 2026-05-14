@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.5.1
+### Fixes
+* [40ebfb9](https://github.com/zobtube/zobtube/commit/40ebfb953961aca3503a037b21e4214eebef8dad) fix(sql/pg): use correct type for pg
+
 ## Version 0.5.0
 ### Features
 * [07f8d4c](https://github.com/zobtube/zobtube/commit/07f8d4c516a709967ec8df1ecba63c98e2e1a266) feat(video/edit): improve library change ux
