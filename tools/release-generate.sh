@@ -13,7 +13,7 @@ generateChangelogBetweenVersions() {
 	local tag=$3
 
 	tagLog=""
-	logs=$(git log --no-decorate --no-color tags/${previousTag}..${currentTag} |grep -E '^.*?(commit|feat|chore|fix|doc)' |sed -r 's/\s\s+//g')
+	logs=$(git log --no-decorate --no-color tags/${previousTag}..${currentTag} |grep -E '^.*?(commit|feat|chore|fix|doc|bc)' |sed -r 's/\s\s+//g')
 	commit=""
 	enrichedLogs=""
 
@@ -33,6 +33,14 @@ generateChangelogBetweenVersions() {
 	tagLog="${tagLog}## Version $tag"$'\n'
 
 
+	if echo "$enrichedLogs" |grep -qE '^\* \[[a-f0-9]{7}\]\([^)]+\) bc'
+	then
+		tagLog="${tagLog}### Breaking change"$'\n'
+		while read log
+		do
+			tagLog="${tagLog}${log}"$'\n'
+		done <<< "$(echo "$enrichedLogs" |grep -E '^\* \[[a-f0-9]{7}\]\([^)]+\) bc')"
+	fi
 	if echo "$enrichedLogs" |grep -qE '^\* \[[a-f0-9]{7}\]\([^)]+\) feat'
 	then
 		tagLog="${tagLog}### Features"$'\n'
