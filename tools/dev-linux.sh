@@ -3,4 +3,6 @@
 export ZT_DB_DRIVER="sqlite"
 export ZT_DB_CONNSTRING="./zt.db"
 export ZT_MEDIA_PATH="./test_data"
+export ZT_METADATA_TYPE=filesystem
+export ZT_METADATA_PATH=./test_data/metadata
 exec air --build.cmd 'go build -o ./tmp/zt main.go' --build.bin './tmp/zt' --build.log './tmp/logs.txt' -build.stop_on_error true -build.include_ext go,html,js,css -proxy.enabled true -proxy.proxy_port 8080 -proxy.app_port 8069

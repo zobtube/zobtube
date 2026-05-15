@@ -31,6 +31,7 @@ type Video struct {
 	ChannelID     *string
 	Thumbnail     bool
 	ThumbnailMini bool
+	Migrated      bool `gorm:"default:false"`
 	Duration      time.Duration
 	Type          string        `gorm:"size:1;"`
 	Imported      bool          `gorm:"default:false"`

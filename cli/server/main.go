@@ -15,17 +15,19 @@ import (
 	"github.com/zobtube/zobtube/internal/provider"
 	"github.com/zobtube/zobtube/internal/runner"
 	"github.com/zobtube/zobtube/internal/storage"
+	"github.com/zobtube/zobtube/internal/task/metamigrate"
 	"github.com/zobtube/zobtube/internal/task/video"
 )
 
 type Parameters struct {
-	Ctx     context.Context
-	Cmd     *cli.Command
-	Logger  *zerolog.Logger
-	Version string
-	Commit  string
-	Date    string
-	WebFS   *embed.FS
+	Ctx      context.Context
+	Cmd      *cli.Command
+	Logger   *zerolog.Logger
+	Version  string
+	Commit   string
+	Date     string
+	WebFS    *embed.FS
+	Metadata config.MetadataParams
 }
 
 // channel for http server shutdown
@@ -66,6 +68,7 @@ func Start(params *Parameters) error {
 		params.Cmd.String("db-driver"),
 		params.Cmd.String("db-connstring"),
 		params.Cmd.String("media-path"),
+		params.Metadata,
 	)
 	if err != nil {
 		startFailsafeWebServer(httpServer, err, c)
@@ -110,6 +113,19 @@ func Start(params *Parameters) error {
 			}
 		}
 	}
+
+	metadataStore, err := storage.OpenMetadata(cfg)
+	if err != nil {
+		startFailsafeWebServer(httpServer, err, c)
+		return nil
+	}
+	if cfg.Metadata.Type == "filesystem" {
+		if err := config.EnsureMetadataTreePresent(cfg.Metadata.Path); err != nil {
+			startFailsafeWebServer(httpServer, err, c)
+			return nil
+		}
+	}
+	c.MetadataStorageRegister(metadataStore)
 
 	storageResolver := storage.NewResolver(db)
 	c.StorageResolverRegister(storageResolver)
@@ -221,7 +237,8 @@ func Start(params *Parameters) error {
 	runner.RegisterTask(video.NewVideoDeleting())
 	runner.RegisterTask(video.NewVideoMoveLibrary())
 	runner.RegisterTask(video.NewVideoGenerateThumbnail())
-	runner.Start(cfg, db, storageResolver)
+	runner.RegisterTask(metamigrate.NewMetadataMigrate())
+	runner.Start(cfg, db, storageResolver, metadataStore)
 	c.RunnerRegister(runner)
 
 	c.BuildDetailsRegister(params.Version, params.Commit, params.Date)

@@ -16,6 +16,7 @@ import (
 
 	"github.com/zobtube/zobtube/cli/passwordreset"
 	"github.com/zobtube/zobtube/cli/server"
+	"github.com/zobtube/zobtube/internal/config"
 )
 
 //go:embed web
@@ -118,6 +119,72 @@ func main() {
 				),
 				Value: "data",
 			},
+			&cli.StringFlag{
+				Name:  "metadata-type",
+				Usage: "metadata storage type (filesystem or s3)",
+				Sources: cli.NewValueSourceChain(
+					cli.EnvVar("ZT_METADATA_TYPE"),
+					yaml.YAML("metadata.type", altsrc.NewStringPtrSourcer(&configurationFile)),
+				),
+				Value: "filesystem",
+			},
+			&cli.StringFlag{
+				Name:  "metadata-path",
+				Usage: "filesystem path for metadata storage (defaults to media-path)",
+				Sources: cli.NewValueSourceChain(
+					cli.EnvVar("ZT_METADATA_PATH"),
+					yaml.YAML("metadata.path", altsrc.NewStringPtrSourcer(&configurationFile)),
+				),
+			},
+			&cli.StringFlag{
+				Name:  "metadata-s3-bucket",
+				Usage: "S3 bucket for metadata storage",
+				Sources: cli.NewValueSourceChain(
+					cli.EnvVar("ZT_METADATA_S3_BUCKET"),
+					yaml.YAML("metadata.s3.bucket", altsrc.NewStringPtrSourcer(&configurationFile)),
+				),
+			},
+			&cli.StringFlag{
+				Name:  "metadata-s3-region",
+				Usage: "S3 region for metadata storage",
+				Sources: cli.NewValueSourceChain(
+					cli.EnvVar("ZT_METADATA_S3_REGION"),
+					yaml.YAML("metadata.s3.region", altsrc.NewStringPtrSourcer(&configurationFile)),
+				),
+				Value: "us-east-1",
+			},
+			&cli.StringFlag{
+				Name:  "metadata-s3-prefix",
+				Usage: "optional S3 key prefix for metadata storage",
+				Sources: cli.NewValueSourceChain(
+					cli.EnvVar("ZT_METADATA_S3_PREFIX"),
+					yaml.YAML("metadata.s3.prefix", altsrc.NewStringPtrSourcer(&configurationFile)),
+				),
+			},
+			&cli.StringFlag{
+				Name:  "metadata-s3-endpoint",
+				Usage: "optional S3 endpoint for metadata storage (e.g. Minio)",
+				Sources: cli.NewValueSourceChain(
+					cli.EnvVar("ZT_METADATA_S3_ENDPOINT"),
+					yaml.YAML("metadata.s3.endpoint", altsrc.NewStringPtrSourcer(&configurationFile)),
+				),
+			},
+			&cli.StringFlag{
+				Name:  "metadata-s3-access-key-id",
+				Usage: "optional S3 access key for metadata storage",
+				Sources: cli.NewValueSourceChain(
+					cli.EnvVar("ZT_METADATA_S3_ACCESS_KEY_ID"),
+					yaml.YAML("metadata.s3.access_key_id", altsrc.NewStringPtrSourcer(&configurationFile)),
+				),
+			},
+			&cli.StringFlag{
+				Name:  "metadata-s3-secret-access-key",
+				Usage: "optional S3 secret key for metadata storage",
+				Sources: cli.NewValueSourceChain(
+					cli.EnvVar("ZT_METADATA_S3_SECRET_ACCESS_KEY"),
+					yaml.YAML("metadata.s3.secret_access_key", altsrc.NewStringPtrSourcer(&configurationFile)),
+				),
+			},
 		},
 		Action: startServer,
 		Commands: []*cli.Command{
@@ -149,6 +216,19 @@ func main() {
 	}
 }
 
+func metadataParamsFromCmd(cmd *cli.Command) config.MetadataParams {
+	return config.MetadataParams{
+		Type:              cmd.String("metadata-type"),
+		Path:              cmd.String("metadata-path"),
+		S3Bucket:          cmd.String("metadata-s3-bucket"),
+		S3Region:          cmd.String("metadata-s3-region"),
+		S3Prefix:          cmd.String("metadata-s3-prefix"),
+		S3Endpoint:        cmd.String("metadata-s3-endpoint"),
+		S3AccessKeyID:     cmd.String("metadata-s3-access-key-id"),
+		S3SecretAccessKey: cmd.String("metadata-s3-secret-access-key"),
+	}
+}
+
 func startServer(ctx context.Context, cmd *cli.Command) error {
 	return server.Start(&server.Parameters{
 		Ctx:     ctx,
@@ -157,6 +237,7 @@ func startServer(ctx context.Context, cmd *cli.Command) error {
 		Version: version,
 		Commit:  commit,
 		Date:    date,
-		WebFS:   &webFS,
+		WebFS:    &webFS,
+		Metadata: metadataParamsFromCmd(cmd),
 	})
 }

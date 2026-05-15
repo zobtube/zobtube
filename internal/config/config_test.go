@@ -14,7 +14,7 @@ import (
 func TestNew_Success(t *testing.T) {
 	logger := log.Logger
 
-	cfg, err := New(&logger, ":8080", "sqlite", "file:test.db", "/tmp")
+	cfg, err := New(&logger, ":8080", "sqlite", "file:test.db", "/tmp", MetadataParams{})
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -30,6 +30,20 @@ func TestNew_Success(t *testing.T) {
 	}
 	if cfg.Media.Path != "/tmp" {
 		t.Errorf("expected Media.Path to be '/tmp', got %q", cfg.Media.Path)
+	}
+	if cfg.Metadata.Type != "filesystem" {
+		t.Errorf("expected Metadata.Type filesystem, got %q", cfg.Metadata.Type)
+	}
+	if cfg.Metadata.Path != "/tmp" {
+		t.Errorf("expected Metadata.Path /tmp, got %q", cfg.Metadata.Path)
+	}
+}
+
+func TestNew_MetadataS3RequiresBucket(t *testing.T) {
+	logger := log.Logger
+	_, err := New(&logger, ":8080", "sqlite", "file:test.db", "/tmp", MetadataParams{Type: "s3"})
+	if err == nil {
+		t.Fatal("expected error for s3 without bucket")
 	}
 }
 
@@ -49,7 +63,7 @@ func TestNew_MissingFields(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := New(&logger, ":8080", tt.driver, tt.connstring, tt.path)
+			_, err := New(&logger, ":8080", tt.driver, tt.connstring, tt.path, MetadataParams{})
 			if err == nil {
 				t.Fatal("expected error, got nil")
 			}

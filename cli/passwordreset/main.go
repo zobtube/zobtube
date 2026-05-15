@@ -26,6 +26,7 @@ func Run(cmd *cli.Command, logger *zerolog.Logger) error {
 		cmd.String("db-driver"),
 		cmd.String("db-connstring"),
 		cmd.String("media-path"),
+		config.MetadataParams{},
 	)
 	if err != nil {
 		return err

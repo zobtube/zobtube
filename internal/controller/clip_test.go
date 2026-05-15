@@ -42,6 +42,7 @@ func setupClipController(t *testing.T) *Controller {
 	ctrl.ConfigurationRegister(cfg)
 	storageResolver := storage.NewResolver(db)
 	ctrl.StorageResolverRegister(storageResolver)
+	registerTestMetadataStorage(ctrl, "/tmp")
 
 	return ctrl
 }

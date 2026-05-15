@@ -43,10 +43,9 @@ func moveFilesToNewLibrary(ctx *common.Context, params common.Parameters) (strin
 	if err != nil {
 		return "unable to resolve target storage", err
 	}
-	paths := []string{
-		video.RelativePath(),
-		video.ThumbnailRelativePath(),
-		video.ThumbnailXSRelativePath(),
+	paths := []string{video.RelativePath()}
+	if !video.Migrated {
+		paths = append(paths, video.ThumbnailRelativePath(), video.ThumbnailXSRelativePath())
 	}
 	for _, p := range paths {
 		ok, err := sourceStore.Exists(p)
@@ -125,7 +124,9 @@ func deleteFromSourceLibrary(ctx *common.Context, params common.Parameters) (str
 		return "unable to resolve source storage", err
 	}
 	_ = store.Delete(video.RelativePath())
-	_ = store.Delete(video.ThumbnailRelativePath())
-	_ = store.Delete(video.ThumbnailXSRelativePath())
+	if !video.Migrated {
+		_ = store.Delete(video.ThumbnailRelativePath())
+		_ = store.Delete(video.ThumbnailXSRelativePath())
+	}
 	return "", nil
 }

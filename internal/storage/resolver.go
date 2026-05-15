@@ -61,11 +61,11 @@ func (r *Resolver) load(libraryID string) (Storage, error) {
 			return nil, ErrS3ConfigMissing
 		}
 		cfg := lib.Config.S3
-		var creds *struct{ AccessKey, SecretKey string }
+		var creds *StaticS3Credentials
 		if cfg.AccessKeyID != "" && cfg.SecretAccessKey != "" {
-			creds = &struct{ AccessKey, SecretKey string }{AccessKey: cfg.AccessKeyID, SecretKey: cfg.SecretAccessKey}
+			creds = &StaticS3Credentials{AccessKey: cfg.AccessKeyID, SecretKey: cfg.SecretAccessKey}
 		}
-		client, err := newS3Client(cfg.Region, cfg.Endpoint, creds)
+		client, err := NewS3Client(cfg.Region, cfg.Endpoint, creds)
 		if err != nil {
 			return nil, err
 		}
@@ -80,9 +80,15 @@ var (
 	ErrUnknownLibraryType = errors.New("library: unknown type")
 )
 
-// newS3Client builds an S3 client. Credentials come from env (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) or IAM.
+// StaticS3Credentials holds optional static credentials for S3-compatible storage.
+type StaticS3Credentials struct {
+	AccessKey string
+	SecretKey string
+}
+
+// NewS3Client builds an S3 client. Credentials come from env (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) or IAM.
 // endpoint is optional (e.g. for Minio); creds are optional (for static Minio credentials).
-func newS3Client(region, endpoint string, creds *struct{ AccessKey, SecretKey string }) (*s3.Client, error) {
+func NewS3Client(region, endpoint string, creds *StaticS3Credentials) (*s3.Client, error) {
 	opts := []func(*config.LoadOptions) error{
 		config.WithRegion(region),
 	}

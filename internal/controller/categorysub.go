@@ -76,7 +76,7 @@ func (c *Controller) CategorySubThumbSet(g *gin.Context) {
 		g.JSON(500, gin.H{"error": err.Error(), "human_error": "unable to retrieve thumbnail from form"})
 		return
 	}
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	store, err := c.metadataStoreForWrite()
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -100,16 +100,11 @@ func (c *Controller) CategorySubThumbSet(g *gin.Context) {
 		return
 	}
 
-	// check if thumbnail exists
-	if !category.Thumbnail {
-		category.Thumbnail = true
-		err = c.datastore.Save(category).Error
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
+	category.Thumbnail = true
+	category.Migrated = true
+	if err := c.datastore.Save(category).Error; err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
 	}
 
 	// all good
@@ -140,7 +135,7 @@ func (c *Controller) CategorySubThumbRemove(g *gin.Context) {
 	// construct file path
 	filename := fmt.Sprintf("%s.jpg", category.ID)
 	path := filepath.Join("categories", filename)
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	store, err := c.metadataStore(category.Migrated)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -150,8 +145,7 @@ func (c *Controller) CategorySubThumbRemove(g *gin.Context) {
 	// check if thumbnail exists
 	if category.Thumbnail {
 		category.Thumbnail = false
-		err = c.datastore.Save(category).Error
-		if err != nil {
+		if err := c.datastore.Save(category).Error; err != nil {
 			g.JSON(500, gin.H{
 				"error": err.Error(),
 			})
@@ -234,7 +228,7 @@ func (c *Controller) CategorySubThumb(g *gin.Context) {
 		g.Redirect(http.StatusFound, CATEGORY_PROFILE_PICTURE_MISSING)
 		return
 	}
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	store, err := c.metadataStore(category.Migrated)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return

@@ -13,9 +13,10 @@ import (
 type Parameters map[string]string
 
 type Context struct {
-	DB               *gorm.DB
-	Config           *config.Config
-	StorageResolver  StorageResolver
+	DB              *gorm.DB
+	Config          *config.Config
+	StorageResolver StorageResolver
+	MetadataStorage storage.Storage
 }
 
 // StorageResolver resolves storage by library ID (optional in context for tasks that need it).

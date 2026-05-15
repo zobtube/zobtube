@@ -19,6 +19,7 @@ ZtAdmTabs.prototype.connectedCallback = function() {
     group("Main") +
     link("Overview", "/adm", "overview") +
     group("Storage") +
+    link("Metadata", "/adm/metadata-storage", "metadata-storage") +
     link("Libraries", "/adm/libraries", "libraries") +
     group("Media") +
     link("Videos", "/adm/videos", "videos") +

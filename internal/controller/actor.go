@@ -65,7 +65,7 @@ func (c *Controller) ActorDelete(g *gin.Context) {
 		g.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 		return
 	}
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	store, err := c.metadataStore(actor.Migrated)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -99,7 +99,7 @@ func (c *Controller) ActorThumb(g *gin.Context) {
 		g.Redirect(http.StatusFound, ACTOR_PROFILE_PICTURE_MISSING)
 		return
 	}
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	store, err := c.metadataStore(actor.Migrated)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -355,7 +355,7 @@ func (c *Controller) ActorUploadThumb(g *gin.Context) {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	store, err := c.metadataStoreForWrite()
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -382,16 +382,11 @@ func (c *Controller) ActorUploadThumb(g *gin.Context) {
 		return
 	}
 
-	// check if thumbnail exists
-	if !actor.Thumbnail {
-		actor.Thumbnail = true
-		err = c.datastore.Save(actor).Error
-		if err != nil {
-			g.JSON(500, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
+	actor.Thumbnail = true
+	actor.Migrated = true
+	if err := c.datastore.Save(actor).Error; err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
 	}
 
 	// all good
@@ -855,8 +850,7 @@ func (c *Controller) ActorMerge(g *gin.Context) {
 		return
 	}
 
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
-	if err == nil {
+	if store, err := c.metadataStore(source.Migrated); err == nil {
 		thumbPath := filepath.Join("actors", source.ID, "thumb.jpg")
 		_ = store.Delete(thumbPath)
 	}

@@ -28,6 +28,7 @@ var routes = [
   { pattern: /^\/adm\/actors\/?$/, component: "zt-adm-object-list", object: "Actor" },
   { pattern: /^\/adm\/channels\/?$/, component: "zt-adm-object-list", object: "Channel" },
   { pattern: /^\/adm\/categories\/?$/, component: "zt-adm-category" },
+  { pattern: /^\/adm\/metadata-storage\/?$/, component: "zt-adm-metadata-storage" },
   { pattern: /^\/adm\/libraries\/?$/, component: "zt-adm-library-list" },
   { pattern: /^\/adm\/task\/home\/?$/, component: "zt-adm-task-home" },
   { pattern: /^\/adm\/tasks\/?$/, component: "zt-adm-task-list" },

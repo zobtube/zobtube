@@ -5,6 +5,7 @@ import (
 
 	"github.com/zobtube/zobtube/internal/config"
 	"github.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/storage"
 	"github.com/zobtube/zobtube/internal/task/common"
 )
 
@@ -28,11 +29,12 @@ func (r *Runner) RegisterTask(t *common.Task) {
 	r.tasksChannel[t.Name] = make(chan RunnerEvent, 1000)
 }
 
-func (r *Runner) Start(cfg *config.Config, db *gorm.DB, storageResolver common.StorageResolver) {
+func (r *Runner) Start(cfg *config.Config, db *gorm.DB, storageResolver common.StorageResolver, metadataStorage storage.Storage) {
 	r.ctx = &common.Context{
 		DB:              db,
 		Config:          cfg,
 		StorageResolver: storageResolver,
+		MetadataStorage: metadataStorage,
 	}
 	for _, task := range r.tasks {
 		go func() {

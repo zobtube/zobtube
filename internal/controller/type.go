@@ -45,6 +45,8 @@ type AbstractController interface {
 	AdmLibraryCreate(*gin.Context)
 	AdmLibraryUpdate(*gin.Context)
 	AdmLibraryDelete(*gin.Context)
+	AdmMetadataStorage(*gin.Context)
+	AdmMetadataStorageMigrate(*gin.Context)
 
 	// Home
 	Home(*gin.Context)
@@ -167,6 +169,7 @@ type AbstractController interface {
 	BuildDetailsRegister(string, string, string)
 	RegisterError(string)
 	StorageResolverRegister(StorageResolver)
+	MetadataStorageRegister(storage.Storage)
 
 	// Cleanup
 	CleanupRoutine()
@@ -186,6 +189,7 @@ type Controller struct {
 	config           *config.Config
 	datastore        *gorm.DB
 	storageResolver  StorageResolver
+	metadataStorage  storage.Storage
 	providers        map[string]provider.Provider
 	shutdownChannel  chan<- int
 	runner           *runner.Runner
@@ -238,4 +242,8 @@ func (c *Controller) RegisterError(err string) {
 
 func (c *Controller) StorageResolverRegister(r StorageResolver) {
 	c.storageResolver = r
+}
+
+func (c *Controller) MetadataStorageRegister(store storage.Storage) {
+	c.metadataStorage = store
 }

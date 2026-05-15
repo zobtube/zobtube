@@ -15,6 +15,7 @@ type Channel struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Name      string
 	Thumbnail bool
+	Migrated  bool `gorm:"default:false"`
 }
 
 // UUID pre-hook

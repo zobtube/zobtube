@@ -12,10 +12,10 @@ import (
 	"golang.org/x/image/draw"
 )
 
-func generateHorizontalMiniThumnail(ctx *common.Context, video *model.Video, store storage.Storage) (string, error) {
+func generateHorizontalMiniThumnail(readStore, writeStore storage.Storage, video *model.Video) (string, error) {
 	thumbPath := video.ThumbnailRelativePath()
 	thumbXSPath := video.ThumbnailXSRelativePath()
-	rc, err := store.Open(thumbPath)
+	rc, err := readStore.Open(thumbPath)
 	if err != nil {
 		return "unable to open thumbnail", err
 	}
@@ -40,10 +40,10 @@ func generateHorizontalMiniThumnail(ctx *common.Context, video *model.Video, sto
 	innerH := (targetH - h) / 2
 	innerV := (targetV - v) / 2
 	draw.NearestNeighbor.Scale(dst, image.Rect(innerH, innerV, innerH+h, innerV+v), src, src.Bounds(), draw.Over, nil)
-	if err := store.MkdirAll(filepath.Dir(thumbXSPath)); err != nil {
+	if err := writeStore.MkdirAll(filepath.Dir(thumbXSPath)); err != nil {
 		return "unable to create thumbnail folder", err
 	}
-	w, err := store.Create(thumbXSPath)
+	w, err := writeStore.Create(thumbXSPath)
 	if err != nil {
 		return "unable to create mini thumbnail file", err
 	}
@@ -54,10 +54,10 @@ func generateHorizontalMiniThumnail(ctx *common.Context, video *model.Video, sto
 	return "", nil
 }
 
-func generateSameRatioMiniThumnail(ctx *common.Context, video *model.Video, store storage.Storage) (string, error) {
+func generateSameRatioMiniThumnail(readStore, writeStore storage.Storage, video *model.Video) (string, error) {
 	thumbPath := video.ThumbnailRelativePath()
 	thumbXSPath := video.ThumbnailXSRelativePath()
-	rc, err := store.Open(thumbPath)
+	rc, err := readStore.Open(thumbPath)
 	if err != nil {
 		return "unable to open thumbnail", err
 	}
@@ -79,10 +79,10 @@ func generateSameRatioMiniThumnail(ctx *common.Context, video *model.Video, stor
 		dst = image.NewRGBA(image.Rect(0, 0, targetH, v))
 		draw.NearestNeighbor.Scale(dst, dst.Bounds(), src, src.Bounds(), draw.Over, nil)
 	}
-	if err := store.MkdirAll(filepath.Dir(thumbXSPath)); err != nil {
+	if err := writeStore.MkdirAll(filepath.Dir(thumbXSPath)); err != nil {
 		return "unable to create thumbnail folder", err
 	}
-	w, err := store.Create(thumbXSPath)
+	w, err := writeStore.Create(thumbXSPath)
 	if err != nil {
 		return "unable to create mini thumbnail file", err
 	}
@@ -100,20 +100,25 @@ func generateThumbnailMini(ctx *common.Context, params common.Parameters) (strin
 	if result.RowsAffected < 1 {
 		return "video does not exist", errors.New("id not in db")
 	}
-	store, err := ctx.StorageResolver.Storage(videoLibraryID(ctx, video))
+	readStore, err := videoThumbnailStore(ctx, video)
 	if err != nil {
-		return "unable to resolve storage", err
+		return "unable to resolve thumbnail storage", err
+	}
+	writeStore, err := metadataStoreForWrite(ctx)
+	if err != nil {
+		return "unable to resolve metadata storage", err
 	}
 	var errMsg string
 	if video.Type == "c" {
-		errMsg, err = generateSameRatioMiniThumnail(ctx, video, store)
+		errMsg, err = generateSameRatioMiniThumnail(readStore, writeStore, video)
 	} else {
-		errMsg, err = generateHorizontalMiniThumnail(ctx, video, store)
+		errMsg, err = generateHorizontalMiniThumnail(readStore, writeStore, video)
 	}
 	if err != nil {
 		return errMsg, err
 	}
 	video.ThumbnailMini = true
+	video.Migrated = true
 	ctx.DB.Save(&video)
 	return "", nil
 }
@@ -125,7 +130,7 @@ func deleteThumbnailMini(ctx *common.Context, params common.Parameters) (string,
 	if result.RowsAffected < 1 {
 		return "video does not exist", errors.New("id not in db")
 	}
-	store, err := ctx.StorageResolver.Storage(videoLibraryID(ctx, video))
+	store, err := videoThumbnailStore(ctx, video)
 	if err != nil {
 		return "unable to resolve storage", err
 	}

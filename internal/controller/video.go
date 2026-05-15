@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm/clause"
 
 	"github.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/storage"
 )
 
 // VideoList godoc
@@ -460,7 +461,7 @@ func (c *Controller) VideoUploadThumb(g *gin.Context) {
 		g.JSON(404, gin.H{})
 		return
 	}
-	store, err := c.storageResolver.Storage(c.videoLibraryID(video))
+	store, err := c.metadataStoreForWrite()
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -491,6 +492,7 @@ func (c *Controller) VideoUploadThumb(g *gin.Context) {
 		return
 	}
 	video.Thumbnail = true
+	video.Migrated = true
 	if err := c.datastore.Save(video).Error; err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -635,38 +637,51 @@ func (c *Controller) VideoMigrate(g *gin.Context) {
 	video.Type = newType
 	newFolder := video.FolderRelativePath()
 
-	store, err := c.storageResolver.Storage(c.videoLibraryID(video))
+	libStore, err := c.storageResolver.Storage(c.videoLibraryID(video))
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	// Copy known files from old folder to new folder
-	for _, name := range []string{"video.mp4", "thumb.jpg", "thumb-xs.jpg"} {
+	thumbStore, err := c.videoThumbnailStore(video)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	copyFolderFile := func(store storage.Storage, name string) bool {
 		oldPath := filepath.Join(oldFolder, name)
 		newPath := filepath.Join(newFolder, name)
 		exists, _ := store.Exists(oldPath)
 		if !exists {
-			continue
+			return true
 		}
 		rc, err := store.Open(oldPath)
 		if err != nil {
 			g.JSON(500, gin.H{"error": err.Error()})
-			return
+			return false
 		}
 		wc, err := store.Create(newPath)
 		if err != nil {
 			rc.Close()
 			g.JSON(500, gin.H{"error": err.Error()})
-			return
+			return false
 		}
 		_, err = io.Copy(wc, rc)
 		rc.Close()
 		wc.Close()
 		if err != nil {
 			g.JSON(500, gin.H{"error": err.Error()})
-			return
+			return false
 		}
 		_ = store.Delete(oldPath)
+		return true
+	}
+	if !copyFolderFile(libStore, "video.mp4") {
+		return
+	}
+	for _, name := range []string{"thumb.jpg", "thumb-xs.jpg"} {
+		if !copyFolderFile(thumbStore, name) {
+			return
+		}
 	}
 
 	if err := c.datastore.Save(video).Error; err != nil {
@@ -927,9 +942,9 @@ func (c *Controller) VideoThumb(g *gin.Context) {
 		g.JSON(404, gin.H{})
 		return
 	}
-	store, err := c.storageResolver.Storage(c.videoLibraryID(video))
+	store, err := c.videoThumbnailStore(video)
 	if err != nil {
-		c.logger.Error().Err(err).Str("video_id", video.ID).Str("library_id", c.videoLibraryID(video)).Msg("error resolving storage")
+		c.logger.Error().Err(err).Str("video_id", video.ID).Msg("error resolving thumbnail storage")
 		g.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
@@ -956,7 +971,7 @@ func (c *Controller) VideoThumbXS(g *gin.Context) {
 		g.Redirect(http.StatusFound, VIDEO_THUMB_NOT_GENERATED)
 		return
 	}
-	store, err := c.storageResolver.Storage(c.videoLibraryID(video))
+	store, err := c.videoThumbnailStore(video)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return

@@ -42,14 +42,17 @@ func deleteFolder(ctx *common.Context, params common.Parameters) (string, error)
 	if result.RowsAffected < 1 {
 		return "video does not exist", errors.New("id not in db")
 	}
-	store, err := ctx.StorageResolver.Storage(videoLibraryID(ctx, video))
+	libStore, err := ctx.StorageResolver.Storage(videoLibraryID(ctx, video))
 	if err != nil {
 		return "unable to resolve storage", err
 	}
-	// Delete known files in folder (storage has no recursive delete)
-	_ = store.Delete(video.ThumbnailRelativePath())
-	_ = store.Delete(video.ThumbnailXSRelativePath())
-	_ = store.Delete(video.RelativePath())
+	thumbStore, err := videoThumbnailStore(ctx, video)
+	if err != nil {
+		return "unable to resolve thumbnail storage", err
+	}
+	_ = thumbStore.Delete(video.ThumbnailRelativePath())
+	_ = thumbStore.Delete(video.ThumbnailXSRelativePath())
+	_ = libStore.Delete(video.RelativePath())
 	return "", nil
 }
 

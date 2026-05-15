@@ -47,7 +47,11 @@ func generateThumbnail(ctx *common.Context, params common.Parameters) (string, e
 	if err != nil {
 		return "unable to generate thumbnail with ffmpeg", err
 	}
-	if err := store.MkdirAll(filepath.Dir(thumbPath)); err != nil {
+	thumbStore, err := metadataStoreForWrite(ctx)
+	if err != nil {
+		return "unable to resolve metadata storage", err
+	}
+	if err := thumbStore.MkdirAll(filepath.Dir(thumbPath)); err != nil {
 		return "unable to create thumbnail folder", err
 	}
 	r, err := os.Open(thumbTempPath)
@@ -55,7 +59,7 @@ func generateThumbnail(ctx *common.Context, params common.Parameters) (string, e
 		return "unable to open temp thumbnail", err
 	}
 	defer r.Close()
-	w, err := store.Create(thumbPath)
+	w, err := thumbStore.Create(thumbPath)
 	if err != nil {
 		return "unable to create thumbnail file", err
 	}
@@ -64,6 +68,7 @@ func generateThumbnail(ctx *common.Context, params common.Parameters) (string, e
 		return "unable to write thumbnail", err
 	}
 	video.Thumbnail = true
+	video.Migrated = true
 	ctx.DB.Save(&video)
 	return "", nil
 }
@@ -75,7 +80,7 @@ func deleteThumbnail(ctx *common.Context, params common.Parameters) (string, err
 	if result.RowsAffected < 1 {
 		return "video does not exist", errors.New("id not in db")
 	}
-	store, err := ctx.StorageResolver.Storage(videoLibraryID(ctx, video))
+	store, err := videoThumbnailStore(ctx, video)
 	if err != nil {
 		return "unable to resolve storage", err
 	}

@@ -53,6 +53,9 @@ func setupAdmController(t *testing.T) *Controller {
 	ctrl.BuildDetailsRegister("0.0.0", "abc123", "2024-01-01")
 	storageResolver := storage.NewResolver(db)
 	ctrl.StorageResolverRegister(storageResolver)
+	registerTestMetadataStorage(ctrl, "/tmp")
+	cfg.Metadata.Type = "filesystem"
+	cfg.Metadata.Path = "/tmp"
 
 	// Runner for AdmTaskRetry
 	r := &runner.Runner{}
@@ -60,7 +63,7 @@ func setupAdmController(t *testing.T) *Controller {
 		Name:  "adm-test-task",
 		Steps: []common.Step{{Name: "noop", NiceName: "No-op", Func: func(*common.Context, common.Parameters) (string, error) { return "", nil }}},
 	})
-	r.Start(cfg, db, storageResolver)
+	r.Start(cfg, db, storageResolver, storage.NewFilesystem("/tmp"))
 	ctrl.RunnerRegister(r)
 
 	return ctrl

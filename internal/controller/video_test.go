@@ -48,6 +48,7 @@ func setupVideoController(t *testing.T) *Controller {
 	ctrl.ConfigurationRegister(cfg)
 	storageResolver := storage.NewResolver(db)
 	ctrl.StorageResolverRegister(storageResolver)
+	registerTestMetadataStorage(ctrl, "/tmp")
 
 	// Runner with no-op video/create task for VideoCreate handler
 	r := &runner.Runner{}
@@ -59,7 +60,7 @@ func setupVideoController(t *testing.T) *Controller {
 			Func:     func(*common.Context, common.Parameters) (string, error) { return "", nil },
 		}},
 	})
-	r.Start(cfg, db, storageResolver)
+	r.Start(cfg, db, storageResolver, storage.NewFilesystem("/tmp"))
 	ctrl.RunnerRegister(r)
 
 	return ctrl

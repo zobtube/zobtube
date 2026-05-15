@@ -148,7 +148,7 @@ func (c *Controller) ChannelThumb(g *gin.Context) {
 		g.Redirect(http.StatusFound, ACTOR_PROFILE_PICTURE_MISSING)
 		return
 	}
-	store, err := c.storageResolver.Storage(c.config.DefaultLibraryID)
+	store, err := c.metadataStore(channel.Migrated)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return

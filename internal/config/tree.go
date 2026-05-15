@@ -13,14 +13,29 @@ var defaultLibraryFolders = []string{
 	"triage",
 }
 
+var metadataFolders = []string{
+	"actors",
+	"channels",
+	"categories",
+}
+
 // EnsureTreePresent ensures the library folder and default subfolders exist at path.
 // Used for the single configured media path (backward compat) or for each filesystem library path.
 func (cfg *Config) EnsureTreePresent() error {
 	return EnsureTreePresentForPath(cfg.Media.Path)
 }
 
+// EnsureMetadataTreePresent ensures the metadata root and default subfolders exist.
+func EnsureMetadataTreePresent(path string) error {
+	return ensureSubfolders(path, metadataFolders)
+}
+
 // EnsureTreePresentForPath ensures the library folder and default subfolders exist at the given path.
 func EnsureTreePresentForPath(path string) error {
+	return ensureSubfolders(path, defaultLibraryFolders)
+}
+
+func ensureSubfolders(path string, folders []string) error {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		err = os.Mkdir(path, 0o750)
@@ -30,7 +45,7 @@ func EnsureTreePresentForPath(path string) error {
 	} else if err != nil {
 		return err
 	}
-	for _, folder := range defaultLibraryFolders {
+	for _, folder := range folders {
 		dir := filepath.Join(path, folder)
 		_, err := os.Stat(dir)
 		if os.IsNotExist(err) {

@@ -113,7 +113,7 @@ func TestController_TaskRestart_RetriesTodoTasks(t *testing.T) {
 		Name:  "T1",
 		Steps: []common.Step{step},
 	})
-	r.Start(&config.Config{}, ctrl.datastore, storage.NewResolver(ctrl.datastore))
+	r.Start(&config.Config{}, ctrl.datastore, storage.NewResolver(ctrl.datastore), storage.NewFilesystem(t.TempDir()))
 	ctrl.RunnerRegister(r)
 
 	// Call taskRestart (should trigger TaskRetry)
