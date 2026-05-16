@@ -71,6 +71,44 @@ func TestOrganization_Render_StripsLeadingSlash(t *testing.T) {
 	}
 }
 
+func TestVideo_IsOrganizedWith(t *testing.T) {
+	active := &Organization{ID: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", Template: DefaultOrganizationTemplate}
+	otherID := "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+	path := "videos/vid1/video.mp4"
+	activeID := active.ID
+
+	cases := []struct {
+		name   string
+		video  Video
+		want   bool
+	}{
+		{"not imported", Video{Imported: false, OrganizationID: &activeID, Path: &path}, false},
+		{"no organization", Video{Imported: true, OrganizationID: nil, Path: &path}, false},
+		{"wrong organization", Video{Imported: true, OrganizationID: &otherID, Path: &path}, false},
+		{"wrong path", Video{Imported: true, OrganizationID: &activeID, Path: strPtr("triage/vid1.mp4")}, false},
+		{"organized", Video{Imported: true, OrganizationID: &activeID, Path: &path, Type: "v", ID: "vid1", Filename: "raw.mp4"}, true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			v := tc.video
+			if v.ID == "" {
+				v.ID = "vid1"
+			}
+			if v.Type == "" {
+				v.Type = "v"
+			}
+			if v.Filename == "" {
+				v.Filename = "raw.mp4"
+			}
+			if got := v.IsOrganizedWith(active); got != tc.want {
+				t.Fatalf("IsOrganizedWith() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func strPtr(s string) *string { return &s }
+
 func TestOrganization_Render_HonorsFilename(t *testing.T) {
 	org := &Organization{Template: "$TYPE/$FILENAME"}
 	v := &Video{ID: "id1", Type: "v", Filename: "subdir/raw.mp4"}

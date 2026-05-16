@@ -61,6 +61,14 @@ func setupVideoController(t *testing.T) *Controller {
 			Func:     func(*common.Context, common.Parameters) (string, error) { return "", nil },
 		}},
 	})
+	r.RegisterTask(&common.Task{
+		Name: "video/reorganize",
+		Steps: []common.Step{{
+			Name:     "noop",
+			NiceName: "No-op",
+			Func:     func(*common.Context, common.Parameters) (string, error) { return "", nil },
+		}},
+	})
 	r.Start(cfg, db, storageResolver, storage.NewFilesystem("/tmp"))
 	ctrl.RunnerRegister(r)
 
@@ -272,6 +280,99 @@ func TestController_VideoEdit_IncludesOrganization(t *testing.T) {
 	}
 	if name != org.Name {
 		t.Errorf("expected organization name %q, got %q", org.Name, name)
+	}
+}
+
+func TestController_VideoEdit_NeedsOrganize(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupVideoController(t)
+	active := model.Organization{ID: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", Name: "Active", Template: model.DefaultOrganizationTemplate, Active: true}
+	if err := ctrl.datastore.Create(&active).Error; err != nil {
+		t.Fatal(err)
+	}
+	path := "triage/keep.mp4"
+	vid := &model.Video{Name: "V", Filename: "v.mp4", Type: "v", Imported: true, Path: &path}
+	if err := ctrl.datastore.Create(vid).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Params = gin.Params{{Key: "id", Value: vid.ID}}
+	c.Request = httptest.NewRequest("GET", "/api/video/"+vid.ID+"/edit", nil)
+	ctrl.VideoEdit(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var body map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if body["organized"] == true {
+		t.Fatal("expected organized=false")
+	}
+	if body["needs_organize"] != true {
+		t.Fatalf("expected needs_organize=true, got %v", body["needs_organize"])
+	}
+}
+
+func TestController_VideoReorganize_QueuesTask(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupVideoController(t)
+	active := model.Organization{ID: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", Name: "Active", Template: model.DefaultOrganizationTemplate, Active: true}
+	if err := ctrl.datastore.Create(&active).Error; err != nil {
+		t.Fatal(err)
+	}
+	path := "triage/keep.mp4"
+	vid := &model.Video{Name: "V", Filename: "v.mp4", Type: "v", Imported: true, Path: &path}
+	if err := ctrl.datastore.Create(vid).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Params = gin.Params{{Key: "id", Value: vid.ID}}
+	c.Request = httptest.NewRequest("POST", "/api/video/"+vid.ID+"/reorganize", nil)
+	ctrl.VideoReorganize(c)
+
+	if w.Code != http.StatusAccepted {
+		t.Fatalf("expected 202, got %d: %s", w.Code, w.Body.String())
+	}
+	var count int64
+	ctrl.datastore.Model(&model.Task{}).Where("name = ?", "video/reorganize").Count(&count)
+	if count != 1 {
+		t.Fatalf("expected 1 task, got %d", count)
+	}
+}
+
+func TestController_VideoEditLibrary_RequiresOrganization(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupVideoController(t)
+	_ = ctrl.datastore.Create(&model.Organization{ID: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", Name: "Active", Template: model.DefaultOrganizationTemplate, Active: true}).Error
+	lib2 := model.Library{
+		Name: "Other",
+		Type: model.LibraryTypeFilesystem,
+		Config: model.LibraryConfig{
+			Filesystem: &model.LibraryConfigFilesystem{Path: t.TempDir()},
+		},
+	}
+	if err := ctrl.datastore.Create(&lib2).Error; err != nil {
+		t.Fatal(err)
+	}
+	path := "triage/keep.mp4"
+	vid := &model.Video{Name: "V", Filename: "v.mp4", Type: "v", Imported: true, Path: &path}
+	_ = ctrl.datastore.Create(vid).Error
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Params = gin.Params{{Key: "id", Value: vid.ID}}
+	c.Request = httptest.NewRequest("POST", "/api/video/"+vid.ID+"/library", strings.NewReader(`{"library_id":"`+lib2.ID+`"}`))
+	c.Request.Header.Set("Content-Type", "application/json")
+	ctrl.VideoEditLibrary(c)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d: %s", w.Code, w.Body.String())
 	}
 }
 

@@ -92,3 +92,35 @@ func (o *Organization) Render(v *Video) string {
 	out = strings.TrimPrefix(out, "/")
 	return filepath.Clean(out)
 }
+
+// ActiveOrganization returns the organization marked Active, or the first row if none is active.
+func ActiveOrganization(db *gorm.DB) (*Organization, error) {
+	var active Organization
+	if err := db.Where("active = ?", true).First(&active).Error; err == nil {
+		return &active, nil
+	}
+	var any Organization
+	if err := db.First(&any).Error; err != nil {
+		return nil, err
+	}
+	return &any, nil
+}
+
+// IsOrganizedWith reports whether the video follows the given organization's on-disk layout.
+func (v *Video) IsOrganizedWith(org *Organization) bool {
+	if org == nil || !v.Imported {
+		return false
+	}
+	if v.OrganizationID == nil || *v.OrganizationID != org.ID {
+		return false
+	}
+	return v.RelativePath() == org.Render(v)
+}
+
+// NeedsReorganization reports whether the video should be moved onto org's layout.
+func (v *Video) NeedsReorganization(org *Organization) bool {
+	if org == nil || !v.Imported {
+		return false
+	}
+	return !v.IsOrganizedWith(org)
+}

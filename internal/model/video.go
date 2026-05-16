@@ -161,6 +161,32 @@ func (v *Video) RelativePath() string {
 	return filepath.Join(v.FolderRelativePath(), "video.mp4")
 }
 
+// StoragePathCandidates returns relative paths to probe on a library, most
+// specific first: stored path, in-place triage import, then legacy layout.
+func (v *Video) StoragePathCandidates() []string {
+	seen := make(map[string]struct{})
+	var out []string
+	add := func(p string) {
+		if p == "" {
+			return
+		}
+		p = filepath.Clean(p)
+		if _, ok := seen[p]; ok {
+			return
+		}
+		seen[p] = struct{}{}
+		out = append(out, p)
+	}
+	if v.Path != nil && *v.Path != "" {
+		add(*v.Path)
+	}
+	if v.Imported && v.Filename != "" {
+		add(filepath.Join("triage", v.Filename))
+	}
+	add(filepath.Join(v.FolderRelativePath(), "video.mp4"))
+	return out
+}
+
 func (v *Video) ThumbnailRelativePath() string {
 	return filepath.Join(v.FolderRelativePath(), "thumb.jpg")
 }

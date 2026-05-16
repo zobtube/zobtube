@@ -2,6 +2,7 @@ package model
 
 import (
 	"path/filepath"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -93,6 +94,12 @@ func BackfillVideoOrganization(db *gorm.DB, defaultOrganizationID string) error 
 	}
 	for i := range videos {
 		v := &videos[i]
+		if v.Path != nil && *v.Path != "" {
+			// In-place imports keep triage/<filename>; do not assign legacy layout.
+			if strings.HasPrefix(filepath.ToSlash(*v.Path), "triage/") {
+				continue
+			}
+		}
 		legacyPath := filepath.Join(v.FolderRelativePath(), "video.mp4")
 		orgID := defaultOrganizationID
 		v.OrganizationID = &orgID

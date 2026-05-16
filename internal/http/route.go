@@ -112,6 +112,7 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 		videoGroup.POST("/:id/count-view", c.VideoViewIncrement)
 		videoGroup.POST("/:id/channel", c.VideoEditChannel)
 		videoGroup.POST("/:id/library", c.VideoEditLibrary)
+		videoGroup.POST("/:id/reorganize", c.VideoReorganize)
 	}
 
 	// Uploads

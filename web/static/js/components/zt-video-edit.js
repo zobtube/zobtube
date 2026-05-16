@@ -48,6 +48,10 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       var org = v.Organization||v.organization;
       var organizationId = v.OrganizationID||v.organization_id||(org&&(org.ID||org.id));
       var organizationName = org ? (org.Name||org.name||"") : "";
+      var activeOrg = data.active_organization;
+      var activeOrgName = activeOrg ? (activeOrg.Name||activeOrg.name||"") : "";
+      var organized = data.organized === true;
+      var needsOrganize = data.needs_organize === true;
       var hasThumb = v.Thumbnail||v.thumbnail;
       var hasThumbMini = v.ThumbnailMini||v.thumbnailMini;
       var dur = niceDur(v.Duration||v.duration);
@@ -208,16 +212,21 @@ ZtVideoEdit.prototype.connectedCallback = function() {
 
       var html = '<h2>Video editing</h2><a href="'+urlView+'">← Back to video viewer</a><br/><div class="row">';
       html += '<div class="col-md-9"><video id="zt-video-edit-player" style="width:100%;height:35vw" src="'+streamUrl+'" controls></video></div>';
-      var orgStatusHtml;
-      if (organizationId) {
-        orgStatusHtml = '<h5>Organization</h5><p><span class="badge bg-success">Organized</span>';
-        if (organizationName) orgStatusHtml += ' <span class="text-muted small">'+esc(organizationName)+'</span>';
-        orgStatusHtml += '</p>';
-      } else if (!imported) {
-        orgStatusHtml = '<h5>Organization</h5><p><span class="badge bg-warning">In triage</span></p>';
+      var orgStatusHtml = '<h5>Organization</h5><p>';
+      if (!imported) {
+        orgStatusHtml += '<span class="badge bg-warning">In triage</span>';
+      } else if (organized) {
+        orgStatusHtml += '<span class="badge bg-success">Organized</span>';
+        if (activeOrgName) orgStatusHtml += ' <span class="text-muted small">'+esc(activeOrgName)+'</span>';
+        else if (organizationName) orgStatusHtml += ' <span class="text-muted small">'+esc(organizationName)+'</span>';
+      } else if (!organizationId) {
+        orgStatusHtml += '<span class="badge bg-secondary">In place</span><br><small class="text-muted">Original path kept (no reorganization)</small>';
       } else {
-        orgStatusHtml = '<h5>Organization</h5><p><span class="badge bg-secondary">In place</span><br><small class="text-muted">Original path kept (no reorganization)</small></p>';
+        orgStatusHtml += '<span class="badge bg-warning">Not on active layout</span>';
+        if (organizationName) orgStatusHtml += ' <span class="text-muted small">('+esc(organizationName)+')</span>';
+        if (activeOrgName) orgStatusHtml += '<br><small class="text-muted">Active: '+esc(activeOrgName)+'</small>';
       }
+      orgStatusHtml += '</p>';
       html += '<div class="col-md-3">'+orgStatusHtml;
       html += '<h5>Duration</h5><p><small class="text-muted" id="video-duration">'+dur+'</small></p>';
       html += '<h5>Thumbnail</h5><p><span id="video-thumb" class="badge '+(hasThumb?'bg-success':'bg-warning')+'">'+(hasThumb?'Generated':'Missing')+'</span></p>';
@@ -226,7 +235,10 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       html += '<p><button class="btn btn-primary btn-sm w-100" '+(v.Type==='c'?'disabled':'')+' data-migrate="c">Change to Clip</button></p>';
       html += '<p><button class="btn btn-primary btn-sm w-100" '+(v.Type==='m'?'disabled':'')+' data-migrate="m">Change to Movie</button></p>';
       html += '<p><button class="btn btn-primary btn-sm w-100" '+(v.Type==='v'?'disabled':'')+' data-migrate="v">Change to Video</button></p>';
-      html += '<p><button class="btn btn-warning btn-sm w-100" type="button" id="video-library-edit">Change library</button></p>';
+      if (needsOrganize) {
+        html += '<p><button class="btn btn-warning btn-sm w-100" type="button" id="video-organize">Organize</button></p>';
+      }
+      html += '<p><button class="btn btn-warning btn-sm w-100" type="button" id="video-library-edit"'+(organized ? "" : " disabled")+' title="'+(organized ? "" : "Organize the video with the active organization before changing library")+'">Change library</button></p>';
       html += '<p><button class="btn btn-danger btn-sm w-100" id="zt-del-video">Delete</button></p></div>';
 
       html += '<div class="col-12 mb-3 mt-3"><h4>Video details</h4></div>';
@@ -304,7 +316,32 @@ ZtVideoEdit.prototype.connectedCallback = function() {
           .then(function(r){ if(r.ok) window.location.reload(); });
       });
 
+      var organizeBtn = self.querySelector("#video-organize");
+      if (organizeBtn) {
+        organizeBtn.addEventListener("click", function() {
+          if (!confirm("Queue reorganization to the active organization layout? The file will be moved in the background.")) return;
+          organizeBtn.disabled = true;
+          fetch("/api/video/"+id+"/reorganize", { method: "POST", credentials: "same-origin" })
+            .then(function(r) { return r.json().then(function(body) { return { status: r.status, body: body }; }); })
+            .then(function(res) {
+              if (res.status === 202 || res.status === 200) {
+                if (typeof sendToast === "function") sendToast("Organize", "", "bg-success", (res.body && res.body.message) || "Reorganize queued");
+                if (res.body && res.body.redirect && typeof loadPage === "function") loadPage(res.body.redirect);
+                else window.location.reload();
+              } else {
+                if (typeof sendToast === "function") sendToast("Organize", "failed", "bg-danger", (res.body && res.body.error) || "Failed");
+                organizeBtn.disabled = false;
+              }
+            })
+            .catch(function() {
+              if (typeof sendToast === "function") sendToast("Organize", "failed", "bg-danger", "Request failed");
+              organizeBtn.disabled = false;
+            });
+        });
+      }
+
       self.querySelector("#video-library-edit").addEventListener("click", function(){
+        if (this.disabled) return;
         var sel = self.querySelector("#library-list");
         var sendBtn = self.querySelector("#library-send");
         var noOther = self.querySelector("#library-no-other");

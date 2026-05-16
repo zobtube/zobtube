@@ -124,16 +124,82 @@ func (c *Controller) VideoEdit(g *gin.Context) {
 	c.datastore.Preload("Sub").Find(&categories)
 	var libraries []model.Library
 	c.datastore.Order("created_at").Find(&libraries)
+	activeOrg, _ := model.ActiveOrganization(c.datastore)
 	resp := gin.H{
 		"video":      video,
 		"actors":     actors,
 		"categories": categories,
 		"libraries":  libraries,
+		"organized":  video.IsOrganizedWith(activeOrg),
+	}
+	if activeOrg != nil {
+		resp["active_organization"] = activeOrg
+	}
+	if video.NeedsReorganization(activeOrg) {
+		resp["needs_organize"] = true
 	}
 	if u := c.videoStreamURL(g, video); u != "" {
 		resp["stream_url"] = u
 	}
 	g.JSON(http.StatusOK, resp)
+}
+
+// VideoReorganize godoc
+//
+//	@Summary	Enqueue reorganize task for one video onto the active organization (admin)
+//	@Tags		video
+//	@Param		id	path	string	true	"Video ID"
+//	@Success	202	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Failure	409	{object}	map[string]interface{}
+//	@Router		/video/{id}/reorganize [post]
+func (c *Controller) VideoReorganize(g *gin.Context) {
+	if c.runner == nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "task runner not available"})
+		return
+	}
+	id := g.Param("id")
+	video := &model.Video{ID: id}
+	if c.datastore.First(video).RowsAffected < 1 {
+		g.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		return
+	}
+	if !video.Imported {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "video has not been imported yet"})
+		return
+	}
+	activeOrg, err := model.ActiveOrganization(c.datastore)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "no active organization"})
+		return
+	}
+	if !video.NeedsReorganization(activeOrg) {
+		g.JSON(http.StatusOK, gin.H{"message": "video already follows the active organization"})
+		return
+	}
+	const taskName = "video/reorganize"
+	var pending []model.Task
+	c.datastore.Where("name = ? AND status IN ?", taskName, []model.TaskStatus{model.TaskStatusTodo, model.TaskStatusInProgress}).Find(&pending)
+	for _, task := range pending {
+		if task.Parameters["videoID"] == video.ID {
+			g.JSON(http.StatusConflict, gin.H{"error": "reorganize is already queued or running for this video"})
+			return
+		}
+	}
+	if err := c.runner.NewTask(taskName, map[string]string{
+		"videoID":              video.ID,
+		"targetOrganizationID": activeOrg.ID,
+		"sourcePath":           video.RelativePath(),
+	}); err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	g.JSON(http.StatusAccepted, gin.H{
+		"message":  "reorganize task queued",
+		"task":     taskName,
+		"redirect": "/adm/tasks",
+	})
 }
 
 // VideoActors godoc
@@ -277,17 +343,19 @@ func (c *Controller) VideoStreamInfo(g *gin.Context) {
 		return
 	}
 
-	libID := c.videoLibraryID(video)
-	store, err := c.storageResolver.Storage(libID)
-	if err != nil {
-		g.JSON(500, gin.H{"error": err.Error()})
+	store, path, found := c.resolveVideoFile(video)
+	if store == nil {
+		g.JSON(500, gin.H{"error": "storage not available"})
 		return
 	}
-	path := video.RelativePath()
-	exists, err := store.Exists(path)
-	if err != nil {
-		g.JSON(500, gin.H{"error": err.Error()})
-		return
+	exists := found
+	if !found {
+		var checkErr error
+		exists, checkErr = store.Exists(path)
+		if checkErr != nil {
+			g.JSON(500, gin.H{"error": checkErr.Error()})
+			return
+		}
 	}
 	if exists {
 		g.JSON(200, gin.H{})
@@ -831,6 +899,11 @@ func (c *Controller) VideoEditLibrary(g *gin.Context) {
 		g.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 		return
 	}
+	activeOrg, err := model.ActiveOrganization(c.datastore)
+	if err != nil || !video.IsOrganizedWith(activeOrg) {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "video must be organized with the active organization before changing library"})
+		return
+	}
 	var lib model.Library
 	if c.datastore.First(&lib, "id = ?", body.LibraryID).RowsAffected < 1 {
 		g.JSON(http.StatusBadRequest, gin.H{"error": "library not found"})
@@ -915,17 +988,21 @@ func (c *Controller) VideoStream(g *gin.Context) {
 		g.JSON(404, gin.H{})
 		return
 	}
-	libID := c.videoLibraryID(video)
-	store, err := c.storageResolver.Storage(libID)
-	if err != nil {
-		g.JSON(500, gin.H{"error": err.Error()})
+	store, path, found := c.resolveVideoFile(video)
+	if store == nil {
+		g.JSON(500, gin.H{"error": "storage not available"})
 		return
 	}
-	var path string
-	if video.Imported {
-		path = video.RelativePath()
-	} else {
-		path = filepath.Join("triage", video.Filename)
+	if !found {
+		ok, checkErr := store.Exists(path)
+		if checkErr != nil {
+			g.JSON(500, gin.H{"error": checkErr.Error()})
+			return
+		}
+		if !ok {
+			g.JSON(404, gin.H{})
+			return
+		}
 	}
 	c.serveFromStorage(g, store, path)
 }

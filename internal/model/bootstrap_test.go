@@ -104,6 +104,32 @@ func TestBackfillVideoOrganization_AssignsPathAndOrgToImported(t *testing.T) {
 	}
 }
 
+func TestBackfillVideoOrganization_SkipsTriageInPlacePath(t *testing.T) {
+	db := setupBootstrapDB(t)
+	orgID, err := EnsureDefaultOrganization(db)
+	if err != nil {
+		t.Fatalf("ensure org: %v", err)
+	}
+	triagePath := "triage/keep.mp4"
+	v := Video{ID: "55555555-5555-5555-5555-555555555555", Type: "v", Name: "n", Filename: "keep.mp4", Imported: true, Path: &triagePath}
+	if err := db.Create(&v).Error; err != nil {
+		t.Fatalf("create video: %v", err)
+	}
+	if err := BackfillVideoOrganization(db, orgID); err != nil {
+		t.Fatalf("backfill: %v", err)
+	}
+	var got Video
+	if err := db.First(&got, "id = ?", v.ID).Error; err != nil {
+		t.Fatal(err)
+	}
+	if got.OrganizationID != nil {
+		t.Errorf("in-place triage video must keep organization_id nil, got %v", got.OrganizationID)
+	}
+	if got.Path == nil || *got.Path != triagePath {
+		t.Errorf("path = %v, want %q", got.Path, triagePath)
+	}
+}
+
 func TestBackfillVideoOrganization_DoesNotOverwriteExisting(t *testing.T) {
 	db := setupBootstrapDB(t)
 	orgID, err := EnsureDefaultOrganization(db)

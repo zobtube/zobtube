@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/storage"
 	"github.com/zobtube/zobtube/internal/task/common"
 )
 
@@ -43,17 +44,27 @@ func moveFilesToNewLibrary(ctx *common.Context, params common.Parameters) (strin
 	if err != nil {
 		return "unable to resolve target storage", err
 	}
-	paths := []string{video.RelativePath()}
+	videoPath, ok, err := storage.FirstExistingPath(sourceStore, video.StoragePathCandidates())
+	if err != nil {
+		return "unable to check source file", err
+	}
+	if !ok {
+		return "video file not found on source library", errors.New("source video missing")
+	}
+	paths := []string{videoPath}
 	if !video.Migrated {
 		paths = append(paths, video.ThumbnailRelativePath(), video.ThumbnailXSRelativePath())
 	}
+	copied := 0
 	for _, p := range paths {
-		ok, err := sourceStore.Exists(p)
-		if err != nil {
-			return "unable to check source file", err
-		}
-		if !ok {
-			continue
+		if p != videoPath {
+			ok, err := sourceStore.Exists(p)
+			if err != nil {
+				return "unable to check source file", err
+			}
+			if !ok {
+				continue
+			}
 		}
 		if err := targetStore.MkdirAll(filepath.Dir(p)); err != nil {
 			return "unable to create target folder", err
@@ -76,7 +87,12 @@ func moveFilesToNewLibrary(ctx *common.Context, params common.Parameters) (strin
 		if err := wc.Close(); err != nil {
 			return "unable to close target file", err
 		}
+		copied++
 	}
+	if copied == 0 {
+		return "video file was not copied", errors.New("no video file copied")
+	}
+	params["sourceVideoPath"] = videoPath
 	return "", nil
 }
 
@@ -123,7 +139,13 @@ func deleteFromSourceLibrary(ctx *common.Context, params common.Parameters) (str
 	if err != nil {
 		return "unable to resolve source storage", err
 	}
-	_ = store.Delete(video.RelativePath())
+	sourceVideoPath := params["sourceVideoPath"]
+	if sourceVideoPath == "" {
+		sourceVideoPath, _, _ = storage.FirstExistingPath(store, video.StoragePathCandidates())
+	}
+	if sourceVideoPath != "" {
+		_ = store.Delete(sourceVideoPath)
+	}
 	if !video.Migrated {
 		_ = store.Delete(video.ThumbnailRelativePath())
 		_ = store.Delete(video.ThumbnailXSRelativePath())
