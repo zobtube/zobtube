@@ -70,6 +70,7 @@ def zotbue_server(xprocess):
     env["ZT_SERVER_BIND"] = f"127.0.0.1:{port}"
     env["ZT_DB_CONNSTRING"] = db_path
     env["ZT_MEDIA_PATH"] = media_path
+    env["ZT_METADATA_PATH"] = "/tmp/zt-metadata"
     subprocess.run(
         [str(project_root / "test" / "db" / "generate-empty.sh")],
         cwd=project_root,
@@ -84,6 +85,7 @@ def zotbue_server(xprocess):
             "ZT_DB_DRIVER": "sqlite",
             "ZT_DB_CONNSTRING": db_path,
             "ZT_MEDIA_PATH": media_path,
+            "ZT_METADATA_PATH": "/tmp/zt-metadata",
         }
 
         def startup_check(self):

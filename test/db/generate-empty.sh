@@ -5,6 +5,7 @@ export ZT_SERVER_BIND="${ZT_SERVER_BIND:-127.0.0.1:6969}"
 export ZT_DB_DRIVER="${ZT_DB_DRIVER:-sqlite}"
 export ZT_DB_CONNSTRING="${ZT_DB_CONNSTRING:-/tmp/zt-db.sqlite3}"
 export ZT_MEDIA_PATH="${ZT_MEDIA_PATH:-/tmp/zt-data}"
+export ZT_METADATA_PATH=/tmp/zt-metadata
 
 echo 'delete existing database'
 rm -f $ZT_DB_CONNSTRING
