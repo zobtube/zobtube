@@ -320,12 +320,13 @@ func (c *Controller) UploadMassDelete(g *gin.Context) {
 func (c *Controller) UploadMassImport(g *gin.Context) {
 	// get file list from request
 	type fileImportForm struct {
-		Files      []string `json:"files" binding:"required"`
-		Actors     []string `json:"actors"`
-		Categories []string `json:"categories"`
-		TypeEnum   string   `json:"type" binding:"required"`
-		Channel    string   `json:"channel"`
-		LibraryID  string   `json:"library_id"`
+		Files              []string `json:"files" binding:"required"`
+		Actors             []string `json:"actors"`
+		Categories         []string `json:"categories"`
+		TypeEnum           string   `json:"type" binding:"required"`
+		Channel            string   `json:"channel"`
+		LibraryID          string   `json:"library_id"`
+		SkipReorganization *bool    `json:"skip_reorganization"`
 	}
 
 	form := fileImportForm{}
@@ -476,10 +477,18 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 
 	// now create task for the import
 	for _, video := range videos {
-		err = c.runner.NewTask("video/create", map[string]string{
+		params := map[string]string{
 			"videoID":         video.ID,
 			"thumbnailTiming": "0",
-		})
+		}
+		if form.SkipReorganization != nil {
+			if *form.SkipReorganization {
+				params["skipReorganization"] = "true"
+			} else {
+				params["skipReorganization"] = "false"
+			}
+		}
+		err = c.runner.NewTask("video/create", params)
 		if err != nil {
 			g.JSON(500, gin.H{"error": err.Error()})
 			return

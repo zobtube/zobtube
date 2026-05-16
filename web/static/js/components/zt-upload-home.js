@@ -84,9 +84,10 @@ ZtUploadHome.prototype.connectedCallback = function() {
     html += '<div class="form-floating mb-3"><select class="form-select" id="zt-channel-list"><option value="">None</option></select><label for="zt-channel-list">Channel</label></div>';
     html += '<div class="mb-3"><label>Actors</label><div id="zt-mass-actors" class="border rounded p-2" style="max-height:120px;overflow-y:auto"></div></div>';
     html += '<div class="mb-3"><label>Categories</label><div id="zt-mass-categories" class="border rounded p-2" style="max-height:120px;overflow-y:auto"></div></div>';
+    html += '<div class="mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="zt-skip-reorg-mass"><label class="form-check-label" for="zt-skip-reorg-mass">Keep original path (do not reorganize)</label></div><div class="form-text">When checked, the file stays at its triage location instead of being moved to the active Organization layout.</div></div>';
     html += '</div><div class="modal-footer"><span class="input-group-text">Import as:</span><button type="button" class="btn btn-primary" data-type="v">Video</button><button type="button" class="btn btn-primary" data-type="m">Movie</button><button type="button" class="btn btn-primary" data-type="c">Clip</button></div></div></div></div>';
 
-    html += '<div class="modal fade modal-lg" id="zt-video-import-modal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Import video</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p>Filename: <code id="zt-import-filename"></code></p><p>Path: <code id="zt-import-filepath"></code></p></div><div class="modal-footer"><span class="input-group-text">Import as:</span><button type="button" class="btn btn-primary" data-type="v">Video</button><button type="button" class="btn btn-primary" data-type="m">Movie</button><button type="button" class="btn btn-primary" data-type="c">Clip</button></div></div></div></div>';
+    html += '<div class="modal fade modal-lg" id="zt-video-import-modal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Import video</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p>Filename: <code id="zt-import-filename"></code></p><p>Path: <code id="zt-import-filepath"></code></p><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="zt-skip-reorg-single"><label class="form-check-label" for="zt-skip-reorg-single">Keep original path (do not reorganize)</label></div></div><div class="modal-footer"><span class="input-group-text">Import as:</span><button type="button" class="btn btn-primary" data-type="v">Video</button><button type="button" class="btn btn-primary" data-type="m">Movie</button><button type="button" class="btn btn-primary" data-type="c">Clip</button></div></div></div></div>';
 
     html += '<div class="modal fade" id="newFolderModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Create new folder</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="form-floating"><input type="text" class="form-control" id="folder-new" placeholder="Name"><label for="folder-new">New folder name</label></div></div><div class="modal-footer"><button type="button" class="btn btn-success" id="zt-folder-create-btn">Create</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
 
@@ -273,6 +274,8 @@ ZtUploadHome.prototype.connectedCallback = function() {
         self.querySelectorAll("#zt-mass-categories .zt-mass-cat:checked").forEach(function(cb) { categories.push(cb.value); });
         var payload = { files: files, type: type, channel: channel || "", actors: actors, categories: categories };
         if (selectedLibraryId) payload.library_id = selectedLibraryId;
+        var skipReorgEl = self.querySelector("#zt-skip-reorg-mass");
+        if (skipReorgEl && skipReorgEl.checked) payload.skip_reorganization = true;
         fetch("/api/upload/triage/mass-action", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
           .then(function(r) {
             if (r.ok) { massImportModal.hide(); loadListing(); if (typeof sendToast === "function") sendToast("Import successful", "", "bg-success", "Import tasks will run in background"); }
@@ -304,6 +307,8 @@ ZtUploadHome.prototype.connectedCallback = function() {
         fd.set("filename", filepath);
         fd.set("type", type);
         if (selectedLibraryId) fd.set("library_id", selectedLibraryId);
+        var singleSkip = self.querySelector("#zt-skip-reorg-single");
+        if (singleSkip && singleSkip.checked) fd.set("skip_reorganization", "true");
         fetch("/api/video", { method: "POST", credentials: "same-origin", body: fd })
           .then(function(r) {
             if (r.ok) {

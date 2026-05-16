@@ -19,24 +19,27 @@ const (
 
 // Video model defines the generic video type used for videos, clips and movies
 type Video struct {
-	ID            string `gorm:"type:uuid;primary_key"`
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	DeletedAt     gorm.DeletedAt `gorm:"index"`
-	Name          string
-	Filename      string
-	LibraryID     *string        `gorm:"type:uuid;index;default:00000000-0000-0000-0000-000000000000"` // nil = legacy, backfilled to default library
-	Actors        []Actor `gorm:"many2many:video_actors;"`
-	Channel       *Channel
-	ChannelID     *string
-	Thumbnail     bool
-	ThumbnailMini bool
-	Migrated      bool `gorm:"default:false"`
-	Duration      time.Duration
-	Type          string        `gorm:"size:1;"`
-	Imported      bool          `gorm:"default:false"`
-	Status        VideoStatus   `gorm:"default:creating"`
-	Categories    []CategorySub `gorm:"many2many:video_categories;"`
+	ID             string `gorm:"type:uuid;primary_key"`
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	DeletedAt      gorm.DeletedAt `gorm:"index"`
+	Name           string
+	Filename       string
+	LibraryID      *string       `gorm:"type:uuid;index;default:00000000-0000-0000-0000-000000000000"` // nil = legacy, backfilled to default library
+	OrganizationID *string       `gorm:"type:uuid;index"`                                              // organization driving the on-disk layout, nil = file kept in place (no reorg)
+	Organization   *Organization `gorm:"foreignKey:OrganizationID;references:ID"`
+	Path           *string       `gorm:"size:1024"` // resolved relative path on the library (set on import or reorganize)
+	Actors         []Actor       `gorm:"many2many:video_actors;"`
+	Channel        *Channel
+	ChannelID      *string
+	Thumbnail      bool
+	ThumbnailMini  bool
+	Migrated       bool `gorm:"default:false"`
+	Duration       time.Duration
+	Type           string        `gorm:"size:1;"`
+	Imported       bool          `gorm:"default:false"`
+	Status         VideoStatus   `gorm:"default:creating"`
+	Categories     []CategorySub `gorm:"many2many:video_categories;"`
 }
 
 var videoTypesAsString = map[string]string{
@@ -146,7 +149,15 @@ func (v *Video) FolderRelativePathForType(typeStr string) string {
 	return filepath.Join(videoFileTypeToPath[typeStr], v.ID)
 }
 
+// RelativePath returns the relative path of the video file on its library.
+// When Path is set on the row (resolved from an Organization or stored
+// in-place after a no-reorg import), it is used as-is. Otherwise the legacy
+// hardcoded layout is returned so callers can keep working for videos
+// created before the Organization feature existed.
 func (v *Video) RelativePath() string {
+	if v.Path != nil && *v.Path != "" {
+		return *v.Path
+	}
 	return filepath.Join(v.FolderRelativePath(), "video.mp4")
 }
 

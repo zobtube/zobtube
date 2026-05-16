@@ -27,6 +27,7 @@ var modelToMigrate = []any{
 	Channel{},
 	Configuration{},
 	Library{},
+	Organization{},
 	Provider{},
 	Video{},
 	VideoView{},

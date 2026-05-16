@@ -113,7 +113,7 @@ func (c *Controller) VideoView(g *gin.Context) {
 func (c *Controller) VideoEdit(g *gin.Context) {
 	id := g.Param("id")
 	video := &model.Video{ID: id}
-	result := c.datastore.Preload("Actors").Preload("Channel").Preload("Categories").First(video)
+	result := c.datastore.Preload("Actors").Preload("Channel").Preload("Categories").Preload("Organization").First(video)
 	if result.RowsAffected < 1 {
 		g.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 		return
@@ -369,11 +369,12 @@ func (c *Controller) VideoCreate(g *gin.Context) {
 	var err error
 
 	form := struct {
-		Name      string   `form:"name"`
-		Filename  string   `form:"filename"`
-		Actors    []string `form:"actors"`
-		TypeEnum  string   `form:"type"`
-		LibraryID string   `form:"library_id"`
+		Name               string   `form:"name"`
+		Filename           string   `form:"filename"`
+		Actors             []string `form:"actors"`
+		TypeEnum           string   `form:"type"`
+		LibraryID          string   `form:"library_id"`
+		SkipReorganization string   `form:"skip_reorganization"`
 	}{}
 	err = g.ShouldBind(&form)
 	if err != nil {
@@ -429,10 +430,17 @@ func (c *Controller) VideoCreate(g *gin.Context) {
 		}
 	}
 
-	err = c.runner.NewTask("video/create", map[string]string{
+	createParams := map[string]string{
 		"videoID":         video.ID,
 		"thumbnailTiming": "0",
-	})
+	}
+	switch form.SkipReorganization {
+	case "true", "1":
+		createParams["skipReorganization"] = "true"
+	case "false", "0":
+		createParams["skipReorganization"] = "false"
+	}
+	err = c.runner.NewTask("video/create", createParams)
 	if err != nil {
 		g.JSON(500, gin.H{"error": err.Error()})
 		return

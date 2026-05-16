@@ -99,6 +99,18 @@ func Start(params *Parameters) error {
 	}
 	cfg.DefaultLibraryID = defaultLibID
 
+	params.Logger.Debug().Str("kind", "system").Msg("ensure default organization")
+	defaultOrgID, err := model.EnsureDefaultOrganization(db)
+	if err != nil {
+		startFailsafeWebServer(httpServer, err, c)
+		return nil
+	}
+	params.Logger.Debug().Str("kind", "system").Msg("backfill video organization_id")
+	if err := model.BackfillVideoOrganization(db, defaultOrgID); err != nil {
+		startFailsafeWebServer(httpServer, err, c)
+		return nil
+	}
+
 	params.Logger.Debug().Str("kind", "system").Msg("ensure library folders for filesystem libraries")
 	var libs []model.Library
 	if err := db.Where("type = ?", model.LibraryTypeFilesystem).Find(&libs).Error; err != nil {
@@ -237,6 +249,7 @@ func Start(params *Parameters) error {
 	runner.RegisterTask(video.NewVideoDeleting())
 	runner.RegisterTask(video.NewVideoMoveLibrary())
 	runner.RegisterTask(video.NewVideoGenerateThumbnail())
+	runner.RegisterTask(video.NewVideoReorganize())
 	runner.RegisterTask(metamigrate.NewMetadataMigrate())
 	runner.Start(cfg, db, storageResolver, metadataStore)
 	c.RunnerRegister(runner)

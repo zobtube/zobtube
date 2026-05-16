@@ -9,6 +9,12 @@ import (
 	"github.com/zobtube/zobtube/internal/task/common"
 )
 
+// importFromTriage moves an uploaded file from the library triage folder to
+// the location dictated by the currently Active Organization, unless the
+// import is requested with reorganization disabled (per-import flag or
+// global setting). In the no-reorg case the file stays at
+// triage/<filename> and Path is recorded so the rest of the pipeline can
+// stream it from there.
 func importFromTriage(ctx *common.Context, params common.Parameters) (string, error) {
 	id := params["videoID"]
 	video := &model.Video{ID: id}
@@ -22,7 +28,28 @@ func importFromTriage(ctx *common.Context, params common.Parameters) (string, er
 		return "unable to resolve storage", err
 	}
 	triagePath := filepath.Join("triage", video.Filename)
-	newPath := video.RelativePath()
+
+	skipReorg, err := shouldSkipReorganization(ctx, params)
+	if err != nil {
+		return "unable to resolve reorganization setting", err
+	}
+
+	if skipReorg {
+		path := triagePath
+		video.Path = &path
+		video.OrganizationID = nil
+		video.Imported = true
+		if err := ctx.DB.Save(video).Error; err != nil {
+			return "unable to update database", err
+		}
+		return "", nil
+	}
+
+	org, err := resolveActiveOrganization(ctx)
+	if err != nil {
+		return "unable to resolve active organization", err
+	}
+	newPath := org.Render(video)
 	if err := store.MkdirAll(filepath.Dir(newPath)); err != nil {
 		return "unable to create new video folder", err
 	}
@@ -40,11 +67,43 @@ func importFromTriage(ctx *common.Context, params common.Parameters) (string, er
 		return "unable to copy video", err
 	}
 	_ = store.Delete(triagePath)
+	orgID := org.ID
+	video.OrganizationID = &orgID
+	video.Path = &newPath
 	video.Imported = true
 	if err := ctx.DB.Save(video).Error; err != nil {
 		return "unable to update database", err
 	}
 	return "", nil
+}
+
+// shouldSkipReorganization returns true when the file should remain at its
+// triage path. Per-task params win over the global Configuration default.
+func shouldSkipReorganization(ctx *common.Context, params common.Parameters) (bool, error) {
+	if v, ok := params["skipReorganization"]; ok && v != "" {
+		return v == "true" || v == "1", nil
+	}
+	if ctx.DB == nil {
+		return false, nil
+	}
+	var cfg model.Configuration
+	if err := ctx.DB.First(&cfg).Error; err != nil {
+		return false, nil
+	}
+	return !cfg.ReorganizeOnImport, nil
+}
+
+// resolveActiveOrganization returns the currently Active organization,
+// falling back to the first one found if none are explicitly active.
+func resolveActiveOrganization(ctx *common.Context) (*model.Organization, error) {
+	var org model.Organization
+	if err := ctx.DB.Where("active = ?", true).First(&org).Error; err == nil {
+		return &org, nil
+	}
+	if err := ctx.DB.First(&org).Error; err != nil {
+		return nil, err
+	}
+	return &org, nil
 }
 
 func videoLibraryID(ctx *common.Context, video *model.Video) string {

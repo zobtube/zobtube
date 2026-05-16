@@ -45,6 +45,9 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       var name = esc(v.Name||v.name||"");
       var filename = esc(v.Filename||v.filename||"");
       var imported = v.Imported||v.imported;
+      var org = v.Organization||v.organization;
+      var organizationId = v.OrganizationID||v.organization_id||(org&&(org.ID||org.id));
+      var organizationName = org ? (org.Name||org.name||"") : "";
       var hasThumb = v.Thumbnail||v.thumbnail;
       var hasThumbMini = v.ThumbnailMini||v.thumbnailMini;
       var dur = niceDur(v.Duration||v.duration);
@@ -205,7 +208,17 @@ ZtVideoEdit.prototype.connectedCallback = function() {
 
       var html = '<h2>Video editing</h2><a href="'+urlView+'">← Back to video viewer</a><br/><div class="row">';
       html += '<div class="col-md-9"><video id="zt-video-edit-player" style="width:100%;height:35vw" src="'+streamUrl+'" controls></video></div>';
-      html += '<div class="col-md-3"><h5>Import status</h5><p><span id="video-import" class="badge '+(imported?'bg-success':'bg-warning')+'">'+(imported?'Imported':'In triage')+'</span></p>';
+      var orgStatusHtml;
+      if (organizationId) {
+        orgStatusHtml = '<h5>Organization</h5><p><span class="badge bg-success">Organized</span>';
+        if (organizationName) orgStatusHtml += ' <span class="text-muted small">'+esc(organizationName)+'</span>';
+        orgStatusHtml += '</p>';
+      } else if (!imported) {
+        orgStatusHtml = '<h5>Organization</h5><p><span class="badge bg-warning">In triage</span></p>';
+      } else {
+        orgStatusHtml = '<h5>Organization</h5><p><span class="badge bg-secondary">In place</span><br><small class="text-muted">Original path kept (no reorganization)</small></p>';
+      }
+      html += '<div class="col-md-3">'+orgStatusHtml;
       html += '<h5>Duration</h5><p><small class="text-muted" id="video-duration">'+dur+'</small></p>';
       html += '<h5>Thumbnail</h5><p><span id="video-thumb" class="badge '+(hasThumb?'bg-success':'bg-warning')+'">'+(hasThumb?'Generated':'Missing')+'</span></p>';
       html += '<h5>Thumbnail mini</h5><p><span id="video-thumb-mini" class="badge '+(hasThumbMini?'bg-success':'bg-warning')+'">'+(hasThumbMini?'Generated':'Missing')+'</span></p><hr/>';

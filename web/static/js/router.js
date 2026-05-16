@@ -30,6 +30,7 @@ var routes = [
   { pattern: /^\/adm\/categories\/?$/, component: "zt-adm-category" },
   { pattern: /^\/adm\/metadata-storage\/?$/, component: "zt-adm-metadata-storage" },
   { pattern: /^\/adm\/libraries\/?$/, component: "zt-adm-library-list" },
+  { pattern: /^\/adm\/organizations\/?$/, component: "zt-adm-organization-list" },
   { pattern: /^\/adm\/task\/home\/?$/, component: "zt-adm-task-home" },
   { pattern: /^\/adm\/tasks\/?$/, component: "zt-adm-task-list" },
   { pattern: /^\/adm\/task\/([^\/]+)\/?$/, component: "zt-adm-task-view", param: "id" },

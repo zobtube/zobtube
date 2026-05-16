@@ -208,4 +208,18 @@ func TestVideo_FolderRelativePath_RelativePath_ThumbPaths(t *testing.T) {
 			t.Errorf("FolderRelativePath() = %q", got)
 		}
 	})
+	t.Run("RelativePath_honorsStoredPath", func(t *testing.T) {
+		stored := "custom/layout/file.mp4"
+		v := &Video{ID: id, Type: "v", Path: &stored}
+		if got := v.RelativePath(); got != stored {
+			t.Errorf("RelativePath() = %q, want %q", got, stored)
+		}
+	})
+	t.Run("RelativePath_emptyStoredPathFallsBack", func(t *testing.T) {
+		empty := ""
+		v := &Video{ID: id, Type: "v", Path: &empty}
+		if got := v.RelativePath(); got != filepath.Join("/videos", id, "video.mp4") {
+			t.Errorf("RelativePath() with empty stored path = %q", got)
+		}
+	})
 }

@@ -31,6 +31,7 @@ func setupVideoController(t *testing.T) *Controller {
 	if err := db.AutoMigrate(
 		&model.Video{}, &model.Actor{}, &model.Channel{}, &model.Category{},
 		&model.CategorySub{}, &model.VideoView{}, &model.Task{}, &model.Library{},
+		&model.Organization{},
 	); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
@@ -221,6 +222,56 @@ func TestController_VideoEdit_Success(t *testing.T) {
 	}
 	if body["video"] == nil {
 		t.Error("expected video in response")
+	}
+}
+
+func TestController_VideoEdit_IncludesOrganization(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupVideoController(t)
+	org := model.Organization{ID: "11111111-1111-1111-1111-111111111111", Name: "Default (legacy layout)", Template: model.DefaultOrganizationTemplate, Active: true}
+	if err := ctrl.datastore.Create(&org).Error; err != nil {
+		t.Fatal(err)
+	}
+	orgID := org.ID
+	path := "videos/vid1/video.mp4"
+	vid := &model.Video{
+		Name: "Test", Filename: "test.mp4", Type: "v",
+		Imported: true, OrganizationID: &orgID, Path: &path,
+	}
+	if err := ctrl.datastore.Create(vid).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Params = gin.Params{{Key: "id", Value: vid.ID}}
+	c.Request = httptest.NewRequest("GET", "/api/video/"+vid.ID+"/edit", nil)
+	ctrl.VideoEdit(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var body map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	video, _ := body["video"].(map[string]any)
+	if video == nil {
+		t.Fatal("expected video object")
+	}
+	orgObj, _ := video["Organization"].(map[string]any)
+	if orgObj == nil {
+		orgObj, _ = video["organization"].(map[string]any)
+	}
+	if orgObj == nil {
+		t.Fatal("expected Organization preloaded on video")
+	}
+	name, _ := orgObj["Name"].(string)
+	if name == "" {
+		name, _ = orgObj["name"].(string)
+	}
+	if name != org.Name {
+		t.Errorf("expected organization name %q, got %q", org.Name, name)
 	}
 }
 

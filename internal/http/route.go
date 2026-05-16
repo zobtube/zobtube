@@ -155,6 +155,13 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 	admGroup.POST("/api/adm/libraries", c.AdmLibraryCreate)
 	admGroup.PUT("/api/adm/libraries/:id", c.AdmLibraryUpdate)
 	admGroup.DELETE("/api/adm/libraries/:id", c.AdmLibraryDelete)
+	admGroup.GET("/api/adm/organizations", c.AdmOrganizationList)
+	admGroup.POST("/api/adm/organizations", c.AdmOrganizationCreate)
+	admGroup.PUT("/api/adm/organizations/:id", c.AdmOrganizationUpdate)
+	admGroup.DELETE("/api/adm/organizations/:id", c.AdmOrganizationDelete)
+	admGroup.POST("/api/adm/organizations/:id/activate", c.AdmOrganizationActivate)
+	admGroup.POST("/api/adm/organizations/:id/reorganize", c.AdmOrganizationReorganize)
+	admGroup.GET("/api/adm/config/reorganize-on-import/:action", c.AdmConfigReorganizeOnImportUpdate)
 
 	// Profile
 	authGroup.GET("/api/profile", c.ProfileView)

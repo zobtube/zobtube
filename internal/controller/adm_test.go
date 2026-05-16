@@ -32,7 +32,7 @@ func setupAdmController(t *testing.T) *Controller {
 	if err := db.AutoMigrate(
 		&model.Video{}, &model.Actor{}, &model.Channel{}, &model.Category{},
 		&model.User{}, &model.Task{}, &model.Provider{}, &model.Configuration{},
-		&model.ApiToken{}, &model.Library{},
+		&model.ApiToken{}, &model.Library{}, &model.Organization{},
 	); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
