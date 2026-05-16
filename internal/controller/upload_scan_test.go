@@ -25,12 +25,19 @@ import (
 func setupUploadScanController(t *testing.T) (*Controller, string, string) {
 	t.Helper()
 	root := t.TempDir()
+	// Single connection: the task runner writes asynchronously while the test
+	// reads the same in-memory SQLite database (one DB per connection otherwise).
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	})
 	if err != nil {
 		t.Fatalf("open db: %v", err)
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Fatalf("sql db: %v", err)
+	}
+	sqlDB.SetMaxOpenConns(1)
 	if err := db.AutoMigrate(
 		&model.Video{}, &model.Actor{}, &model.Channel{}, &model.Category{},
 		&model.CategorySub{}, &model.Task{}, &model.Library{},
