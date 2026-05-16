@@ -127,6 +127,7 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 		uploadGroup.POST("/folder", c.UploadFolderCreate)
 		uploadGroup.POST("/triage/mass-action", c.UploadMassImport)
 		uploadGroup.DELETE("/triage/mass-action", c.UploadMassDelete)
+		uploadGroup.POST("/triage/scan", c.UploadTriageScan)
 	}
 
 	// Adm

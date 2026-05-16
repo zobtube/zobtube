@@ -6,14 +6,47 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/zobtube/zobtube/internal/model"
+	"github.com/zobtube/zobtube/internal/storage"
 )
 
 const errFileEmpty = "file name cannot be empty"
+
+var uploadVideoExt = regexp.MustCompile(`(?i)\.(mp4|mkv|webm)$`)
+
+func classifyVideoBySize(sizeBytes, clipVideoMB, videoMovieMB int64) string {
+	mb := sizeBytes / (1024 * 1024)
+	if mb < clipVideoMB {
+		return "c"
+	}
+	if mb < videoMovieMB {
+		return "v"
+	}
+	return "m"
+}
+
+func scanTypeEnabled(enabled struct {
+	C bool `json:"c"`
+	V bool `json:"v"`
+	M bool `json:"m"`
+}, typ string) bool {
+	switch typ {
+	case "c":
+		return enabled.C
+	case "v":
+		return enabled.V
+	case "m":
+		return enabled.M
+	default:
+		return false
+	}
+}
 
 // uploadLibraryID returns the library ID to use for upload/triage: if formLibraryID is non-empty
 // and a library with that ID exists, returns it; otherwise returns the default library ID.
@@ -496,6 +529,224 @@ func (c *Controller) UploadMassImport(g *gin.Context) {
 	}
 
 	g.JSON(200, gin.H{})
+}
+
+// UploadTriageScan godoc
+//
+//	@Summary	Scan triage folder and import videos by size-based type
+//	@Tags		upload
+//	@Accept		json
+//	@Param		body	body	object	true	"JSON with path, recursive, thresholds, enabled types, metadata"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Router		/upload/triage/scan [post]
+func (c *Controller) UploadTriageScan(g *gin.Context) {
+	type scanForm struct {
+		Path               string   `json:"path"`
+		Recursive          bool     `json:"recursive"`
+		LibraryID          string   `json:"library_id"`
+		SkipReorganization *bool    `json:"skip_reorganization"`
+		Channel            string   `json:"channel"`
+		Actors             []string `json:"actors"`
+		Categories         []string `json:"categories"`
+		Enabled            struct {
+			C bool `json:"c"`
+			V bool `json:"v"`
+			M bool `json:"m"`
+		} `json:"enabled"`
+		Thresholds struct {
+			ClipVideoMB  int64 `json:"clip_video_mb"`
+			VideoMovieMB int64 `json:"video_movie_mb"`
+		} `json:"thresholds"`
+	}
+
+	form := scanForm{}
+	if err := g.ShouldBindJSON(&form); err != nil {
+		g.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !form.Enabled.C && !form.Enabled.V && !form.Enabled.M {
+		g.JSON(400, gin.H{"error": "at least one video type must be enabled"})
+		return
+	}
+	if form.Thresholds.ClipVideoMB <= 0 || form.Thresholds.VideoMovieMB <= 0 {
+		g.JSON(400, gin.H{"error": "size thresholds must be positive"})
+		return
+	}
+	if form.Thresholds.ClipVideoMB > form.Thresholds.VideoMovieMB {
+		g.JSON(400, gin.H{"error": "clip threshold must not exceed video threshold"})
+		return
+	}
+
+	var actors []*model.Actor
+	for _, actorID := range form.Actors {
+		actor := &model.Actor{ID: actorID}
+		if c.datastore.First(actor).RowsAffected < 1 {
+			g.JSON(400, gin.H{"error": fmt.Sprintf("actor id %s does not exist", actorID)})
+			return
+		}
+		actors = append(actors, actor)
+	}
+
+	var categories []*model.CategorySub
+	for _, subCategoryID := range form.Categories {
+		subCategory := &model.CategorySub{ID: subCategoryID}
+		if c.datastore.First(subCategory).RowsAffected < 1 {
+			g.JSON(400, gin.H{"error": fmt.Sprintf("category id %s does not exist", subCategoryID)})
+			return
+		}
+		categories = append(categories, subCategory)
+	}
+
+	var channel *model.Channel
+	if form.Channel != "" {
+		channel = &model.Channel{ID: form.Channel}
+		if c.datastore.First(channel).RowsAffected < 1 {
+			g.JSON(400, gin.H{"error": fmt.Sprintf("channel id %s does not exist", form.Channel)})
+			return
+		}
+	}
+
+	libID := c.uploadLibraryID(form.LibraryID)
+	store, err := c.storageResolver.Storage(libID)
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	scanPath := strings.TrimPrefix(strings.TrimPrefix(form.Path, "/"), "\\")
+	prefix := filepath.Join("triage", scanPath)
+
+	type scanCandidate struct {
+		rel  string
+		size int64
+	}
+	var candidates []scanCandidate
+	var skippedNonVideo int
+
+	err = storage.WalkFiles(store, prefix, form.Recursive, func(p string, e storage.Entry) error {
+		if !uploadVideoExt.MatchString(e.Name) {
+			skippedNonVideo++
+			return nil
+		}
+		rel, relErr := filepath.Rel("triage", p)
+		if relErr != nil {
+			return relErr
+		}
+		rel = filepath.ToSlash(rel)
+		candidates = append(candidates, scanCandidate{rel: rel, size: e.Size})
+		return nil
+	})
+	if err != nil {
+		g.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	var skippedExisting int
+	var skippedDisabled int
+	var toImport []struct {
+		rel  string
+		typ  string
+		size int64
+	}
+
+	existingFilenames := make(map[string]struct{})
+	var existingRows []struct {
+		Filename string
+	}
+	if err := c.datastore.Model(&model.Video{}).Select("filename").Where("library_id = ?", libID).Find(&existingRows).Error; err != nil {
+		g.JSON(500, gin.H{"error": "unable to check existing videos"})
+		return
+	}
+	for _, row := range existingRows {
+		existingFilenames[row.Filename] = struct{}{}
+	}
+
+	for _, cand := range candidates {
+		vtyp := classifyVideoBySize(cand.size, form.Thresholds.ClipVideoMB, form.Thresholds.VideoMovieMB)
+		if !scanTypeEnabled(form.Enabled, vtyp) {
+			skippedDisabled++
+			continue
+		}
+		if _, ok := existingFilenames[cand.rel]; ok {
+			skippedExisting++
+			continue
+		}
+		toImport = append(toImport, struct {
+			rel  string
+			typ  string
+			size int64
+		}{cand.rel, vtyp, cand.size})
+	}
+
+	if len(toImport) == 0 {
+		g.JSON(200, gin.H{
+			"imported":          0,
+			"skipped_existing":  skippedExisting,
+			"skipped_disabled":  skippedDisabled,
+			"skipped_non_video": skippedNonVideo,
+		})
+		return
+	}
+
+	tx := c.datastore.Begin()
+	var videos []*model.Video
+	for _, item := range toImport {
+		video := &model.Video{
+			Name:      item.rel,
+			Filename:  item.rel,
+			Type:      item.typ,
+			Imported:  false,
+			Thumbnail: false,
+			LibraryID: &libID,
+		}
+		if channel != nil {
+			video.Channel = channel
+		}
+		if err := tx.Create(video).Error; err != nil {
+			tx.Rollback()
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		if err := tx.Model(video).Association("Actors").Append(actors); err != nil {
+			tx.Rollback()
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		if err := tx.Model(video).Association("Categories").Append(categories); err != nil {
+			tx.Rollback()
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		videos = append(videos, video)
+	}
+	tx.Commit()
+
+	for _, video := range videos {
+		params := map[string]string{
+			"videoID":         video.ID,
+			"thumbnailTiming": "0",
+		}
+		if form.SkipReorganization != nil {
+			if *form.SkipReorganization {
+				params["skipReorganization"] = "true"
+			} else {
+				params["skipReorganization"] = "false"
+			}
+		}
+		if err := c.runner.NewTask("video/create", params); err != nil {
+			g.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	g.JSON(200, gin.H{
+		"imported":          len(videos),
+		"skipped_existing":  skippedExisting,
+		"skipped_disabled":  skippedDisabled,
+		"skipped_non_video": skippedNonVideo,
+	})
 }
 
 // UploadFolderCreate godoc

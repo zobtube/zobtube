@@ -27,6 +27,7 @@ ZtUploadHome.prototype.connectedCallback = function() {
   var massActionModal = null;
   var massImportModal = null;
   var videoImportModal = null;
+  var scanFolderModal = null;
   var libraries = [];
   var selectedLibraryId = "";
 
@@ -69,6 +70,7 @@ ZtUploadHome.prototype.connectedCallback = function() {
     html += '<button class="btn btn-outline-success" id="zt-upload-file-btn">Upload file</button>';
     html += ' <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#newFolderModal">New folder</button>';
     html += ' <button class="btn btn-outline-success disabled" id="zt-mass-action-btn">Mass action</button>';
+    html += ' <button class="btn btn-outline-success" id="zt-scan-folder-btn" data-bs-toggle="modal" data-bs-target="#zt-scan-folder-modal">Scan folder</button>';
     html += '</div></div><hr />';
     html += '<nav id="zt-path" style="font-size:large;margin:30px 0;--bs-breadcrumb-divider:\'>\';"></nav>';
     html += '<div class="row"><div class="col-md-12"><table class="table triage-listing-table"><colgroup><col style="width:2%"><col style="width:2%"><col style="width:71%"><col style="width:15%"><col style="width:10%"></colgroup>';
@@ -88,6 +90,23 @@ ZtUploadHome.prototype.connectedCallback = function() {
     html += '</div><div class="modal-footer"><span class="input-group-text">Import as:</span><button type="button" class="btn btn-primary" data-type="v">Video</button><button type="button" class="btn btn-primary" data-type="m">Movie</button><button type="button" class="btn btn-primary" data-type="c">Clip</button></div></div></div></div>';
 
     html += '<div class="modal fade modal-lg" id="zt-video-import-modal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Import video</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p>Filename: <code id="zt-import-filename"></code></p><p>Path: <code id="zt-import-filepath"></code></p><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="zt-skip-reorg-single"><label class="form-check-label" for="zt-skip-reorg-single">Keep original path (do not reorganize)</label></div></div><div class="modal-footer"><span class="input-group-text">Import as:</span><button type="button" class="btn btn-primary" data-type="v">Video</button><button type="button" class="btn btn-primary" data-type="m">Movie</button><button type="button" class="btn btn-primary" data-type="c">Clip</button></div></div></div></div>';
+
+    html += '<div class="modal modal-xl fade" id="zt-scan-folder-modal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Scan folder</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body">';
+    html += '<p class="mb-3">Folder: <code id="zt-scan-current-path"></code></p>';
+    html += '<div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" role="switch" id="zt-scan-recursive" checked><label class="form-check-label" for="zt-scan-recursive">Recursive (include subfolders)</label></div>';
+    html += '<h6 class="mb-2">Type assignment by file size</h6>';
+    html += '<div class="row g-2 mb-2"><div class="col-md-4"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="zt-scan-en-c" checked><label class="form-check-label" for="zt-scan-en-c">Clip</label></div></div>';
+    html += '<div class="col-md-4"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="zt-scan-en-v" checked><label class="form-check-label" for="zt-scan-en-v">Video</label></div></div>';
+    html += '<div class="col-md-4"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="zt-scan-en-m" checked><label class="form-check-label" for="zt-scan-en-m">Movie</label></div></div></div>';
+    html += '<div class="row g-2 mb-3"><div class="col-md-6"><label class="form-label" for="zt-scan-th-cv">Clip if size &lt; (MB)</label><input type="number" class="form-control" id="zt-scan-th-cv" min="1" value="50"></div>';
+    html += '<div class="col-md-6"><label class="form-label" for="zt-scan-th-vm">Video if size &lt; (MB), else Movie</label><input type="number" class="form-control" id="zt-scan-th-vm" min="1" value="500"></div></div>';
+    html += '<div class="form-floating mb-3"><select class="form-select" id="zt-scan-channel-list"><option value="">None</option></select><label for="zt-scan-channel-list">Channel</label></div>';
+    html += '<div class="mb-3"><label>Actors</label><div id="zt-scan-actors" class="border rounded p-2" style="max-height:120px;overflow-y:auto"></div></div>';
+    html += '<div class="mb-3"><label>Categories</label><div id="zt-scan-categories" class="border rounded p-2" style="max-height:120px;overflow-y:auto"></div></div>';
+    html += '<div class="mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="zt-scan-skip-reorg"><label class="form-check-label" for="zt-scan-skip-reorg">Keep original path (do not reorganize)</label></div><div class="form-text">When checked, files stay at their triage location instead of being moved to the active Organization layout.</div></div>';
+    html += '</div><div class="modal-footer"><button type="button" class="btn btn-primary" id="zt-scan-start-btn">Scan</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
+
+
 
     html += '<div class="modal fade" id="newFolderModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Create new folder</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="form-floating"><input type="text" class="form-control" id="folder-new" placeholder="Name"><label for="folder-new">New folder name</label></div></div><div class="modal-footer"><button type="button" class="btn btn-success" id="zt-folder-create-btn">Create</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
 
@@ -175,6 +194,7 @@ ZtUploadHome.prototype.connectedCallback = function() {
     massActionModal = new bootstrap.Modal(self.querySelector("#zt-mass-action-modal"));
     massImportModal = new bootstrap.Modal(self.querySelector("#zt-mass-import-modal"));
     videoImportModal = new bootstrap.Modal(self.querySelector("#zt-video-import-modal"));
+    scanFolderModal = new bootstrap.Modal(self.querySelector("#zt-scan-folder-modal"));
 
     function showFileDetails(fileName, filePath, fileType, fileSize, fileDate) {
       var niceTypes = { unknown: "Unrecognized", video: "Video", image: "Picture", archive: "Archive" };
@@ -295,6 +315,91 @@ ZtUploadHome.prototype.connectedCallback = function() {
           else r.json().catch(function(){return{};}).then(function(d){ if (typeof sendToast === "function") sendToast("Unable to delete selected files", "", "bg-warning", (d && d.error) || "Failed"); });
         });
     };
+    function loadScanMetadata() {
+      return Promise.all([
+        fetch("/api/channel", { credentials: "same-origin" }).then(function(r) { return r.json(); }),
+        fetch("/api/actor", { credentials: "same-origin" }).then(function(r) { return r.json(); }),
+        fetch("/api/category", { credentials: "same-origin" }).then(function(r) { return r.json(); })
+      ]).then(function(arr) {
+        var channels = arr[0].items || [];
+        var actors = arr[1].items || [];
+        var categories = arr[2].items || [];
+        var chSel = self.querySelector("#zt-scan-channel-list");
+        chSel.innerHTML = '<option value="">None</option>';
+        channels.forEach(function(ch) {
+          chSel.innerHTML += '<option value="' + (ch.ID || ch.id) + '">' + (ch.Name || ch.name || "").replace(/</g,"&lt;") + "</option>";
+        });
+        var actDiv = self.querySelector("#zt-scan-actors");
+        actDiv.innerHTML = "";
+        actors.forEach(function(a) {
+          var id = a.ID || a.id;
+          actDiv.innerHTML += '<div class="form-check"><input class="form-check-input zt-scan-actor" type="checkbox" value="' + id + '"><label class="form-check-label">' + (a.Name || a.name || "").replace(/</g,"&lt;") + "</label></div>";
+        });
+        var catDiv = self.querySelector("#zt-scan-categories");
+        catDiv.innerHTML = "";
+        categories.forEach(function(c) {
+          (c.Sub || c.sub || []).forEach(function(s) {
+            var sid = s.ID || s.id;
+            catDiv.innerHTML += '<div class="form-check"><input class="form-check-input zt-scan-cat" type="checkbox" value="' + sid + '"><label class="form-check-label">' + (s.Name || s.name || "").replace(/</g,"&lt;") + "</label></div>";
+          });
+        });
+      });
+    }
+
+    self.querySelector("#zt-scan-folder-btn").onclick = function() {
+      var pathEl = self.querySelector("#zt-scan-current-path");
+      if (pathEl) pathEl.textContent = currentPath;
+      loadScanMetadata();
+    };
+
+    self.querySelector("#zt-scan-start-btn").onclick = function() {
+      var btn = this;
+      btn.disabled = true;
+      var actors = [];
+      self.querySelectorAll("#zt-scan-actors .zt-scan-actor:checked").forEach(function(cb) { actors.push(cb.value); });
+      var categories = [];
+      self.querySelectorAll("#zt-scan-categories .zt-scan-cat:checked").forEach(function(cb) { categories.push(cb.value); });
+      var payload = {
+        path: currentPath === "/" ? "" : currentPath.replace(/^\//, ""),
+        recursive: !!self.querySelector("#zt-scan-recursive").checked,
+        channel: self.querySelector("#zt-scan-channel-list").value || "",
+        actors: actors,
+        categories: categories,
+        enabled: {
+          c: !!self.querySelector("#zt-scan-en-c").checked,
+          v: !!self.querySelector("#zt-scan-en-v").checked,
+          m: !!self.querySelector("#zt-scan-en-m").checked
+        },
+        thresholds: {
+          clip_video_mb: parseInt(self.querySelector("#zt-scan-th-cv").value, 10) || 50,
+          video_movie_mb: parseInt(self.querySelector("#zt-scan-th-vm").value, 10) || 500
+        }
+      };
+      if (selectedLibraryId) payload.library_id = selectedLibraryId;
+      var skipReorgEl = self.querySelector("#zt-scan-skip-reorg");
+      if (skipReorgEl && skipReorgEl.checked) payload.skip_reorganization = true;
+      fetch("/api/upload/triage/scan", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+        .then(function(r) {
+          return r.json().catch(function() { return {}; }).then(function(d) {
+            btn.disabled = false;
+            if (r.ok) {
+              scanFolderModal.hide();
+              loadListing();
+              var msg = "Imported " + (d.imported || 0);
+              if (d.skipped_existing) msg += ", skipped " + d.skipped_existing + " already imported";
+              if (d.skipped_disabled) msg += ", skipped " + d.skipped_disabled + " (type disabled)";
+              if (typeof sendToast === "function") sendToast("Scan complete", "", "bg-success", msg + ". Import tasks will run in background.");
+            } else if (typeof sendToast === "function") {
+              sendToast("Unable to scan folder", "", "bg-warning", (d && d.error) || "Failed");
+            }
+          });
+        })
+        .catch(function(err) {
+          btn.disabled = false;
+          if (typeof sendToast === "function") sendToast("Unable to scan folder", "", "bg-warning", (err && err.message) || "Failed");
+        });
+    };
+
 
     self.querySelector("#zt-video-import-modal").querySelectorAll("button[data-type]").forEach(function(btn) {
       btn.onclick = function() {
