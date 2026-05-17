@@ -6,10 +6,13 @@ function ZtVideoViewTile() {
 }
 ZtVideoViewTile.prototype = Object.create(HTMLElement.prototype);
 ZtVideoViewTile.prototype.connectedCallback = function() {
-  var d = JSON.parse(this.getAttribute("data-item") || "{}");
+  var rawAttr = this.getAttribute("data-item") || "{}";
+  var d = {};
+  try { d = JSON.parse(rawAttr); } catch (parseErr) { d = {}; }
   var v = d.video || d;
   var count = d.count || 0;
   var id = v.ID || v.id;
+  if (!id) return;
   var t = v.Type || v.type || "v";
   var urlView = t === "c" ? "/clip/" + id : "/video/" + id;
   var urlThumb = "/api/video/" + id + "/thumb_xs";

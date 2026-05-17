@@ -7,12 +7,71 @@ import (
 	"sort"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+
 	"github.com/zobtube/zobtube/internal/model"
 )
 
 type profileActorViewResult struct {
 	Actor model.Actor `json:"actor"`
 	Count int         `json:"count"`
+}
+
+// migrateVideoViewsFromDeletedVideos moves view counts from soft-deleted videos onto
+// a still-active video with the same filename in the same library (e.g. after
+// re-importing triage content as a different type).
+func (c *Controller) migrateVideoViewsFromDeletedVideos(userID string) {
+	var views []model.VideoView
+	c.datastore.Where("user_id = ?", userID).Find(&views)
+	for _, vv := range views {
+		var active model.Video
+		if c.datastore.First(&active, "id = ?", vv.VideoID).RowsAffected > 0 {
+			continue
+		}
+		var deleted model.Video
+		if c.datastore.Unscoped().First(&deleted, "id = ?", vv.VideoID).Error != nil || deleted.ID == "" {
+			c.datastore.Delete(&model.VideoView{}, "video_id = ? AND user_id = ?", vv.VideoID, userID)
+			continue
+		}
+		replacement := c.findReplacementVideo(&deleted)
+		if replacement == nil {
+			continue
+		}
+		c.mergeVideoView(vv.VideoID, replacement.ID, userID, vv.Count)
+	}
+}
+
+func (c *Controller) findReplacementVideo(deleted *model.Video) *model.Video {
+	if deleted.Filename == "" {
+		return nil
+	}
+	q := c.datastore.Where("filename = ? AND deleted_at IS NULL AND id != ?", deleted.Filename, deleted.ID)
+	if deleted.LibraryID != nil && *deleted.LibraryID != "" {
+		q = q.Where("library_id = ?", *deleted.LibraryID)
+	}
+	var replacement model.Video
+	if q.Order("created_at desc").First(&replacement).Error != nil || replacement.ID == "" {
+		return nil
+	}
+	return &replacement
+}
+
+func (c *Controller) mergeVideoView(fromVideoID, toVideoID, userID string, count int) {
+	if fromVideoID == "" || toVideoID == "" || fromVideoID == toVideoID || count <= 0 {
+		return
+	}
+	var target model.VideoView
+	if c.datastore.First(&target, "video_id = ? AND user_id = ?", toVideoID, userID).RowsAffected > 0 {
+		target.Count += count
+		_ = c.datastore.Save(&target).Error
+	} else {
+		_ = c.datastore.Create(&model.VideoView{VideoID: toVideoID, UserID: userID, Count: count}).Error
+	}
+	c.datastore.Delete(&model.VideoView{}, "video_id = ? AND user_id = ?", fromVideoID, userID)
+}
+
+func profileVideoPreload(db *gorm.DB) *gorm.DB {
+	return db.Unscoped()
 }
 
 // ProfileView godoc
@@ -26,9 +85,26 @@ func (c *Controller) ProfileView(g *gin.Context) {
 	// get user
 	user := g.MustGet("user").(*model.User)
 
+	c.migrateVideoViewsFromDeletedVideos(user.ID)
+
 	// get user views
 	var videoViewsTop []model.VideoView
-	c.datastore.Where("user_id = ?", user.ID).Order("count desc").Limit(8).Preload("Video").Find(&videoViewsTop)
+	c.datastore.Where("user_id = ?", user.ID).Order("count desc").Limit(8).
+		Preload("Video", profileVideoPreload).Find(&videoViewsTop)
+	filteredViews := make([]model.VideoView, 0, len(videoViewsTop))
+	for _, vv := range videoViewsTop {
+		if vv.Video.ID == "" {
+			c.datastore.Delete(&model.VideoView{}, "video_id = ? AND user_id = ?", vv.VideoID, user.ID)
+			continue
+		}
+		if vv.Video.DeletedAt.Valid {
+			if replacement := c.findReplacementVideo(&vv.Video); replacement != nil {
+				vv.Video = *replacement
+			}
+		}
+		filteredViews = append(filteredViews, vv)
+	}
+	videoViewsTop = filteredViews
 
 	// count actors
 	countPerActor := make(map[string]int)

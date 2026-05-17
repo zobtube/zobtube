@@ -23,7 +23,11 @@ ZtProfileView.prototype.connectedCallback = function() {
       } else {
         videoViews.forEach(function(vv) {
           var v = vv.Video || vv.video;
-          if (!v) return;
+          var videoID = vv.VideoID || vv.video_id || vv.videoId;
+          if (v && !v.ID && !v.id && videoID) {
+            v = Object.assign({}, v, { ID: videoID });
+          }
+          if (!v || (!v.ID && !v.id)) return;
           html += '<div class="col-md-3"><zt-video-view-tile data-item="'+escapeAttr(JSON.stringify({video:v,count:vv.Count||vv.count||0}))+'"></zt-video-view-tile></div>';
         });
       }

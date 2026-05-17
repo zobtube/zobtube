@@ -26,7 +26,7 @@ func setupProfileController(t *testing.T) *Controller {
 	if err != nil {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
-	if err := db.AutoMigrate(&model.User{}); err != nil {
+	if err := db.AutoMigrate(&model.User{}, &model.Video{}, &model.VideoView{}); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
 
@@ -162,5 +162,82 @@ func TestController_ProfileChangePassword_InvalidJSON(t *testing.T) {
 	}
 	if errMsg, _ := resp["error"].(string); errMsg != "invalid request" {
 		t.Errorf("expected error 'invalid request', got %q", errMsg)
+	}
+}
+
+func TestController_ProfileView_OmitsOrphanVideoViews(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupProfileController(t)
+	user := &model.User{Username: "u", Password: "x"}
+	ctrl.datastore.Create(user)
+
+	vid := &model.Video{Name: "exists", Filename: "exists.mp4", Type: "v"}
+	ctrl.datastore.Create(vid)
+	ctrl.datastore.Create(&model.VideoView{VideoID: vid.ID, UserID: user.ID, Count: 1})
+	ctrl.datastore.Create(&model.VideoView{VideoID: "missing-video-id", UserID: user.ID, Count: 99})
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/api/profile", nil)
+	c.Set("user", user)
+
+	ctrl.ProfileView(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var resp map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	views, ok := resp["video_views"].([]any)
+	if !ok {
+		t.Fatalf("expected video_views array, got %T", resp["video_views"])
+	}
+	if len(views) != 1 {
+		t.Fatalf("expected 1 video_view, got %d", len(views))
+	}
+	var remain int64
+	ctrl.datastore.Model(&model.VideoView{}).Where("video_id = ?", "missing-video-id").Count(&remain)
+	if remain != 0 {
+		t.Errorf("expected orphan video_view removed, count=%d", remain)
+	}
+}
+
+func TestController_ProfileView_MigratesViewsFromDeletedVideo(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupProfileController(t)
+	user := &model.User{Username: "u", Password: "x"}
+	ctrl.datastore.Create(user)
+	libID := "lib-1"
+
+	deleted := &model.Video{Name: "old", Filename: "shared.mp4", Type: "v", LibraryID: &libID}
+	ctrl.datastore.Create(deleted)
+	ctrl.datastore.Delete(deleted)
+
+	replacement := &model.Video{Name: "movie 1", Filename: "shared.mp4", Type: "m", LibraryID: &libID}
+	ctrl.datastore.Create(replacement)
+	ctrl.datastore.Create(&model.VideoView{VideoID: deleted.ID, UserID: user.ID, Count: 4})
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/api/profile", nil)
+	c.Set("user", user)
+	ctrl.ProfileView(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var migrated model.VideoView
+	if err := ctrl.datastore.First(&migrated, "video_id = ? AND user_id = ?", replacement.ID, user.ID).Error; err != nil {
+		t.Fatalf("expected migrated view on replacement: %v", err)
+	}
+	if migrated.Count != 4 {
+		t.Errorf("expected count 4 on replacement, got %d", migrated.Count)
+	}
+	var oldRemain int64
+	ctrl.datastore.Model(&model.VideoView{}).Where("video_id = ?", deleted.ID).Count(&oldRemain)
+	if oldRemain != 0 {
+		t.Errorf("expected old video_view removed, count=%d", oldRemain)
 	}
 }
