@@ -113,7 +113,7 @@ ZtPlaylistPicker.prototype.connectedCallback = function() {
     if (!playlists.length) {
       html += '<li class="px-2 py-1 text-muted small">No playlists yet.</li>';
     } else {
-      playlists.forEach(function(p) {
+      playlists.filter(function(p) { return !p.virtual; }).forEach(function(p) {
         var checked = p.contains ? " checked" : "";
         html += '<li class="dropdown-item-text px-2 py-1">' +
           '<label class="d-flex align-items-center gap-2 mb-0" style="cursor:pointer">' +

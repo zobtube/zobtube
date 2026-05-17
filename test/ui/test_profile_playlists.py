@@ -18,6 +18,18 @@ def test_profile_playlists_page_loads(page: Page):
     expect(page.get_by_role("link", name="Your playlists")).to_be_visible()
 
 
+def test_profile_playlists_virtual_unseen_lists(page: Page):
+    """Automatic unseen playlists are listed and cannot be deleted."""
+    login_non_admin(page)
+    page.goto(BASE_URL + "/profile/playlists")
+    page.wait_for_load_state("networkidle")
+    expect(page.get_by_role("link", name="Unseen videos")).to_be_visible()
+    expect(page.get_by_role("link", name="Unseen clips")).to_be_visible()
+    expect(page.get_by_role("link", name="Unseen movies")).to_be_visible()
+    unseen_row = page.get_by_role("row", name="Unseen videos")
+    expect(unseen_row.get_by_role("button", name="Delete")).to_have_count(0)
+
+
 def test_profile_playlists_create_and_view(page: Page):
     """User can create a playlist and open its detail page."""
     login_non_admin(page)

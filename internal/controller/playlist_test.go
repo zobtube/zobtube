@@ -25,7 +25,7 @@ func setupPlaylistController(t *testing.T) *Controller {
 	if err != nil {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
-	if err := db.AutoMigrate(&model.User{}, &model.Video{}, &model.Playlist{}, &model.PlaylistVideo{}); err != nil {
+	if err := db.AutoMigrate(&model.User{}, &model.Video{}, &model.Playlist{}, &model.PlaylistVideo{}, &model.VideoView{}); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
 
@@ -60,8 +60,8 @@ func TestController_PlaylistList_Empty(t *testing.T) {
 		t.Fatalf("unmarshal: %v", err)
 	}
 	playlists, _ := resp["playlists"].([]any)
-	if len(playlists) != 0 {
-		t.Errorf("expected 0 playlists, got %d", len(playlists))
+	if len(playlists) != 3 {
+		t.Fatalf("expected 3 virtual playlists, got %d", len(playlists))
 	}
 }
 
@@ -209,12 +209,22 @@ func TestController_PlaylistList_ContainsVideo(t *testing.T) {
 	var resp map[string]any
 	json.Unmarshal(w.Body.Bytes(), &resp)
 	playlists, _ := resp["playlists"].([]any)
-	if len(playlists) != 1 {
-		t.Fatalf("expected 1 playlist, got %d", len(playlists))
+	if len(playlists) != 4 {
+		t.Fatalf("expected 3 virtual + 1 user playlist, got %d", len(playlists))
 	}
-	item, _ := playlists[0].(map[string]any)
-	if item["contains"] != true {
-		t.Errorf("expected contains true, got %v", item["contains"])
+	var found bool
+	for _, p := range playlists {
+		item, _ := p.(map[string]any)
+		if item["id"] == pl.ID {
+			if item["contains"] != true {
+				t.Errorf("expected contains true on user playlist, got %v", item["contains"])
+			}
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Error("user playlist not in list")
 	}
 }
 
@@ -298,5 +308,109 @@ func TestController_PlaylistDelete_Success(t *testing.T) {
 	ctrl.datastore.Model(&model.Playlist{}).Where("id = ?", pl.ID).Count(&count)
 	if count != 0 {
 		t.Error("playlist should be deleted")
+	}
+}
+
+func TestController_PlaylistList_IncludesVirtualPlaylists(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupPlaylistController(t)
+	user := &model.User{Username: "u"}
+	ctrl.datastore.Create(user)
+	now := time.Now()
+	vSeen := &model.Video{Name: "Seen", Type: "v", Status: model.VideoStatusReady, CreatedAt: now, UpdatedAt: now}
+	vUnseen := &model.Video{Name: "Unseen", Type: "v", Status: model.VideoStatusReady, CreatedAt: now, UpdatedAt: now}
+	ctrl.datastore.Create(vSeen)
+	ctrl.datastore.Create(vUnseen)
+	ctrl.datastore.Create(&model.VideoView{VideoID: vSeen.ID, UserID: user.ID, Count: 1})
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/api/playlists", nil)
+	c.Set("user", user)
+	ctrl.PlaylistList(c)
+
+	var resp map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatal(err)
+	}
+	playlists, _ := resp["playlists"].([]any)
+	if len(playlists) < 3 {
+		t.Fatalf("expected at least 3 virtual playlists, got %d", len(playlists))
+	}
+	first, _ := playlists[0].(map[string]any)
+	if first["id"] != PlaylistUnseenVideosID {
+		t.Errorf("expected first unseen-v, got %v", first["id"])
+	}
+	if first["video_count"].(float64) != 1 {
+		t.Errorf("expected 1 unseen video, got %v", first["video_count"])
+	}
+}
+
+func TestController_PlaylistView_UnseenVideos(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupPlaylistController(t)
+	user := &model.User{Username: "u"}
+	ctrl.datastore.Create(user)
+	now := time.Now()
+	v1 := &model.Video{Name: "V1", Type: "v", Status: model.VideoStatusReady, CreatedAt: now, UpdatedAt: now}
+	v2 := &model.Video{Name: "C1", Type: "c", Status: model.VideoStatusReady, CreatedAt: now, UpdatedAt: now}
+	ctrl.datastore.Create(v1)
+	ctrl.datastore.Create(v2)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/api/playlists/"+PlaylistUnseenVideosID, nil)
+	c.Params = gin.Params{{Key: "id", Value: PlaylistUnseenVideosID}}
+	c.Set("user", user)
+	ctrl.PlaylistView(c)
+
+	var resp map[string]any
+	json.Unmarshal(w.Body.Bytes(), &resp)
+	pl, _ := resp["playlist"].(map[string]any)
+	if pl["virtual"] != true {
+		t.Error("expected virtual playlist")
+	}
+	videos, _ := resp["videos"].([]any)
+	if len(videos) != 1 {
+		t.Fatalf("expected 1 unseen video, got %d", len(videos))
+	}
+}
+
+func TestController_PlaylistDelete_VirtualForbidden(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupPlaylistController(t)
+	user := &model.User{Username: "u"}
+	ctrl.datastore.Create(user)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("DELETE", "/api/playlists/"+PlaylistUnseenVideosID, nil)
+	c.Params = gin.Params{{Key: "id", Value: PlaylistUnseenVideosID}}
+	c.Set("user", user)
+	ctrl.PlaylistDelete(c)
+
+	if w.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d", w.Code)
+	}
+}
+
+func TestController_PlaylistPlaybackContext_Virtual(t *testing.T) {
+	ctrl := setupPlaylistController(t)
+	user := &model.User{Username: "u"}
+	ctrl.datastore.Create(user)
+	now := time.Now()
+	v1 := &model.Video{Name: "V1", Type: "v", Status: model.VideoStatusReady, CreatedAt: now, UpdatedAt: now}
+	v2 := &model.Video{Name: "V2", Type: "v", Status: model.VideoStatusReady, CreatedAt: now, UpdatedAt: now}
+	ctrl.datastore.Create(v1)
+	ctrl.datastore.Create(v2)
+	ctrl.datastore.Create(&model.VideoView{VideoID: v2.ID, UserID: user.ID, Count: 1})
+
+	ctx := ctrl.playlistPlaybackContext(user.ID, PlaylistUnseenVideosID, v1.ID)
+	if ctx == nil {
+		t.Fatal("expected playback context")
+	}
+	ids, _ := ctx["playlist_video_ids"].([]string)
+	if len(ids) != 1 || ids[0] != v1.ID {
+		t.Errorf("expected [v1], got %v", ids)
 	}
 }

@@ -40,8 +40,14 @@ ZtProfilePlaylists.prototype.connectedCallback = function() {
           var name = escapeHtml(p.name || "");
           var id = p.id || "";
           var count = p.video_count != null ? p.video_count : 0;
-          var updated = p.updated_at ? new Date(p.updated_at).toLocaleString() : "";
-          table += '<tr><td><a href="/playlist/' + escapeHtml(id) + '">' + name + '</a></td><td>' + count + '</td><td>' + escapeHtml(updated) + '</td><td><button type="button" class="btn btn-sm btn-outline-danger zt-playlist-delete" data-id="' + escapeHtml(id) + '">Delete</button></td></tr>';
+          var isVirtual = !!p.virtual;
+          var countCell = isVirtual ? count + ' <span class="text-muted small">(automatic)</span>' : String(count);
+          var updated = isVirtual ? "—" : (p.updated_at ? new Date(p.updated_at).toLocaleString() : "");
+          table += '<tr><td><a href="/playlist/' + escapeHtml(id) + '">' + name + '</a></td><td>' + countCell + '</td><td>' + escapeHtml(updated) + '</td><td>';
+          if (!isVirtual && p.deletable !== false) {
+            table += '<button type="button" class="btn btn-sm btn-outline-danger zt-playlist-delete" data-id="' + escapeHtml(id) + '">Delete</button>';
+          }
+          table += '</td></tr>';
         });
         table += "</tbody></table>";
         listEl.innerHTML = table;
