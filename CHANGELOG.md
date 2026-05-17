@@ -1,5 +1,46 @@
 # Changelog
 
+## Version 0.6.0
+### Breaking change
+* [e4ab539](https://github.com/zobtube/zobtube/commit/e4ab53933f5bf7814e1cb997e67d2c28dbf8da2a) bc: metadata storage parameters are now needed to start zobtube
+### Features
+* [0119bd3](https://github.com/zobtube/zobtube/commit/0119bd314fd79c61fa9bd5d46a69c67b3a2a23c3) feat(adm/category): allow editing and deleting cat/subcat
+* [0a90418](https://github.com/zobtube/zobtube/commit/0a90418fac78d4bcf34d09004568a81ab4df1579) feat(bootstrap): allow chaning default storage path from env
+* [28f8dd3](https://github.com/zobtube/zobtube/commit/28f8dd3daf15b60564bae24ea58be5d274fcab6a) feat: add photosets
+* [442ec32](https://github.com/zobtube/zobtube/commit/442ec323619bd17942f84260fa3d4707d184ca2f) feat: add media organization
+* [45fb8ab](https://github.com/zobtube/zobtube/commit/45fb8ab143162d5155734f37ad16ef002a27c261) feat(profile): add stats page
+* [4680d61](https://github.com/zobtube/zobtube/commit/4680d613e5663edc818814a59e1faf5cd52e01d0) feat(adm/actor): allow merging duplicate actors
+* [5444dff](https://github.com/zobtube/zobtube/commit/5444dff89b097110442b5860fece35fe8de4110f) feat(library/import): allow import through folder scanning
+* [6039f74](https://github.com/zobtube/zobtube/commit/6039f7477c8cc30076b29c20b6db66ad27932627) feat(actor/list): list actors by name whether it starts with an uppercase or not
+* [7433c3c](https://github.com/zobtube/zobtube/commit/7433c3c9653179fa76c2bdee36b0c4ceac15bf77) feat(profile): refactor sidebar
+* [7433c3c](https://github.com/zobtube/zobtube/commit/7433c3c9653179fa76c2bdee36b0c4ceac15bf77) feat(profile): split actors and videos most viewed
+* [856de86](https://github.com/zobtube/zobtube/commit/856de86e5507eb874602e2f72c30e21392dfb3cc) feat(profile): add playlist with unseen videos
+* [869f8a9](https://github.com/zobtube/zobtube/commit/869f8a9c658696ce238d70d4a61f537326608803) feat: add video playlists
+* [8ea758f](https://github.com/zobtube/zobtube/commit/8ea758fe39a7ddee2fc2579f3c77a8bd8cc08ae2) feat(adm/libraries): improve listing and creation
+* [9614d6b](https://github.com/zobtube/zobtube/commit/9614d6bf6f27a404ef4840f93cd649bbb99653f2) feat(triage): allow setting images for actors, subcategories, channels and videos
+* [b044f8a](https://github.com/zobtube/zobtube/commit/b044f8aaf543fab172ef336624f2782b62391f5e) feat(release): now support breaking changes in changelog generation
+* [d446152](https://github.com/zobtube/zobtube/commit/d446152aa76d82960d789ed1f97d63ebe46f3ee0) feat(tests): add mock data for actors
+* [e4ab539](https://github.com/zobtube/zobtube/commit/e4ab53933f5bf7814e1cb997e67d2c28dbf8da2a) feat: implement metadata storage
+* [eafc823](https://github.com/zobtube/zobtube/commit/eafc8238a04bab31802ef6dbd45ef80c8ef93d00) feat(video/edit): allow pressing enter to rename video
+* [efd0228](https://github.com/zobtube/zobtube/commit/efd0228ecc3cd4f478ccbb256df77ac42cd0e2a3) feat(video/edit): allow changing library
+### Chores
+* [09f69b6](https://github.com/zobtube/zobtube/commit/09f69b64fe81e86c46beba126642a26e471d87af) chore: update copyright year
+* [35977e4](https://github.com/zobtube/zobtube/commit/35977e452cbfc317e3ebb69402572618ec6f15bb) chore(ci): remove sonarqube through ci (kept on the side)
+* [46e93ee](https://github.com/zobtube/zobtube/commit/46e93eee1b76107e7f26dd83f14d175289ae67d5) chore(ci): restrict number of db connections during tests
+* [5ce0f1c](https://github.com/zobtube/zobtube/commit/5ce0f1c8aeeb11720c30e3ace2cb944b87ce6b46) chore(actor/list): uniformize actor picture size
+* [f40202e](https://github.com/zobtube/zobtube/commit/f40202e7dd0d8d150ee34244db4651d411b0c622) chore(adm/actor): order by name
+* [f962513](https://github.com/zobtube/zobtube/commit/f9625132c3666421603dda9c3e5c45f4cf6ce642) chore(ci): add missing linting
+### Fixes
+* [1e8b8e8](https://github.com/zobtube/zobtube/commit/1e8b8e868f5a417234dccc30c4ddbd0b4a72111b) fix(video-count): handle video counts when video is reorganized
+* [72f3ca0](https://github.com/zobtube/zobtube/commit/72f3ca0ed267bcac25f7618d333a9236e1c27356) fix(actor/edit): fix deletion button
+* [7303469](https://github.com/zobtube/zobtube/commit/73034693a70fb6339cf2aa57c43b0ab0e0646358) fix(photosets): remove unused function
+* [781237a](https://github.com/zobtube/zobtube/commit/781237a5d369716c655d0f98a63d223dc9c5fad0) fix(e2e): use new relations
+* [8e06d2f](https://github.com/zobtube/zobtube/commit/8e06d2fc17c412d0d50a4aa6be07ff62d1011b6e) fix(ci): add new metadata env var for tests
+* [c1aafd4](https://github.com/zobtube/zobtube/commit/c1aafd4f76d541e8f45346d17a8a610aa5177553) fix(video/view): add missing header name update on e2e
+* [fa7cd29](https://github.com/zobtube/zobtube/commit/fa7cd29c8209d2cc4dd21cf107951d1fe6e446ec) fix(category/view): only display videos once
+### Documentation
+* [a75caea](https://github.com/zobtube/zobtube/commit/a75caea52bea9b8ff37d9c1d139628b7c61cb39c) doc(adm/api-token): add help on how tokens can be created
+
 ## Version 0.5.1
 ### Fixes
 * [40ebfb9](https://github.com/zobtube/zobtube/commit/40ebfb953961aca3503a037b21e4214eebef8dad) fix(sql/pg): use correct type for pg
@@ -870,6 +911,8 @@
 * [801cae3](https://github.com/zobtube/zobtube/commit/801cae3bce8d66d2a5094f536dcd44715370540f) fix(cfg): bind according to configuration
 
 ## Version 0.1.0
+### Breaking change
+* [b9dfaa1](https://github.com/zobtube/zobtube/commit/b9dfaa19905b4414b3124584a010620ca319bce6) bc: change in env variable name
 ### Features
 * [5b5475a](https://github.com/zobtube/zobtube/commit/5b5475a2e65c11956b76ec060b10908f4d45b63d) feat(http): bind port from configuration
 * [b9dfaa1](https://github.com/zobtube/zobtube/commit/b9dfaa19905b4414b3124584a010620ca319bce6) feat: allow configuration through ci and yaml
