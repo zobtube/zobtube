@@ -50,5 +50,19 @@ func (c *Controller) ClipView(g *gin.Context) {
 	if u := c.videoStreamURL(g, video); u != "" {
 		resp["stream_url"] = u
 	}
+	if playlistID := g.Query("playlist"); playlistID != "" {
+		if user, ok := g.Get("user"); ok {
+			if u, ok := user.(*model.User); ok && u != nil && u.ID != "" {
+				if ctx := c.playlistPlaybackContext(u.ID, playlistID, video.ID); ctx != nil {
+					for k, v := range ctx {
+						resp[k] = v
+					}
+					if ids, ok := ctx["playlist_video_ids"].([]string); ok && len(ids) > 0 {
+						resp["clip_ids"] = ids
+					}
+				}
+			}
+		}
+	}
 	g.JSON(http.StatusOK, resp)
 }

@@ -166,6 +166,15 @@ type AbstractController interface {
 	ProfileTokenCreate(*gin.Context)
 	ProfileTokenDelete(*gin.Context)
 
+	// Playlists
+	PlaylistList(*gin.Context)
+	PlaylistCreate(*gin.Context)
+	PlaylistView(*gin.Context)
+	PlaylistUpdate(*gin.Context)
+	PlaylistDelete(*gin.Context)
+	PlaylistVideoAdd(*gin.Context)
+	PlaylistVideoRemove(*gin.Context)
+
 	// Error pages
 	ErrNotFound(*gin.Context)
 	ErrUnauthorized(*gin.Context)

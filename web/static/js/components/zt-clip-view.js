@@ -16,11 +16,20 @@ ZtClipView.prototype.connectedCallback = function() {
   var id = this.getAttribute("data-id");
   if (!id) { self.innerHTML = "Missing id"; if (window.zt && window.zt.pageReady) window.zt.pageReady(self); return; }
   var lastStatus = 0;
-  fetch("/api/clip/" + encodeURIComponent(id), { credentials: "same-origin" })
+  var pageSearch = typeof window !== "undefined"
+    ? (window.location.search || window.__ZT_PAGE_SEARCH__ || "")
+    : "";
+  var playlistId = window.ztPlaylistIdFromSearch ? window.ztPlaylistIdFromSearch(pageSearch) : "";
+  var apiUrl = "/api/clip/" + encodeURIComponent(id);
+  if (playlistId) apiUrl += "?playlist=" + encodeURIComponent(playlistId);
+  var fetchOpts = { credentials: "same-origin" };
+  if (playlistId) fetchOpts.cache = "no-store";
+  fetch(apiUrl, fetchOpts)
     .then(function(r) { lastStatus = r.status; if (!r.ok) throw new Error(String(r.status)); return r.json(); })
     .then(function(data) {
       var v = data.video || data;
       var clipIds = data.clip_ids || [id];
+      var playlistCtx = data.playlist_video_ids ? data : null;
       var streamUrl = data.stream_url || "/api/video/"+id+"/stream";
       var thumbUrl = "/api/video/"+id+"/thumb";
       var name = (v.Name||v.name||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
@@ -66,6 +75,7 @@ ZtClipView.prototype.connectedCallback = function() {
       html += '<svg id="clip-change-previous" class="clip-change-disabled" style="width:40px;display:block;margin-top:25px;margin-left:auto;transform:rotate(180deg)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">'+arrowSvg+'</svg>';
       html += '<svg id="clip-change-next" class="clip-change" style="width:40px;display:block;margin-top:25px;margin-left:auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">'+arrowSvg+'</svg>';
       html += editBtn;
+      html += '<div style="width:40px;display:block;margin-top:25px;margin-left:auto"><zt-playlist-picker data-video-id="'+id+'"></zt-playlist-picker></div>';
       html += '</div></div>';
       html += '<div id="zt-clip-details"><div id="zt-clip-details-inner">';
       html += '<div id="clip-title">'+name+'</div>';
@@ -87,7 +97,7 @@ ZtClipView.prototype.connectedCallback = function() {
       }
       var viewCounted = false;
       var curIdx = clipIds.indexOf(id);
-      var autoplay = typeof window !== "undefined" && window.location.search.indexOf("autoplay") !== -1;
+      var autoplay = pageSearch.indexOf("autoplay") !== -1;
       function updateNavButtons() {
         if (nextBtn) {
           nextBtn.style.pointerEvents = curIdx < clipIds.length - 1 ? "auto" : "none";
@@ -98,7 +108,25 @@ ZtClipView.prototype.connectedCallback = function() {
           prevBtn.setAttribute("class", curIdx > 0 ? "clip-change" : "clip-change-disabled");
         }
       }
-      function switchToClip(newId, shouldPlay) {
+      function goToQueueItem(newIdx, shouldPlay) {
+        if (newIdx < 0 || newIdx >= clipIds.length) return;
+        var newId = clipIds[newIdx];
+        if (playlistCtx && playlistId && window.ztPlaylistTypeForId) {
+          var t = window.ztPlaylistTypeForId(playlistCtx, newId);
+          if (t !== "c") {
+            if (window.ztPlaylistNavigateToId) {
+              window.ztPlaylistNavigateToId(newId, playlistCtx, playlistId, { autoplay: !!shouldPlay });
+            } else {
+              var url = "/video/" + newId + "?playlist=" + encodeURIComponent(playlistId);
+              if (shouldPlay) url += "&autoplay=1";
+              if (window.navigate) window.navigate(url); else window.location.href = url;
+            }
+            return;
+          }
+        }
+        switchToClip(newId, shouldPlay);
+      }
+            function switchToClip(newId, shouldPlay) {
         var newIdx = clipIds.indexOf(newId);
         if (newIdx < 0) return;
         curIdx = newIdx;
@@ -110,8 +138,12 @@ ZtClipView.prototype.connectedCallback = function() {
         video.load();
         if (seekFill) seekFill.style.width = "0%";
         updateNavButtons();
-        if (window.history && window.history.replaceState) history.replaceState({path: "/clip/"+newId}, "", "/clip/"+newId);
-        fetch("/api/clip/"+encodeURIComponent(newId), { credentials: "same-origin" })
+        var clipPath = "/clip/" + newId;
+        if (playlistId) clipPath += "?playlist=" + encodeURIComponent(playlistId) + (shouldPlay ? "&autoplay=1" : "");
+        if (window.history && window.history.replaceState) history.replaceState({path: clipPath}, "", clipPath);
+        var refetchUrl = "/api/clip/" + encodeURIComponent(newId);
+        if (playlistId) refetchUrl += "?playlist=" + encodeURIComponent(playlistId);
+        fetch(refetchUrl, { credentials: "same-origin" })
           .then(function(r){ return r.ok ? r.json() : Promise.reject(); })
           .then(function(data){
             var v = data.video || data;
@@ -132,6 +164,8 @@ ZtClipView.prototype.connectedCallback = function() {
             if (titleEl) titleEl.textContent = name || "";
             if (descEl) descEl.innerHTML = descParts.join(" ");
             if (editIcon) editIcon.onclick = function(){ window.navigate("/video/"+newId+"/edit"); };
+            var picker = self.querySelector("zt-playlist-picker");
+            if (picker) picker.setAttribute("data-video-id", newId);
             if (shouldPlay) video.play();
           });
       }
@@ -144,7 +178,7 @@ ZtClipView.prototype.connectedCallback = function() {
         });
         video.addEventListener("pause", function(){ playBtn.classList.remove("playing"); });
         video.addEventListener("ended", function(){
-          if (curIdx < clipIds.length - 1) switchToClip(clipIds[curIdx+1], true);
+          if (curIdx < clipIds.length - 1) goToQueueItem(curIdx + 1, true);
         });
         video.addEventListener("timeupdate", function(){
           var d = video.duration;
@@ -166,11 +200,11 @@ ZtClipView.prototype.connectedCallback = function() {
       var prevBtn = self.querySelector("#clip-change-previous");
       if (clipIds.length > 1) {
         updateNavButtons();
-        if (nextBtn) nextBtn.addEventListener("click", function() { if (curIdx < clipIds.length - 1) switchToClip(clipIds[curIdx+1], false); });
-        if (prevBtn) prevBtn.addEventListener("click", function() { if (curIdx > 0) switchToClip(clipIds[curIdx-1], false); });
+        if (nextBtn) nextBtn.addEventListener("click", function() { if (curIdx < clipIds.length - 1) goToQueueItem(curIdx + 1, false); });
+        if (prevBtn) prevBtn.addEventListener("click", function() { if (curIdx > 0) goToQueueItem(curIdx - 1, false); });
         var wheelTimeout;
-        function goNext() { if (curIdx < clipIds.length - 1) switchToClip(clipIds[curIdx+1], false); }
-        function goPrev() { if (curIdx > 0) switchToClip(clipIds[curIdx-1], false); }
+        function goNext() { if (curIdx < clipIds.length - 1) goToQueueItem(curIdx + 1, false); }
+        function goPrev() { if (curIdx > 0) goToQueueItem(curIdx - 1, false); }
         function debounce(fn, ms) { clearTimeout(wheelTimeout); wheelTimeout = setTimeout(fn, ms || 200); }
         var mainEl = self.querySelector("#zt-clip-main");
         if (mainEl) {

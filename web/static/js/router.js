@@ -20,6 +20,8 @@ var routes = [
   { pattern: /^\/video\/([^\/]+)\/?$/, component: "zt-video-view", param: "id" },
   { pattern: /^\/clip\/([^\/]+)\/?$/, component: "zt-clip-view", param: "id" },
   { pattern: /^\/profile\/stats\/?$/, component: "zt-profile-stats" },
+  { pattern: /^\/profile\/playlists\/?$/, component: "zt-profile-playlists" },
+  { pattern: /^\/playlist\/([^\/]+)\/?$/, component: "zt-playlist-view", param: "id" },
   { pattern: /^\/profile\/tokens\/?$/, component: "zt-profile-tokens" },
   { pattern: /^\/profile\/settings\/?$/, component: "zt-profile-settings" },
   { pattern: /^\/profile\/most-viewed\/videos\/?$/, component: "zt-profile-most-viewed-videos" },
@@ -188,6 +190,7 @@ function navigate(url) {
     var a = document.createElement("a");
     a.href = url;
     path = a.pathname || "/";
+    window.__ZT_PAGE_SEARCH__ = a.search || "";
   } catch (e) {}
   if (path === "") path = "/";
   history.pushState({ path: path }, "", url);
@@ -214,6 +217,7 @@ document.addEventListener("click", function(e) {
 });
 
 window.addEventListener("popstate", function() {
+  window.__ZT_PAGE_SEARCH__ = window.location.search || "";
   loadPage(window.location.pathname || "/");
 });
 

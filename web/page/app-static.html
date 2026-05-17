@@ -168,6 +168,7 @@ zt.updateHeader = function(user) {
     <script src="/static/js/components/zt-channel-edit.js"></script>
     <script src="/static/js/components/zt-clip-list.js"></script>
     <script src="/static/js/components/zt-video-list.js"></script>
+    <script src="/static/js/components/zt-playlist-playback.js"></script>
     <script src="/static/js/components/zt-video-view.js"></script>
     <script src="/static/js/components/zt-video-edit.js"></script>
     <script src="/static/js/components/zt-clip-view.js"></script>
@@ -177,6 +178,9 @@ zt.updateHeader = function(user) {
     <script src="/static/js/components/zt-profile-most-viewed-actors.js"></script>
     <script src="/static/js/components/zt-profile-settings.js"></script>
     <script src="/static/js/components/zt-profile-tokens.js"></script>
+    <script src="/static/js/components/zt-profile-playlists.js"></script>
+    <script src="/static/js/components/zt-playlist-view.js"></script>
+    <script src="/static/js/components/zt-playlist-picker.js"></script>
     <script src="/static/js/components/zt-upload-home.js"></script>
     <script src="/static/js/components/zt-adm-home.js"></script>
     <script src="/static/js/components/zt-adm-object-list.js"></script>
@@ -201,6 +205,7 @@ zt.updateHeader = function(user) {
     var loginForm = document.getElementById("login-form");
     var app = document.getElementById("app");
     if (!app) return;
+    window.__ZT_PAGE_SEARCH__ = window.location.search || "";
 
     fetch("/api/bootstrap", { credentials: "same-origin" })
         .then(function(r) { return r.json(); })
@@ -209,12 +214,15 @@ zt.updateHeader = function(user) {
             window.__USER__ = data.user || null;
             if (window.zt && window.zt.updateHeader) window.zt.updateHeader(data.user);
 
+            function spaUrl(path) {
+                return path + (window.location.search || "") + (window.location.hash || "");
+            }
             if (!data.auth_enabled) {
                 app.style.display = "block";
                 if (loginForm) loginForm.style.display = "none";
                 var pathNoAuth = window.location.pathname || "/";
                 loadPage(pathNoAuth);
-                history.replaceState({ path: pathNoAuth }, "", pathNoAuth);
+                history.replaceState({ path: pathNoAuth }, "", spaUrl(pathNoAuth));
                 return;
             }
             if (data.user) {
@@ -222,7 +230,7 @@ zt.updateHeader = function(user) {
                 app.style.display = "block";
                 var path = window.location.pathname || "/";
                 loadPage(path);
-                history.replaceState({ path: path }, "", path);
+                history.replaceState({ path: path }, "", spaUrl(path));
             } else {
                 if (loginForm) loginForm.style.display = "block";
                 app.style.display = "none";

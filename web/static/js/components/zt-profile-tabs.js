@@ -18,6 +18,7 @@ ZtProfileTabs.prototype.connectedCallback = function() {
   this.innerHTML = '<style>' + sidebarStyles + '</style><div id="zt-profile-sidebar"><h3 class="zt-profile-sidebar-title"><span class="heading-icon"><i class="fa fa-user"></i></span> Your account</h3><nav class="nav flex-column">' +
     group("Home") +
     link("Your stats", "/profile/stats", "stats") +
+    link("Your playlists", "/profile/playlists", "playlists") +
     group("Most viewed") +
     link("Videos", "/profile/most-viewed/videos", "most-viewed-videos") +
     link("Actors", "/profile/most-viewed/actors", "most-viewed-actors") +

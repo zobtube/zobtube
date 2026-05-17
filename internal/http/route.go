@@ -178,6 +178,15 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 	authGroup.POST("/api/profile/tokens", c.ProfileTokenCreate)
 	authGroup.DELETE("/api/profile/tokens/:id", c.ProfileTokenDelete)
 
+	// Playlists (user-owned)
+	authGroup.GET("/api/playlists", c.PlaylistList)
+	authGroup.POST("/api/playlists", c.PlaylistCreate)
+	authGroup.GET("/api/playlists/:id", c.PlaylistView)
+	authGroup.PUT("/api/playlists/:id", c.PlaylistUpdate)
+	authGroup.DELETE("/api/playlists/:id", c.PlaylistDelete)
+	authGroup.POST("/api/playlists/:id/videos", c.PlaylistVideoAdd)
+	authGroup.DELETE("/api/playlists/:id/videos/:video_id", c.PlaylistVideoRemove)
+
 	// Error
 	authGroup.Any("/api/error/unauthorized", c.ErrUnauthorized)
 
