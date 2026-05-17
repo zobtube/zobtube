@@ -40,7 +40,8 @@ def test_access(page: Page):
                 "/video/d8045d56-1dc4-11f0-9970-305a3a05e04d/stream",
                 #"/video/d8045d56-1dc4-11f0-9970-305a3a05e04d/thumb",
                 "/video/d8045d56-1dc4-11f0-9970-305a3a05e04d/thumb_xs",
-                "/profile",
+                "/profile/most-viewed/videos",
+                "/profile/most-viewed/actors",
             ],
             'POST': [
                 #"/api/video/d8045d56-1dc4-11f0-9970-305a3a05e04d/count-view",

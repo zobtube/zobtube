@@ -21,7 +21,8 @@ var routes = [
   { pattern: /^\/clip\/([^\/]+)\/?$/, component: "zt-clip-view", param: "id" },
   { pattern: /^\/profile\/tokens\/?$/, component: "zt-profile-tokens" },
   { pattern: /^\/profile\/settings\/?$/, component: "zt-profile-settings" },
-  { pattern: /^\/profile\/?$/, component: "zt-profile-view" },
+  { pattern: /^\/profile\/most-viewed\/videos\/?$/, component: "zt-profile-most-viewed-videos" },
+  { pattern: /^\/profile\/most-viewed\/actors\/?$/, component: "zt-profile-most-viewed-actors" },
   { pattern: /^\/upload\/?$/, component: "zt-upload-home" },
   { pattern: /^\/adm\/?$/, component: "zt-adm-home" },
   { pattern: /^\/adm\/videos\/?$/, component: "zt-adm-object-list", object: "Video" },
@@ -129,6 +130,11 @@ function loadPage(path) {
   if (!app) return;
   path = path || window.location.pathname || "/";
   if (path === "") path = "/";
+  var normalized = path.replace(/\/$/, "") || "/";
+  if (normalized === "/profile") {
+    navigate("/profile/most-viewed/videos");
+    return;
+  }
 
   if (loadTimeout) { clearTimeout(loadTimeout); loadTimeout = null; }
 

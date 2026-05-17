@@ -10,12 +10,12 @@ function ZtProfileTokens() {
 ZtProfileTokens.prototype = Object.create(HTMLElement.prototype);
 ZtProfileTokens.prototype.connectedCallback = function() {
   var self = this;
-  var html = '<div class="row"><div class="col-12"><zt-profile-tabs data-active="tokens"></zt-profile-tabs></div></div>';
-  html += '<div class="row"><div class="col-md-12"><div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-key"></i></span><h3>API tokens</h3><hr /></div>';
+  var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-profile-tabs data-active="tokens"></zt-profile-tabs></div><div class="col-md-9 col-lg-9">';
+  html += '<div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-key"></i></span><h3>API tokens</h3><hr /></div>';
   html += '<p class="text-muted">Use API tokens to authenticate script or client requests with <code>Authorization: Bearer &lt;token&gt;</code>. Create a token and copy it now; it will not be shown again.</p>';
   html += '<form id="zt-profile-token-create-form" class="mb-4" style="max-width:400px"><div class="input-group"><input type="text" class="form-control" id="zt-token-name" placeholder="Token name (e.g. My script)" required><button type="submit" class="btn btn-primary">Create token</button></div><div id="zt-token-form-error" class="alert alert-danger mt-2" style="display:none" role="alert"></div></form>';
   html += '<div id="zt-tokens-list"></div>';
-  html += '<div class="modal fade" id="zt-token-show-modal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Token created</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p class="text-warning">Copy this token now. It will not be shown again.</p><div class="input-group"><input type="text" class="form-control font-monospace" id="zt-token-show-value" readonly><button type="button" class="btn btn-outline-secondary" id="zt-token-copy-btn">Copy</button></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
+  html += '<div class="modal fade" id="zt-token-show-modal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Token created</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p class="text-warning">Copy this token now. It will not be shown again.</p><div class="input-group"><input type="text" class="form-control font-monospace" id="zt-token-show-value" readonly><button type="button" class="btn btn-outline-secondary" id="zt-token-copy-btn">Copy</button></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div></div></div>';
   self.innerHTML = html;
 
   var listEl = self.querySelector("#zt-tokens-list");

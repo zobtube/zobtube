@@ -7,8 +7,8 @@ function ZtProfileSettings() {
 ZtProfileSettings.prototype = Object.create(HTMLElement.prototype);
 ZtProfileSettings.prototype.connectedCallback = function() {
   var self = this;
-  var html = '<div class="row"><div class="col-12"><zt-profile-tabs data-active="settings"></zt-profile-tabs></div></div>';
-  html += '<div class="row"><div class="col-md-12"><div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-cog"></i></span><h3>Settings</h3><hr /></div>';
+  var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-profile-tabs data-active="settings"></zt-profile-tabs></div><div class="col-md-9 col-lg-9">';
+  html += '<div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-cog"></i></span><h3>Settings</h3><hr /></div>';
   html += '<form id="zt-profile-change-password-form" style="margin-top:1rem;max-width:400px">';
   html += '<div class="mb-3"><label for="zt-current-password" class="form-label">Current password</label><input type="password" class="form-control" id="zt-current-password" name="current_password" required autocomplete="current-password"></div>';
   html += '<div class="mb-3"><label for="zt-new-password" class="form-label">New password</label><input type="password" class="form-control" id="zt-new-password" name="new_password" required autocomplete="new-password"></div>';
