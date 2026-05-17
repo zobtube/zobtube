@@ -49,6 +49,33 @@ func (c *Controller) ActorGet(g *gin.Context) {
 	g.JSON(http.StatusOK, actor)
 }
 
+// ActorPhotosets returns photosets where the actor is tagged on the album or on any photo.
+func (c *Controller) ActorPhotosets(g *gin.Context) {
+	id := g.Param("id")
+	var actor model.Actor
+	if c.datastore.Select("id").First(&actor, "id = ?", id).RowsAffected < 1 {
+		g.JSON(http.StatusNotFound, gin.H{"error": "not found"})
+		return
+	}
+
+	photosetFromAlbum := c.datastore.Table("photoset_actors").Select("photoset_id").Where("actor_id = ?", id)
+	photosetFromPhoto := c.datastore.Table("photo_actors").
+		Select("photos.photoset_id").
+		Joins("JOIN photos ON photos.id = photo_actors.photo_id").
+		Where("photo_actors.actor_id = ?", id)
+
+	var items []model.Photoset
+	if err := c.datastore.
+		Where("id IN (?) OR id IN (?)", photosetFromAlbum, photosetFromPhoto).
+		Where("status <> ?", model.PhotosetStatusDeleting).
+		Order("created_at desc").
+		Find(&items).Error; err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	g.JSON(http.StatusOK, gin.H{"items": items, "total": len(items)})
+}
+
 // ActorDelete godoc
 //
 //	@Summary	Delete an actor

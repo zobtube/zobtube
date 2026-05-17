@@ -20,6 +20,17 @@ const DefaultOrganizationUUID = "00000000-0000-0000-0000-000000000001"
 // hardcoded layout: <typePlural>/<id>/video.mp4 (e.g. videos/abc/video.mp4).
 const DefaultOrganizationTemplate = "$TYPE/$ID/video.mp4"
 
+// DefaultPhotosetOrganizationUUID is the fixed UUID for the bootstrap photoset organization.
+const DefaultPhotosetOrganizationUUID = "00000000-0000-0000-0000-000000000002"
+
+// DefaultPhotosetOrganizationTemplate is the default on-disk layout for photosets.
+const DefaultPhotosetOrganizationTemplate = "photosets/$ID/$FILENAME"
+
+const (
+	OrganizationScopeVideo    = "video"
+	OrganizationScopePhotoset = "photoset"
+)
+
 // Organization defines a versioned scheme used to store video files on a
 // library. Only one Organization is Active at a time; new imports use the
 // Active one to resolve the on-disk path. Existing videos keep their stored
@@ -30,6 +41,7 @@ type Organization struct {
 	UpdatedAt time.Time
 	Name      string `gorm:"size:255;not null"`
 	Template  string `gorm:"size:1024;not null"`
+	Scope     string `gorm:"size:32;not null;default:video"`
 	Active    bool   `gorm:"default:false"`
 }
 
@@ -93,14 +105,39 @@ func (o *Organization) Render(v *Video) string {
 	return filepath.Clean(out)
 }
 
-// ActiveOrganization returns the organization marked Active, or the first row if none is active.
+// RenderPhotoset returns the relative path for a photo within a photoset.
+func (o *Organization) RenderPhotoset(ps *Photoset, p *Photo) string {
+	out := o.Template
+	out = strings.ReplaceAll(out, "$ID", ps.ID)
+	out = strings.ReplaceAll(out, "$TYPE_LETTER", "p")
+	out = strings.ReplaceAll(out, "$TYPE_NAME", "photoset")
+	out = strings.ReplaceAll(out, "$TYPE", "photosets")
+	filename := filepath.Base(p.Filename)
+	ext := filepath.Ext(filename)
+	base := strings.TrimSuffix(filename, ext)
+	out = strings.ReplaceAll(out, "$FILENAME", filename)
+	out = strings.ReplaceAll(out, "$BASENAME", base)
+	out = strings.ReplaceAll(out, "$EXT", ext)
+	out = strings.TrimPrefix(out, "/")
+	return filepath.Clean(out)
+}
+
+// ActiveOrganization returns the active video-scoped organization.
 func ActiveOrganization(db *gorm.DB) (*Organization, error) {
+	return ActiveOrganizationForScope(db, OrganizationScopeVideo)
+}
+
+// ActiveOrganizationForScope returns the active organization for the given scope.
+func ActiveOrganizationForScope(db *gorm.DB, scope string) (*Organization, error) {
+	if scope == "" {
+		scope = OrganizationScopeVideo
+	}
 	var active Organization
-	if err := db.Where("active = ?", true).First(&active).Error; err == nil {
+	if err := db.Where("active = ? AND scope = ?", true, scope).First(&active).Error; err == nil {
 		return &active, nil
 	}
 	var any Organization
-	if err := db.First(&any).Error; err != nil {
+	if err := db.Where("scope = ?", scope).First(&any).Error; err != nil {
 		return nil, err
 	}
 	return &any, nil

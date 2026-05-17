@@ -10,6 +10,9 @@ var routes = [
   { pattern: /^\/categories\/?$/, component: "zt-category-list" },
   { pattern: /^\/category\/([^\/]+)\/?$/, component: "zt-category-view", param: "id" },
   { pattern: /^\/channels\/?$/, component: "zt-channel-list" },
+  { pattern: /^\/photosets\/?$/, component: "zt-photoset-list" },
+  { pattern: /^\/photoset\/([^\/]+)\/edit\/?$/, component: "zt-photoset-edit", param: "id" },
+  { pattern: /^\/photoset\/([^\/]+)\/?$/, component: "zt-photoset-view", param: "id" },
   { pattern: /^\/channel\/new\/?$/, component: "zt-channel-create" },
   { pattern: /^\/channel\/([^\/]+)\/edit\/?$/, component: "zt-channel-edit", param: "id" },
   { pattern: /^\/channel\/([^\/]+)\/?$/, component: "zt-channel-view", param: "id" },
@@ -127,7 +130,14 @@ if (window.zt) {
   };
 }
 
+function closePhotoLightboxes() {
+  document.querySelectorAll("zt-photo-lightbox").forEach(function(lb) {
+    if (typeof lb.close === "function") lb.close();
+  });
+}
+
 function loadPage(path) {
+  closePhotoLightboxes();
   var app = document.getElementById("app");
   var staging = document.getElementById("app-staging");
   if (!app) return;

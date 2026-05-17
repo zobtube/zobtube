@@ -80,6 +80,33 @@ func EnsureDefaultOrganization(db *gorm.DB) (string, error) {
 		ID:       DefaultOrganizationUUID,
 		Name:     "Default (legacy layout)",
 		Template: DefaultOrganizationTemplate,
+		Scope:    OrganizationScopeVideo,
+		Active:   true,
+	}
+	if err := db.Create(&org).Error; err != nil {
+		return "", err
+	}
+	return org.ID, nil
+}
+
+// EnsureDefaultPhotosetOrganization creates the bootstrap photoset organization if none exists for that scope.
+func EnsureDefaultPhotosetOrganization(db *gorm.DB) (string, error) {
+	var count int64
+	if err := db.Model(&Organization{}).Where("scope = ?", OrganizationScopePhotoset).Count(&count).Error; err != nil {
+		return "", err
+	}
+	if count > 0 {
+		org, err := ActiveOrganizationForScope(db, OrganizationScopePhotoset)
+		if err != nil {
+			return "", err
+		}
+		return org.ID, nil
+	}
+	org := Organization{
+		ID:       DefaultPhotosetOrganizationUUID,
+		Name:     "Default (photoset layout)",
+		Template: DefaultPhotosetOrganizationTemplate,
+		Scope:    OrganizationScopePhotoset,
 		Active:   true,
 	}
 	if err := db.Create(&org).Error; err != nil {

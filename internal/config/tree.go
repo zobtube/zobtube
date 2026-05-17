@@ -9,6 +9,7 @@ var defaultLibraryFolders = []string{
 	"clips",
 	"movies",
 	"videos",
+	"photosets",
 	"actors",
 	"triage",
 }

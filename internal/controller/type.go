@@ -87,6 +87,7 @@ type AbstractController interface {
 	ActorMerge(*gin.Context)
 	ActorList(*gin.Context)
 	ActorGet(*gin.Context)
+	ActorPhotosets(*gin.Context)
 	ActorDelete(*gin.Context)
 	ActorThumb(*gin.Context)
 
@@ -133,6 +134,28 @@ type AbstractController interface {
 	VideoView(*gin.Context)
 	VideoEdit(*gin.Context)
 
+	// Photosets
+	PhotosetList(*gin.Context)
+	PhotosetView(*gin.Context)
+	PhotosetEdit(*gin.Context)
+	PhotosetCreate(*gin.Context)
+	PhotosetUploadFiles(*gin.Context)
+	PhotosetUploadArchive(*gin.Context)
+	PhotosetDelete(*gin.Context)
+	PhotosetRename(*gin.Context)
+	PhotosetEditChannel(*gin.Context)
+	PhotosetActors(*gin.Context)
+	PhotosetCategories(*gin.Context)
+	PhotosetSetCover(*gin.Context)
+	PhotosetReorganize(*gin.Context)
+	PhotosetCover(*gin.Context)
+	PhotoStream(*gin.Context)
+	PhotoThumbMini(*gin.Context)
+	PhotoDelete(*gin.Context)
+	PhotoEditChannel(*gin.Context)
+	PhotoActors(*gin.Context)
+	PhotoCategories(*gin.Context)
+
 	// Channels
 	ChannelList(*gin.Context)
 	ChannelGet(*gin.Context)
@@ -153,6 +176,7 @@ type AbstractController interface {
 	UploadMassImport(*gin.Context)
 	UploadTriageScan(*gin.Context)
 	UploadAssignImage(*gin.Context)
+	UploadImportPhotoset(*gin.Context)
 
 	// Providers
 	ProviderRegister(provider.Provider) error

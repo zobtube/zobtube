@@ -34,6 +34,7 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 	// Actors - list and get for all auth users; create/delete/mutate for admin
 	authGroup.GET("/api/actor", c.ActorList)
 	authGroup.GET("/api/actor/:id", c.ActorGet)
+	authGroup.GET("/api/actor/:id/photosets", c.ActorPhotosets)
 	authGroup.GET("/api/actor/:id/thumb", c.ActorThumb)
 
 	actorGroup := admGroup.Group("/api/actor")
@@ -116,6 +117,37 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 		videoGroup.POST("/:id/reorganize", c.VideoReorganize)
 	}
 
+	// Photosets
+	authGroup.GET("/api/photoset", c.PhotosetList)
+	authGroup.GET("/api/photoset/:id", c.PhotosetView)
+	authGroup.GET("/api/photoset/:id/cover", c.PhotosetCover)
+	authGroup.GET("/api/photo/:id/stream", c.PhotoStream)
+	authGroup.GET("/api/photo/:id/thumb_mini", c.PhotoThumbMini)
+
+	photosetGroup := admGroup.Group("/api/photoset")
+	{
+		photosetGroup.POST("", c.PhotosetCreate)
+		photosetGroup.GET("/:id/edit", c.PhotosetEdit)
+		photosetGroup.POST("/:id/upload/files", c.PhotosetUploadFiles)
+		photosetGroup.POST("/:id/upload/archive", c.PhotosetUploadArchive)
+		photosetGroup.DELETE("/:id", c.PhotosetDelete)
+		photosetGroup.POST("/:id/rename", c.PhotosetRename)
+		photosetGroup.POST("/:id/channel", c.PhotosetEditChannel)
+		photosetGroup.PUT("/:id/actor/:actor_id", c.PhotosetActors)
+		photosetGroup.DELETE("/:id/actor/:actor_id", c.PhotosetActors)
+		photosetGroup.PUT("/:id/category/:category_id", c.PhotosetCategories)
+		photosetGroup.DELETE("/:id/category/:category_id", c.PhotosetCategories)
+		photosetGroup.POST("/:id/cover/:photo_id", c.PhotosetSetCover)
+		photosetGroup.POST("/:id/reorganize", c.PhotosetReorganize)
+
+		photosetGroup.DELETE("/photo/:photo_id", c.PhotoDelete)
+		photosetGroup.POST("/photo/:photo_id/channel", c.PhotoEditChannel)
+		photosetGroup.PUT("/photo/:photo_id/actor/:actor_id", c.PhotoActors)
+		photosetGroup.DELETE("/photo/:photo_id/actor/:actor_id", c.PhotoActors)
+		photosetGroup.PUT("/photo/:photo_id/category/:category_id", c.PhotoCategories)
+		photosetGroup.DELETE("/photo/:photo_id/category/:category_id", c.PhotoCategories)
+	}
+
 	// Uploads
 	uploadGroup := admGroup.Group("/api/upload")
 	{
@@ -130,6 +162,7 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 		uploadGroup.DELETE("/triage/mass-action", c.UploadMassDelete)
 		uploadGroup.POST("/triage/scan", c.UploadTriageScan)
 		uploadGroup.POST("/triage/assign-image", c.UploadAssignImage)
+		uploadGroup.POST("/triage/import-photoset", c.UploadImportPhotoset)
 	}
 
 	// Adm

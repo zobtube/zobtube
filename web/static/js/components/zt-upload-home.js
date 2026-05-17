@@ -29,6 +29,7 @@ ZtUploadHome.prototype.connectedCallback = function() {
   var videoImportModal = null;
   var scanFolderModal = null;
   var imageAssignModal = null;
+  var photosetImportModal = null;
   var libraries = [];
   var selectedLibraryId = "";
 
@@ -47,8 +48,8 @@ ZtUploadHome.prototype.connectedCallback = function() {
     .catch(function() { libraries = []; selectedLibraryId = ""; return Promise.resolve(); })
     .then(function() {
   function updateView() {
-    var sidebarStyles = "#zt-upload-sidebar{position:sticky;top:70px;padding:1rem 0;background:#f7f7f7;border-radius:8px;min-width:180px}#zt-upload-sidebar .zt-upload-sidebar-title{margin:0 0 0.75rem;padding:0 1rem;font-size:1.1rem;font-weight:600}#zt-upload-sidebar .nav{flex-direction:column}#zt-upload-sidebar .nav-link{padding:0.5rem 1rem;border-radius:4px;border-left:3px solid transparent;cursor:pointer;color:inherit;text-decoration:none;display:block}#zt-upload-sidebar .nav-link:hover{background:rgba(0,0,0,0.05)}#zt-upload-sidebar .nav-link.active{background:rgba(22,122,198,0.1);border-left-color:#167ac6;color:#167ac6}";
-    var styles = ".br-link{color:#0d6efd;text-decoration:underline;cursor:pointer}.triage-listing-table{width:100%;table-layout:fixed;font-size:medium}.triage-listing-table tr{user-select:none}.triage-listing-table tr:hover td{background-color:#efefef}.checks{color:grey;cursor:pointer}";
+    var sidebarStyles = "#zt-upload-sidebar{position:sticky;top:70px;padding:1rem 0;background:#f7f7f7;border-radius:8px;min-width:180px;flex:0 0 180px}#zt-upload-sidebar .zt-upload-sidebar-title{margin:0 0 0.75rem;padding:0 1rem;font-size:1.1rem;font-weight:600}#zt-upload-sidebar .nav{flex-direction:column}#zt-upload-sidebar .nav-link{padding:0.5rem 1rem;border-radius:4px;border-left:3px solid transparent;cursor:pointer;color:inherit;text-decoration:none;display:block}#zt-upload-sidebar .nav-link:hover{background:rgba(0,0,0,0.05)}#zt-upload-sidebar .nav-link.active{background:rgba(22,122,198,0.1);border-left-color:#167ac6;color:#167ac6}";
+    var styles = ".zt-upload-main{flex:1;min-width:0;width:100%}.zt-upload-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem;margin-bottom:1rem}.zt-upload-toolbar h4{margin:0;flex:0 1 auto}.zt-upload-toolbar .zt-upload-actions{display:flex;flex-wrap:wrap;gap:0.35rem}.br-link{color:#0d6efd;text-decoration:underline;cursor:pointer}.triage-listing-table{width:100%;table-layout:fixed;font-size:medium}.triage-listing-table tr{user-select:none}.triage-listing-table tr:hover td{background-color:#efefef}.checks{color:grey;cursor:pointer}";
     var html = '<style>'+sidebarStyles+'</style><style>'+styles+'</style>';
     html += '<div class="zt-upload-wrap" style="display:flex;gap:1rem;align-items:flex-start">';
     html += '<div id="zt-upload-sidebar" class="zt-upload-sidebar">';
@@ -66,12 +67,12 @@ ZtUploadHome.prototype.connectedCallback = function() {
       });
     }
     html += '</nav></div>';
-    html += '<div class="zt-upload-main" style="flex:1;min-width:0">';
-    html += '<div style="display:flex;justify-content:space-between;"><h4>Upload and triage folder</h4><div>';
+    html += '<div class="zt-upload-main">';
+    html += '<div class="zt-upload-toolbar"><h4>Upload and triage folder</h4><div class="zt-upload-actions">';
     html += '<button class="btn btn-outline-success" id="zt-upload-file-btn">Upload file</button>';
-    html += ' <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#newFolderModal">New folder</button>';
-    html += ' <button class="btn btn-outline-success disabled" id="zt-mass-action-btn">Mass action</button>';
-    html += ' <button class="btn btn-outline-success" id="zt-scan-folder-btn" data-bs-toggle="modal" data-bs-target="#zt-scan-folder-modal">Scan folder</button>';
+    html += '<button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#newFolderModal">New folder</button>';
+    html += '<button class="btn btn-outline-success disabled" id="zt-mass-action-btn">Mass action</button>';
+    html += '<button class="btn btn-outline-success" id="zt-scan-folder-btn" data-bs-toggle="modal" data-bs-target="#zt-scan-folder-modal">Scan folder</button>';
     html += '</div></div><hr />';
     html += '<nav id="zt-path" style="font-size:large;margin:30px 0;--bs-breadcrumb-divider:\'>\';"></nav>';
     html += '<div class="row"><div class="col-md-12"><table class="table triage-listing-table"><colgroup><col style="width:2%"><col style="width:2%"><col style="width:71%"><col style="width:15%"><col style="width:10%"></colgroup>';
@@ -89,6 +90,8 @@ ZtUploadHome.prototype.connectedCallback = function() {
     html += '<div class="mb-3"><label>Categories</label><div id="zt-mass-categories" class="border rounded p-2" style="max-height:120px;overflow-y:auto"></div></div>';
     html += '<div class="mb-3"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="zt-skip-reorg-mass"><label class="form-check-label" for="zt-skip-reorg-mass">Keep original path (do not reorganize)</label></div><div class="form-text">When checked, the file stays at its triage location instead of being moved to the active Organization layout.</div></div>';
     html += '</div><div class="modal-footer"><span class="input-group-text">Import as:</span><button type="button" class="btn btn-primary" data-type="v">Video</button><button type="button" class="btn btn-primary" data-type="m">Movie</button><button type="button" class="btn btn-primary" data-type="c">Clip</button></div></div></div></div>';
+
+    html += '<div class="modal fade modal-lg" id="zt-photoset-import-modal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Import photoset</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="form-floating mb-3"><input type="text" class="form-control" id="zt-ps-import-name" placeholder="Album name"><label for="zt-ps-import-name">Photoset name</label></div><p class="mb-2">Archive: <code id="zt-ps-import-filepath"></code></p><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="zt-ps-import-delete"><label class="form-check-label" for="zt-ps-import-delete">Remove from triage after import</label></div></div><div class="modal-footer"><button type="button" class="btn btn-primary" id="zt-ps-import-submit">Import photoset</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button></div></div></div></div>';
 
     html += '<div class="modal fade modal-lg" id="zt-video-import-modal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Import video</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><p>Filename: <code id="zt-import-filename"></code></p><p>Path: <code id="zt-import-filepath"></code></p><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" id="zt-skip-reorg-single"><label class="form-check-label" for="zt-skip-reorg-single">Keep original path (do not reorganize)</label></div></div><div class="modal-footer"><span class="input-group-text">Import as:</span><button type="button" class="btn btn-primary" data-type="v">Video</button><button type="button" class="btn btn-primary" data-type="m">Movie</button><button type="button" class="btn btn-primary" data-type="c">Clip</button></div></div></div></div>';
 
@@ -126,6 +129,7 @@ ZtUploadHome.prototype.connectedCallback = function() {
 
     html += '</div></div>';
     self.innerHTML = html;
+
 
     self.querySelectorAll("#zt-upload-sidebar .nav-link[data-library-id]").forEach(function(a) {
       a.onclick = function(e) {
@@ -208,6 +212,7 @@ ZtUploadHome.prototype.connectedCallback = function() {
     massActionModal = new bootstrap.Modal(self.querySelector("#zt-mass-action-modal"));
     massImportModal = new bootstrap.Modal(self.querySelector("#zt-mass-import-modal"));
     videoImportModal = new bootstrap.Modal(self.querySelector("#zt-video-import-modal"));
+    photosetImportModal = new bootstrap.Modal(self.querySelector("#zt-photoset-import-modal"));
     scanFolderModal = new bootstrap.Modal(self.querySelector("#zt-scan-folder-modal"));
     imageAssignModal = new bootstrap.Modal(self.querySelector("#zt-image-assign-modal"));
 
@@ -363,6 +368,9 @@ ZtUploadHome.prototype.connectedCallback = function() {
       if (fileType === "image") {
         content += '<button class="btn btn-outline-primary me-2" id="zt-image-assign-btn"><i class="far fa-image"></i> Assign image</button>';
       }
+      if (fileType === "archive" && /\.zip$/i.test(fileName || "")) {
+        content += '<button class="btn btn-outline-primary me-2" id="zt-ps-import-btn"><i class="fas fa-file-import"></i> Import as photoset</button>';
+      }
       content += '<a class="btn btn-outline-primary me-2" href="' + previewUrl(filePath) + '" target="_blank"><i class="fas fa-download"></i> Download</a>';
       content += '<button class="btn btn-outline-danger" id="zt-file-delete-btn"><i class="far fa-trash-alt"></i> Delete</button>';
       self.querySelector("#zt-item-details-content").innerHTML = content;
@@ -376,6 +384,17 @@ ZtUploadHome.prototype.connectedCallback = function() {
           self.querySelector("#zt-import-filepath").textContent = filePath;
           self._importFilePath = filePath.replace(/^\//, "");
           videoImportModal.show();
+        };
+      }
+      var psImportBtn = detailContent.querySelector("#zt-ps-import-btn");
+      if (psImportBtn) {
+        psImportBtn.onclick = function() {
+          detailOffcanvas.hide();
+          var base = (fileName || "").replace(/\.zip$/i, "");
+          self.querySelector("#zt-ps-import-name").value = base;
+          self.querySelector("#zt-ps-import-filepath").textContent = filePath;
+          self._psImportFilePath = filePath.replace(/^\//, "");
+          photosetImportModal.show();
         };
       }
       var imageAssignBtn = detailContent.querySelector("#zt-image-assign-btn");
@@ -589,6 +608,45 @@ ZtUploadHome.prototype.connectedCallback = function() {
           });
       };
     });
+
+
+    var psImportSubmit = self.querySelector("#zt-ps-import-submit");
+    if (psImportSubmit) {
+      psImportSubmit.onclick = function() {
+        var filepath = self._psImportFilePath;
+        var nameEl = self.querySelector("#zt-ps-import-name");
+        var name = nameEl && nameEl.value.trim();
+        if (!filepath || !name) {
+          if (typeof sendToast === "function") sendToast("Import photoset", "", "bg-warning", "Name and file are required");
+          return;
+        }
+        var del = self.querySelector("#zt-ps-import-delete");
+        var body = { path: filepath, name: name, delete_from_triage: !!(del && del.checked) };
+        if (selectedLibraryId) body.library_id = selectedLibraryId;
+        psImportSubmit.disabled = true;
+        fetch("/api/upload/triage/import-photoset", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+          .then(function(r) {
+            return r.json().then(function(d) { return { ok: r.ok, d: d }; });
+          })
+          .then(function(res) {
+            psImportSubmit.disabled = false;
+            if (res.ok) {
+              photosetImportModal.hide();
+              detailOffcanvas.hide();
+              loadListing();
+              var psId = res.d && (res.d.photoset_id || res.d.id);
+              if (typeof sendToast === "function") sendToast("Import photoset", "", "bg-success", psId ? 'Queued. <a href="/photoset/' + psId + '/edit" target="_blank">Edit photoset</a>' : "Import queued.");
+              if (typeof navigate === "function") navigate("/adm/tasks");
+            } else {
+              if (typeof sendToast === "function") sendToast("Unable to import photoset", "", "bg-warning", (res.d && res.d.error) || "Import failed");
+            }
+          })
+          .catch(function() {
+            psImportSubmit.disabled = false;
+            if (typeof sendToast === "function") sendToast("Unable to import photoset", "", "bg-warning", "Import failed");
+          });
+      };
+    }
 
     self.querySelector("#zt-upload-file-btn").onclick = function() {
       var input = self.querySelector("#zt-upload-input-file");

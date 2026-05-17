@@ -38,6 +38,8 @@ var modelToMigrate = []any{
 	ApiToken{},
 	Playlist{},
 	PlaylistVideo{},
+	Photoset{},
+	Photo{},
 }
 
 func New(cfg *config.Config) (db *gorm.DB, err error) {

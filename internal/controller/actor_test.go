@@ -271,3 +271,62 @@ func TestController_Actor_ActorMerge_SameID(t *testing.T) {
 		t.Fatalf("expected 400, got %d: %s", w.Code, string(body))
 	}
 }
+
+func TestController_ActorPhotosets_UnionExcludesDeleting(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupActorController(t)
+
+	actor := &model.Actor{Name: "Tagged Actor"}
+	if err := ctrl.datastore.Create(actor).Error; err != nil {
+		t.Fatalf("create actor: %v", err)
+	}
+
+	psAlbum := &model.Photoset{Name: "Album tag", Status: model.PhotosetStatusReady}
+	psPhoto := &model.Photoset{Name: "Photo tag", Status: model.PhotosetStatusReady}
+	psDeleting := &model.Photoset{Name: "Deleting", Status: model.PhotosetStatusDeleting}
+	for _, ps := range []*model.Photoset{psAlbum, psPhoto, psDeleting} {
+		if err := ctrl.datastore.Create(ps).Error; err != nil {
+			t.Fatalf("create photoset: %v", err)
+		}
+	}
+	if err := ctrl.datastore.Model(psAlbum).Association("Actors").Append(actor); err != nil {
+		t.Fatalf("album actor link: %v", err)
+	}
+	if err := ctrl.datastore.Model(psDeleting).Association("Actors").Append(actor); err != nil {
+		t.Fatalf("deleting album actor link: %v", err)
+	}
+
+	photo := &model.Photo{PhotosetID: psPhoto.ID, Filename: "one.jpg"}
+	if err := ctrl.datastore.Create(photo).Error; err != nil {
+		t.Fatalf("create photo: %v", err)
+	}
+	if err := ctrl.datastore.Model(photo).Association("Actors").Append(actor); err != nil {
+		t.Fatalf("photo actor link: %v", err)
+	}
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Params = gin.Params{{Key: "id", Value: actor.ID}}
+	c.Request = httptest.NewRequest("GET", "/api/actor/"+actor.ID+"/photosets", nil)
+	ctrl.ActorPhotosets(c)
+
+	if w.Code != http.StatusOK {
+		body, _ := io.ReadAll(w.Result().Body)
+		t.Fatalf("expected 200, got %d: %s", w.Code, string(body))
+	}
+
+	var resp struct {
+		Items []model.Photoset `json:"items"`
+		Total int              `json:"total"`
+	}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if resp.Total != 2 || len(resp.Items) != 2 {
+		t.Fatalf("expected 2 photosets, got total=%d len=%d", resp.Total, len(resp.Items))
+	}
+	ids := map[string]bool{resp.Items[0].ID: true, resp.Items[1].ID: true}
+	if !ids[psAlbum.ID] || !ids[psPhoto.ID] {
+		t.Fatalf("unexpected photoset ids: %v", ids)
+	}
+}

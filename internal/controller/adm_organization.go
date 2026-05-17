@@ -55,6 +55,7 @@ func (c *Controller) AdmOrganizationCreate(g *gin.Context) {
 	var body struct {
 		Name     string `json:"name" binding:"required"`
 		Template string `json:"template" binding:"required"`
+		Scope    string `json:"scope"`
 		Active   bool   `json:"active"`
 	}
 	if err := g.ShouldBindJSON(&body); err != nil {
@@ -65,10 +66,15 @@ func (c *Controller) AdmOrganizationCreate(g *gin.Context) {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	scope := body.Scope
+	if scope == "" {
+		scope = model.OrganizationScopeVideo
+	}
 	org := model.Organization{
 		ID:       uuid.NewString(),
 		Name:     body.Name,
 		Template: body.Template,
+		Scope:    scope,
 		Active:   body.Active,
 	}
 	if err := c.datastore.Create(&org).Error; err != nil {
@@ -76,7 +82,11 @@ func (c *Controller) AdmOrganizationCreate(g *gin.Context) {
 		return
 	}
 	if org.Active {
-		c.datastore.Model(&model.Organization{}).Where("id != ?", org.ID).Update("active", false)
+		scope := org.Scope
+		if scope == "" {
+			scope = model.OrganizationScopeVideo
+		}
+		c.datastore.Model(&model.Organization{}).Where("id != ? AND scope = ?", org.ID, scope).Update("active", false)
 	}
 	g.JSON(http.StatusCreated, gin.H{"id": org.ID, "organization": org})
 }
@@ -133,7 +143,11 @@ func (c *Controller) AdmOrganizationUpdate(g *gin.Context) {
 		return
 	}
 	if org.Active {
-		c.datastore.Model(&model.Organization{}).Where("id != ?", org.ID).Update("active", false)
+		scope := org.Scope
+		if scope == "" {
+			scope = model.OrganizationScopeVideo
+		}
+		c.datastore.Model(&model.Organization{}).Where("id != ? AND scope = ?", org.ID, scope).Update("active", false)
 	}
 	g.JSON(http.StatusOK, gin.H{"organization": org})
 }
@@ -185,8 +199,12 @@ func (c *Controller) AdmOrganizationActivate(g *gin.Context) {
 		g.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 		return
 	}
+	scope := org.Scope
+	if scope == "" {
+		scope = model.OrganizationScopeVideo
+	}
 	err := c.datastore.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&model.Organization{}).Where("id != ?", org.ID).Update("active", false).Error; err != nil {
+		if err := tx.Model(&model.Organization{}).Where("id != ? AND scope = ?", org.ID, scope).Update("active", false).Error; err != nil {
 			return err
 		}
 		return tx.Model(&org).Update("active", true).Error

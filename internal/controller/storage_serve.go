@@ -35,6 +35,10 @@ func (c *Controller) serveFromStorage(g *gin.Context, store storage.Storage, pat
 		contentType = "image/jpeg"
 	case ".png":
 		contentType = "image/png"
+	case ".gif":
+		contentType = "image/gif"
+	case ".webp":
+		contentType = "image/webp"
 	}
 	g.DataFromReader(http.StatusOK, -1, contentType, rc, nil)
 }

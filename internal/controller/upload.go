@@ -20,6 +20,7 @@ const errFileEmpty = "file name cannot be empty"
 
 var uploadVideoExt = regexp.MustCompile(`(?i)\.(mp4|mkv|webm)$`)
 var uploadImageExt = regexp.MustCompile(`(?i)\.(png|jpg|jpeg)$`)
+var uploadZipExt = regexp.MustCompile(`(?i)\.zip$`)
 
 const (
 	assignTargetVideo       = "video"
@@ -100,6 +101,109 @@ func (c *Controller) UploadImport(g *gin.Context) {
 		return
 	}
 	g.JSON(http.StatusCreated, gin.H{"id": video.ID, "redirect": "/video/" + video.ID})
+}
+
+// UploadImportPhotoset godoc
+//
+//	@Summary	Import a zip archive from triage as a photoset
+//	@Tags		upload
+//	@Accept		json
+//	@Param		body	body	object	true	"JSON with path, name, optional library_id and delete_from_triage"
+//	@Success	202	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/upload/triage/import-photoset [post]
+func (c *Controller) UploadImportPhotoset(g *gin.Context) {
+	type importForm struct {
+		Path             string `json:"path" binding:"required"`
+		Name             string `json:"name" binding:"required"`
+		LibraryID        string `json:"library_id"`
+		DeleteFromTriage bool   `json:"delete_from_triage"`
+	}
+	form := importForm{}
+	if err := g.ShouldBindJSON(&form); err != nil {
+		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	file := strings.TrimPrefix(strings.TrimPrefix(form.Path, "/"), "\\")
+	if file == "" {
+		g.JSON(http.StatusBadRequest, gin.H{"error": errFileEmpty})
+		return
+	}
+	if !uploadZipExt.MatchString(file) {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "file must be a .zip archive"})
+		return
+	}
+
+	name := strings.TrimSpace(form.Name)
+	if name == "" {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "name is required"})
+		return
+	}
+
+	libID := c.uploadLibraryID(form.LibraryID)
+	store, err := c.storageResolver.Storage(libID)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	srcPath := filepath.Join("triage", file)
+	exists, err := store.Exists(srcPath)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if !exists {
+		g.JSON(http.StatusNotFound, gin.H{"error": "triage file not found"})
+		return
+	}
+
+	ps := &model.Photoset{
+		Name:      name,
+		LibraryID: &libID,
+		Status:    model.PhotosetStatusCreating,
+	}
+	if err := c.datastore.Create(ps).Error; err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	archivePath := filepath.Join(ps.FolderRelativePath(), "_upload.zip")
+	if err := store.MkdirAll(ps.FolderRelativePath()); err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if err := storage.CopyObject(store, store, srcPath, archivePath); err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if form.DeleteFromTriage {
+		if err := store.Delete(srcPath); err != nil {
+			g.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	if c.runner == nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "task runner not available"})
+		return
+	}
+	if err := c.runner.NewTask("photoset/unzip", map[string]string{
+		"photosetID":  ps.ID,
+		"archivePath": archivePath,
+	}); err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	g.JSON(http.StatusAccepted, gin.H{
+		"photoset_id": ps.ID,
+		"id":          ps.ID,
+		"redirect":    "/adm/tasks",
+	})
 }
 
 // UploadPreview godoc

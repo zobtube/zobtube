@@ -16,6 +16,7 @@ import (
 	"github.com/zobtube/zobtube/internal/runner"
 	"github.com/zobtube/zobtube/internal/storage"
 	"github.com/zobtube/zobtube/internal/task/metamigrate"
+	"github.com/zobtube/zobtube/internal/task/photoset"
 	"github.com/zobtube/zobtube/internal/task/video"
 )
 
@@ -107,6 +108,12 @@ func Start(params *Parameters) error {
 	}
 	params.Logger.Debug().Str("kind", "system").Msg("backfill video organization_id")
 	if err := model.BackfillVideoOrganization(db, defaultOrgID); err != nil {
+		startFailsafeWebServer(httpServer, err, c)
+		return nil
+	}
+
+	params.Logger.Debug().Str("kind", "system").Msg("ensure default photoset organization")
+	if _, err := model.EnsureDefaultPhotosetOrganization(db); err != nil {
 		startFailsafeWebServer(httpServer, err, c)
 		return nil
 	}
@@ -250,6 +257,10 @@ func Start(params *Parameters) error {
 	runner.RegisterTask(video.NewVideoMoveLibrary())
 	runner.RegisterTask(video.NewVideoGenerateThumbnail())
 	runner.RegisterTask(video.NewVideoReorganize())
+	runner.RegisterTask(photoset.NewPhotosetFinalize())
+	runner.RegisterTask(photoset.NewPhotosetUnzip())
+	runner.RegisterTask(photoset.NewPhotosetDeleting())
+	runner.RegisterTask(photoset.NewPhotosetReorganize())
 	runner.RegisterTask(metamigrate.NewMetadataMigrate())
 	runner.Start(cfg, db, storageResolver, metadataStore)
 	c.RunnerRegister(runner)
