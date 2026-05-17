@@ -22,6 +22,7 @@ var modelToMigrate = []any{
 	Actor{},
 	ActorAlias{},
 	ActorLink{},
+	ActorDismissedDuplicate{},
 	Category{},
 	CategorySub{},
 	Channel{},

@@ -25,6 +25,7 @@ var routes = [
   { pattern: /^\/upload\/?$/, component: "zt-upload-home" },
   { pattern: /^\/adm\/?$/, component: "zt-adm-home" },
   { pattern: /^\/adm\/videos\/?$/, component: "zt-adm-object-list", object: "Video" },
+  { pattern: /^\/adm\/actors\/duplicates\/?$/, component: "zt-adm-actor-duplicates" },
   { pattern: /^\/adm\/actors\/?$/, component: "zt-adm-object-list", object: "Actor" },
   { pattern: /^\/adm\/channels\/?$/, component: "zt-adm-object-list", object: "Channel" },
   { pattern: /^\/adm\/categories\/?$/, component: "zt-adm-category" },

@@ -25,6 +25,7 @@ ZtAdmTabs.prototype.connectedCallback = function() {
     group("Media") +
     link("Videos", "/adm/videos", "videos") +
     link("Actors", "/adm/actors", "actors") +
+    link("Actor duplicates", "/adm/actors/duplicates", "actor-duplicates") +
     link("Channels", "/adm/channels", "channels") +
     link("Categories", "/adm/categories", "categories") +
     group("Authentication") +
