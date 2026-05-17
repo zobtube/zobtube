@@ -28,6 +28,7 @@ ZtUploadHome.prototype.connectedCallback = function() {
   var massImportModal = null;
   var videoImportModal = null;
   var scanFolderModal = null;
+  var imageAssignModal = null;
   var libraries = [];
   var selectedLibraryId = "";
 
@@ -107,6 +108,19 @@ ZtUploadHome.prototype.connectedCallback = function() {
     html += '</div><div class="modal-footer"><button type="button" class="btn btn-primary" id="zt-scan-start-btn">Scan</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
 
 
+
+    html += '<div class="modal modal-lg fade" id="zt-image-assign-modal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Assign image</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body">';
+    html += '<p class="mb-3">Assign <code id="zt-image-assign-filename"></code> as thumbnail for:</p>';
+    html += '<div class="btn-group mb-3 w-100" role="group">';
+    html += '<input type="radio" class="btn-check" name="zt-image-assign-type" id="zt-image-assign-type-video" value="video" checked><label class="btn btn-outline-primary" for="zt-image-assign-type-video">Video</label>';
+    html += '<input type="radio" class="btn-check" name="zt-image-assign-type" id="zt-image-assign-type-actor" value="actor"><label class="btn btn-outline-primary" for="zt-image-assign-type-actor">Actor</label>';
+    html += '<input type="radio" class="btn-check" name="zt-image-assign-type" id="zt-image-assign-type-channel" value="channel"><label class="btn btn-outline-primary" for="zt-image-assign-type-channel">Channel</label>';
+    html += '<input type="radio" class="btn-check" name="zt-image-assign-type" id="zt-image-assign-type-category" value="category_sub"><label class="btn btn-outline-primary" for="zt-image-assign-type-category">Sub-category</label>';
+    html += '</div>';
+    html += '<div class="form-floating mb-2"><input type="text" class="form-control" id="zt-image-assign-filter" placeholder="Filter" autocomplete="off"><label for="zt-image-assign-filter">Filter by name</label></div>';
+    html += '<div class="form-floating"><select class="form-select" id="zt-image-assign-target" size="8" style="height:auto;min-height:12rem"></select><label for="zt-image-assign-target">Target</label></div>';
+    html += '<div class="form-check form-switch mt-3"><input class="form-check-input" type="checkbox" role="switch" id="zt-image-assign-delete"><label class="form-check-label" for="zt-image-assign-delete">Remove from triage after assign</label></div>';
+    html += '</div><div class="modal-footer"><button type="button" class="btn btn-primary" id="zt-image-assign-submit">Assign</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
 
     html += '<div class="modal fade" id="newFolderModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Create new folder</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="form-floating"><input type="text" class="form-control" id="folder-new" placeholder="Name"><label for="folder-new">New folder name</label></div></div><div class="modal-footer"><button type="button" class="btn btn-success" id="zt-folder-create-btn">Create</button><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
 
@@ -195,6 +209,141 @@ ZtUploadHome.prototype.connectedCallback = function() {
     massImportModal = new bootstrap.Modal(self.querySelector("#zt-mass-import-modal"));
     videoImportModal = new bootstrap.Modal(self.querySelector("#zt-video-import-modal"));
     scanFolderModal = new bootstrap.Modal(self.querySelector("#zt-scan-folder-modal"));
+    imageAssignModal = new bootstrap.Modal(self.querySelector("#zt-image-assign-modal"));
+
+    var imageAssignTargets = { video: [], actor: [], channel: [], category_sub: [] };
+    var imageAssignTargetsLoaded = false;
+
+    function videoTypeLabel(t) {
+      if (t === "c") return "Clip";
+      if (t === "m") return "Movie";
+      return "Video";
+    }
+
+    function loadImageAssignTargets() {
+      if (imageAssignTargetsLoaded) return Promise.resolve();
+      return Promise.all([
+        fetch("/api/adm/video", { credentials: "same-origin" }).then(function(r) { return r.json(); }),
+        fetch("/api/actor", { credentials: "same-origin" }).then(function(r) { return r.json(); }),
+        fetch("/api/channel", { credentials: "same-origin" }).then(function(r) { return r.json(); }),
+        fetch("/api/category", { credentials: "same-origin" }).then(function(r) { return r.json(); })
+      ]).then(function(arr) {
+        imageAssignTargets.video = (arr[0].items || []).map(function(v) {
+          return { id: v.ID || v.id, name: (v.Name || v.name || "").trim(), extra: videoTypeLabel(v.Type || v.type || "v") };
+        });
+        imageAssignTargets.actor = (arr[1].items || []).map(function(a) {
+          return { id: a.ID || a.id, name: (a.Name || a.name || "").trim() };
+        });
+        imageAssignTargets.channel = (arr[2].items || []).map(function(ch) {
+          return { id: ch.ID || ch.id, name: (ch.Name || ch.name || "").trim() };
+        });
+        imageAssignTargets.category_sub = [];
+        (arr[3].items || []).forEach(function(c) {
+          (c.Sub || c.sub || []).forEach(function(s) {
+            imageAssignTargets.category_sub.push({ id: s.ID || s.id, name: (s.Name || s.name || "").trim() });
+          });
+        });
+        imageAssignTargetsLoaded = true;
+      });
+    }
+
+    function selectedImageAssignType() {
+      var checked = self.querySelector('input[name="zt-image-assign-type"]:checked');
+      return checked ? checked.value : "video";
+    }
+
+    function populateImageAssignSelect() {
+      var type = selectedImageAssignType();
+      var filterEl = self.querySelector("#zt-image-assign-filter");
+      var sel = self.querySelector("#zt-image-assign-target");
+      if (!sel) return;
+      var q = (filterEl && filterEl.value || "").toLowerCase();
+      var items = imageAssignTargets[type] || [];
+      sel.innerHTML = "";
+      items.forEach(function(it) {
+        var label = it.name || it.id;
+        if (it.extra) label += " [" + it.extra + "]";
+        if (q && label.toLowerCase().indexOf(q) === -1) return;
+        var opt = document.createElement("option");
+        opt.value = it.id;
+        opt.textContent = label;
+        sel.appendChild(opt);
+      });
+      if (sel.options.length === 0) {
+        var empty = document.createElement("option");
+        empty.value = "";
+        empty.textContent = items.length ? "No matches" : "No items";
+        empty.disabled = true;
+        sel.appendChild(empty);
+      }
+    }
+
+    function openImageAssignModal(fileName, filePath) {
+      self._assignImagePath = filePath.replace(/^\//, "");
+      var nameEl = self.querySelector("#zt-image-assign-filename");
+      if (nameEl) nameEl.textContent = fileName || self._assignImagePath;
+      var deleteEl = self.querySelector("#zt-image-assign-delete");
+      if (deleteEl) deleteEl.checked = false;
+      var filterEl = self.querySelector("#zt-image-assign-filter");
+      if (filterEl) filterEl.value = "";
+      loadImageAssignTargets().then(function() {
+        populateImageAssignSelect();
+        imageAssignModal.show();
+      }).catch(function(err) {
+        if (typeof sendToast === "function") sendToast("Unable to load assign targets", "", "bg-warning", (err && err.message) || "Failed");
+      });
+    }
+
+    self.querySelectorAll('input[name="zt-image-assign-type"]').forEach(function(radio) {
+      radio.addEventListener("change", function() {
+        var filterEl = self.querySelector("#zt-image-assign-filter");
+        if (filterEl) filterEl.value = "";
+        populateImageAssignSelect();
+      });
+    });
+    var imageAssignFilter = self.querySelector("#zt-image-assign-filter");
+    if (imageAssignFilter) {
+      imageAssignFilter.addEventListener("input", populateImageAssignSelect);
+    }
+    var imageAssignSubmit = self.querySelector("#zt-image-assign-submit");
+    if (imageAssignSubmit) {
+      imageAssignSubmit.onclick = function() {
+        var btn = this;
+        var targetId = (self.querySelector("#zt-image-assign-target") || {}).value;
+        if (!targetId || !self._assignImagePath) {
+          if (typeof sendToast === "function") sendToast("Assign image", "", "bg-warning", "Select a target");
+          return;
+        }
+        btn.disabled = true;
+        var payload = {
+          file: self._assignImagePath,
+          target_type: selectedImageAssignType(),
+          target_id: targetId,
+          delete_from_triage: !!(self.querySelector("#zt-image-assign-delete") && self.querySelector("#zt-image-assign-delete").checked)
+        };
+        if (selectedLibraryId) payload.library_id = selectedLibraryId;
+        fetch("/api/upload/triage/assign-image", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+          .then(function(r) {
+            return r.json().catch(function() { return {}; }).then(function(d) {
+              btn.disabled = false;
+              if (r.ok) {
+                imageAssignModal.hide();
+                detailOffcanvas.hide();
+                loadListing();
+                var msg = "Image assigned successfully";
+                if (d.redirect) msg += ' <a href="' + d.redirect + '" target="_blank">View</a>';
+                if (typeof sendToast === "function") sendToast("Assign image", "", "bg-success", msg);
+              } else if (typeof sendToast === "function") {
+                sendToast("Unable to assign image", "", "bg-warning", (d && d.error) || "Failed");
+              }
+            });
+          })
+          .catch(function(err) {
+            btn.disabled = false;
+            if (typeof sendToast === "function") sendToast("Unable to assign image", "", "bg-warning", (err && err.message) || "Failed");
+          });
+      };
+    }
 
     function showFileDetails(fileName, filePath, fileType, fileSize, fileDate) {
       var niceTypes = { unknown: "Unrecognized", video: "Video", image: "Picture", archive: "Archive" };
@@ -211,6 +360,9 @@ ZtUploadHome.prototype.connectedCallback = function() {
       if (fileType === "video") {
         content += '<button class="btn btn-outline-primary me-2" id="zt-single-import-btn"><i class="fas fa-file-import"></i> Import</button>';
       }
+      if (fileType === "image") {
+        content += '<button class="btn btn-outline-primary me-2" id="zt-image-assign-btn"><i class="far fa-image"></i> Assign image</button>';
+      }
       content += '<a class="btn btn-outline-primary me-2" href="' + previewUrl(filePath) + '" target="_blank"><i class="fas fa-download"></i> Download</a>';
       content += '<button class="btn btn-outline-danger" id="zt-file-delete-btn"><i class="far fa-trash-alt"></i> Delete</button>';
       self.querySelector("#zt-item-details-content").innerHTML = content;
@@ -224,6 +376,12 @@ ZtUploadHome.prototype.connectedCallback = function() {
           self.querySelector("#zt-import-filepath").textContent = filePath;
           self._importFilePath = filePath.replace(/^\//, "");
           videoImportModal.show();
+        };
+      }
+      var imageAssignBtn = detailContent.querySelector("#zt-image-assign-btn");
+      if (imageAssignBtn) {
+        imageAssignBtn.onclick = function() {
+          openImageAssignModal(fileName, filePath);
         };
       }
       detailContent.querySelector("#zt-file-delete-btn").onclick = function() {

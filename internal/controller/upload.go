@@ -19,6 +19,14 @@ import (
 const errFileEmpty = "file name cannot be empty"
 
 var uploadVideoExt = regexp.MustCompile(`(?i)\.(mp4|mkv|webm)$`)
+var uploadImageExt = regexp.MustCompile(`(?i)\.(png|jpg|jpeg)$`)
+
+const (
+	assignTargetVideo       = "video"
+	assignTargetActor       = "actor"
+	assignTargetChannel     = "channel"
+	assignTargetCategorySub = "category_sub"
+)
 
 func classifyVideoBySize(sizeBytes, clipVideoMB, videoMovieMB int64) string {
 	mb := sizeBytes / (1024 * 1024)
@@ -781,4 +789,166 @@ func (c *Controller) UploadFolderCreate(g *gin.Context) {
 		return
 	}
 	g.JSON(200, gin.H{})
+}
+
+// UploadAssignImage godoc
+//
+//	@Summary	Copy a triage image onto an entity thumbnail
+//	@Tags		upload
+//	@Accept		json
+//	@Param		body	body	object	true	"JSON with file, target_type, target_id, optional library_id and delete_from_triage"
+//	@Success	200	{object}	map[string]interface{}
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/upload/triage/assign-image [post]
+func (c *Controller) UploadAssignImage(g *gin.Context) {
+	type assignForm struct {
+		File             string `json:"file" binding:"required"`
+		LibraryID        string `json:"library_id"`
+		TargetType       string `json:"target_type" binding:"required"`
+		TargetID         string `json:"target_id" binding:"required"`
+		DeleteFromTriage bool   `json:"delete_from_triage"`
+	}
+
+	form := assignForm{}
+	if err := g.ShouldBindJSON(&form); err != nil {
+		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	file := strings.TrimPrefix(strings.TrimPrefix(form.File, "/"), "\\")
+	if file == "" {
+		g.JSON(http.StatusBadRequest, gin.H{"error": errFileEmpty})
+		return
+	}
+	if !uploadImageExt.MatchString(file) {
+		g.JSON(http.StatusBadRequest, gin.H{"error": "file must be a png, jpg, or jpeg image"})
+		return
+	}
+
+	metaStore, err := c.metadataStoreForWrite()
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	libID := c.uploadLibraryID(form.LibraryID)
+	libStore, err := c.storageResolver.Storage(libID)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	srcPath := filepath.Join("triage", file)
+	exists, err := libStore.Exists(srcPath)
+	if err != nil {
+		g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if !exists {
+		g.JSON(http.StatusNotFound, gin.H{"error": "triage file not found"})
+		return
+	}
+
+	var redirect string
+	var videoID string
+
+	switch form.TargetType {
+	case assignTargetVideo:
+		video := &model.Video{ID: form.TargetID}
+		if c.datastore.First(video).RowsAffected < 1 {
+			g.JSON(http.StatusNotFound, gin.H{"error": "video not found"})
+			return
+		}
+		dstPath := video.ThumbnailRelativePath()
+		redirect = video.URLAdmEdit()
+		videoID = video.ID
+		if err := storage.CopyObject(libStore, metaStore, srcPath, dstPath); err != nil {
+			g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		video.Thumbnail = true
+		video.Migrated = true
+		if err := c.datastore.Save(video).Error; err != nil {
+			g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+	case assignTargetActor:
+		actor := &model.Actor{ID: form.TargetID}
+		if c.datastore.First(actor).RowsAffected < 1 {
+			g.JSON(http.StatusNotFound, gin.H{"error": "actor not found"})
+			return
+		}
+		dstPath := filepath.Join("actors", actor.ID, "thumb.jpg")
+		redirect = actor.URLAdmEdit()
+		if err := storage.CopyObject(libStore, metaStore, srcPath, dstPath); err != nil {
+			g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		actor.Thumbnail = true
+		actor.Migrated = true
+		if err := c.datastore.Save(actor).Error; err != nil {
+			g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+	case assignTargetChannel:
+		channel := &model.Channel{ID: form.TargetID}
+		if c.datastore.First(channel).RowsAffected < 1 {
+			g.JSON(http.StatusNotFound, gin.H{"error": "channel not found"})
+			return
+		}
+		dstPath := filepath.Join("channels", channel.ID, "thumb.jpg")
+		redirect = channel.URLView()
+		if err := storage.CopyObject(libStore, metaStore, srcPath, dstPath); err != nil {
+			g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		channel.Thumbnail = true
+		channel.Migrated = true
+		if err := c.datastore.Save(channel).Error; err != nil {
+			g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+	case assignTargetCategorySub:
+		sub := &model.CategorySub{ID: form.TargetID}
+		if c.datastore.First(sub).RowsAffected < 1 {
+			g.JSON(http.StatusNotFound, gin.H{"error": "category sub not found"})
+			return
+		}
+		dstPath := filepath.Join("categories", sub.ID+".jpg")
+		redirect = sub.URLThumb()
+		if err := storage.CopyObject(libStore, metaStore, srcPath, dstPath); err != nil {
+			g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		sub.Thumbnail = true
+		sub.Migrated = true
+		if err := c.datastore.Save(sub).Error; err != nil {
+			g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+	default:
+		g.JSON(http.StatusBadRequest, gin.H{"error": "target_type must be video, actor, channel, or category_sub"})
+		return
+	}
+
+	if videoID != "" {
+		if err := c.runner.NewTask("video/mini-thumb", map[string]string{"videoID": videoID}); err != nil {
+			g.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	if form.DeleteFromTriage {
+		if err := libStore.Delete(srcPath); err != nil {
+			g.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	g.JSON(http.StatusOK, gin.H{"redirect": redirect})
 }

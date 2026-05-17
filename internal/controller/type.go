@@ -152,6 +152,7 @@ type AbstractController interface {
 	UploadMassDelete(*gin.Context)
 	UploadMassImport(*gin.Context)
 	UploadTriageScan(*gin.Context)
+	UploadAssignImage(*gin.Context)
 
 	// Providers
 	ProviderRegister(provider.Provider) error
