@@ -82,7 +82,7 @@ ZtActorEdit.prototype.connectedCallback = function() {
     var html = '<h2>Edit actor information</h2><hr/><br/><div class="row">';
     html += '<div class="col-3"><img class="rounded" src="' + urlThumb + '" style="width:100%">';
     html += '<div style="margin-top:15px"><a class="btn btn-success" style="width:100%" href="' + urlView + '">View profile</a>';
-    html += '<a class="btn btn-danger" style="margin-top:15px;width:100%" href="/actor/' + id + '/delete" data-full-reload>Delete actor profile</a>';
+    html += '<button type="button" class="btn btn-danger" style="margin-top:15px;width:100%" id="zt-actor-delete">Delete actor profile</button>';
     html += '<button type="button" class="btn btn-info" style="margin-top:15px;width:100%" id="zt-view-link-pictures">View link pictures</button></div></div>';
     html += '<div class="col-9"><h3>Profile details</h3><br/>';
     html += '<div class="mb-3"><div class="form-floating input-group"><input type="text" class="form-control" id="actor-name" disabled value="' + name + '"><label for="actor-name">Name</label><button class="btn btn-outline-warning" type="button" id="actor-name-edit">Edit</button></div></div>';
@@ -116,6 +116,24 @@ ZtActorEdit.prototype.connectedCallback = function() {
     html += '<div class="modal fade" id="addCategoryModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add category</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body">' + categoryModalHtml + '</div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div></div></div></div>';
 
     self.innerHTML = html;
+
+    var deleteBtn = self.querySelector("#zt-actor-delete");
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", function() {
+        if (!confirm("Delete this actor profile? This cannot be undone.")) return;
+        fetch("/api/actor/" + encodeURIComponent(id), { method: "DELETE", credentials: "same-origin" })
+          .then(function(r) {
+            if (r.ok) {
+              if (typeof navigate === "function") navigate("/actors");
+              else window.location.href = "/actors";
+            } else {
+              r.json().catch(function() { return {}; }).then(function(d) {
+                if (typeof sendToast === "function") sendToast("Actor deletion failed", "", "bg-danger", (d && d.error) || "Unable to delete actor profile");
+              });
+            }
+          });
+      });
+    }
 
     var nameEl = self.querySelector("#actor-name");
     var nameBtn = self.querySelector("#actor-name-edit");

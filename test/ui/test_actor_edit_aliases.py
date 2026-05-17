@@ -66,3 +66,27 @@ def test_actor_edit_delete_alias_and_persists_after_reload(page: Page):
 
     # Cleanup
     page.request.delete(BASE_URL + "/api/actor/" + actor_id)
+
+
+def test_actor_edit_delete_profile_via_ui(page: Page):
+    """On /actor/UUID/edit, delete actor profile via UI and land on actors list."""
+    login_admin(page)
+    r = page.request.post(
+        BASE_URL + "/api/actor/",
+        data={"name": "E2E Delete Profile Target", "sex": "f"},
+    )
+    assert r.status == 200
+    actor_id = r.json()["result"]
+
+    page.goto(BASE_URL + "/actor/" + actor_id + "/edit")
+    page.wait_for_load_state("networkidle")
+
+    page.once("dialog", lambda d: d.accept())
+    page.get_by_role("button", name="Delete actor profile").click()
+    page.wait_for_load_state("networkidle")
+
+    expect(page).to_have_url(BASE_URL + "/actors")
+    expect(page.get_by_text("E2E Delete Profile Target", exact=True)).to_have_count(0)
+
+    r = page.request.get(BASE_URL + "/api/actor/" + actor_id)
+    assert r.status == 404
