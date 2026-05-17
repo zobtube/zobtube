@@ -33,10 +33,10 @@ func (c *Controller) AdmLibraryList(g *gin.Context) {
 //	@Router		/adm/libraries [post]
 func (c *Controller) AdmLibraryCreate(g *gin.Context) {
 	var body struct {
-		Name   string                 `json:"name" binding:"required"`
-		Type   model.LibraryType      `json:"type" binding:"required"`
-		Config model.LibraryConfig    `json:"config"`
-		Default bool                  `json:"default"`
+		Name    string              `json:"name" binding:"required"`
+		Type    model.LibraryType   `json:"type" binding:"required"`
+		Config  model.LibraryConfig `json:"config"`
+		Default bool                `json:"default"`
 	}
 	if err := g.ShouldBindJSON(&body); err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -88,10 +88,10 @@ func (c *Controller) AdmLibraryUpdate(g *gin.Context) {
 		return
 	}
 	var body struct {
-		Name    *string                `json:"name"`
-		Type    *model.LibraryType     `json:"type"`
-		Config  *model.LibraryConfig   `json:"config"`
-		Default *bool                  `json:"default"`
+		Name    *string              `json:"name"`
+		Type    *model.LibraryType   `json:"type"`
+		Config  *model.LibraryConfig `json:"config"`
+		Default *bool                `json:"default"`
 	}
 	if err := g.ShouldBindJSON(&body); err != nil {
 		g.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

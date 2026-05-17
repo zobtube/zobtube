@@ -49,9 +49,9 @@ func (c *Controller) PhotosetView(g *gin.Context) {
 	}
 	type photoView struct {
 		model.Photo
-		EffectiveActors     []model.Actor `json:"effective_actors"`
+		EffectiveActors     []model.Actor       `json:"effective_actors"`
 		EffectiveCategories []model.CategorySub `json:"effective_categories"`
-		EffectiveChannel    *model.Channel `json:"effective_channel"`
+		EffectiveChannel    *model.Channel      `json:"effective_channel"`
 	}
 	photos := make([]photoView, 0, len(ps.Photos))
 	for i := range ps.Photos {

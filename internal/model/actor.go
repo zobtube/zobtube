@@ -17,7 +17,7 @@ type Actor struct {
 	Name        string
 	Videos      []Video `gorm:"many2many:video_actors;"`
 	Thumbnail   bool
-	Migrated    bool `gorm:"default:false"`
+	Migrated    bool   `gorm:"default:false"`
 	Sex         string `gorm:"size:2;"`
 	Aliases     []ActorAlias
 	Links       []ActorLink

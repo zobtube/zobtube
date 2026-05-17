@@ -231,12 +231,12 @@ func (c *Controller) AdmActorDuplicateDismissRemove(g *gin.Context) {
 }
 
 type admDismissedDuplicateItem struct {
-	ID          string `json:"id"`
-	ActorID1    string `json:"actor_id_1"`
-	ActorID2    string `json:"actor_id_2"`
-	ActorName1  string `json:"actor_name_1"`
-	ActorName2  string `json:"actor_name_2"`
-	CreatedAt   string `json:"created_at"`
+	ID         string `json:"id"`
+	ActorID1   string `json:"actor_id_1"`
+	ActorID2   string `json:"actor_id_2"`
+	ActorName1 string `json:"actor_name_1"`
+	ActorName2 string `json:"actor_name_2"`
+	CreatedAt  string `json:"created_at"`
 }
 
 // AdmActorDuplicateDismissedList godoc

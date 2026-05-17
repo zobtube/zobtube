@@ -8,9 +8,9 @@ import (
 )
 
 type Playlist struct {
-	ID        string    `gorm:"type:uuid;primary_key"`
-	UserID    string    `gorm:"type:uuid;index;not null"`
-	Name      string    `gorm:"not null"`
+	ID        string `gorm:"type:uuid;primary_key"`
+	UserID    string `gorm:"type:uuid;index;not null"`
+	Name      string `gorm:"not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

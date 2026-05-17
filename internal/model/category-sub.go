@@ -16,7 +16,7 @@ type CategorySub struct {
 	Name      string
 	Category  string `gorm:"type:uuid"`
 	Thumbnail bool
-	Migrated  bool `gorm:"default:false"`
+	Migrated  bool     `gorm:"default:false"`
 	Videos    []*Video `gorm:"many2many:video_categories;"`
 	Actors    []*Actor `gorm:"many2many:actor_categories;"`
 }

@@ -62,6 +62,7 @@ func contentTypeByPath(path string) string {
 		return mime.TypeByExtension(ext)
 	}
 }
+
 func (s *S3) key(path string) string {
 	path = strings.TrimPrefix(path, "/")
 	if s.prefix == "" {

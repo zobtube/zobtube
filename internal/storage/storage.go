@@ -16,10 +16,10 @@ type PreviewableStorage interface {
 
 // Entry describes a single item from List.
 type Entry struct {
-	Name  string
-	Size  int64
+	Name    string
+	Size    int64
 	ModTime time.Time
-	IsDir bool
+	IsDir   bool
 }
 
 // Storage is the abstraction for library media storage (filesystem or S3).

@@ -78,10 +78,10 @@ func (f *Filesystem) List(prefix string) ([]Entry, error) {
 			continue
 		}
 		out = append(out, Entry{
-			Name:   e.Name(),
-			Size:   info.Size(),
+			Name:    e.Name(),
+			Size:    info.Size(),
 			ModTime: info.ModTime(),
-			IsDir:  e.IsDir(),
+			IsDir:   e.IsDir(),
 		})
 	}
 	return out, nil

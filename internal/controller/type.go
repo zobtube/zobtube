@@ -234,16 +234,16 @@ type buildDetails struct {
 }
 
 type Controller struct {
-	config           *config.Config
-	datastore        *gorm.DB
-	storageResolver  StorageResolver
-	metadataStorage  storage.Storage
-	providers        map[string]provider.Provider
-	shutdownChannel  chan<- int
-	runner           *runner.Runner
-	build            *buildDetails
-	logger           *zerolog.Logger
-	healthError      []string
+	config          *config.Config
+	datastore       *gorm.DB
+	storageResolver StorageResolver
+	metadataStorage storage.Storage
+	providers       map[string]provider.Provider
+	shutdownChannel chan<- int
+	runner          *runner.Runner
+	build           *buildDetails
+	logger          *zerolog.Logger
+	healthError     []string
 }
 
 func New(shutdownChannel chan int) AbstractController {

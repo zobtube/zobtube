@@ -18,9 +18,11 @@ import (
 
 const errFileEmpty = "file name cannot be empty"
 
-var uploadVideoExt = regexp.MustCompile(`(?i)\.(mp4|mkv|webm)$`)
-var uploadImageExt = regexp.MustCompile(`(?i)\.(png|jpg|jpeg)$`)
-var uploadZipExt = regexp.MustCompile(`(?i)\.zip$`)
+var (
+	uploadVideoExt = regexp.MustCompile(`(?i)\.(mp4|mkv|webm)$`)
+	uploadImageExt = regexp.MustCompile(`(?i)\.(png|jpg|jpeg)$`)
+	uploadZipExt   = regexp.MustCompile(`(?i)\.zip$`)
+)
 
 const (
 	assignTargetVideo       = "video"
@@ -44,7 +46,8 @@ func scanTypeEnabled(enabled struct {
 	C bool `json:"c"`
 	V bool `json:"v"`
 	M bool `json:"m"`
-}, typ string) bool {
+}, typ string,
+) bool {
 	switch typ {
 	case "c":
 		return enabled.C
@@ -69,14 +72,14 @@ func (c *Controller) uploadLibraryID(formLibraryID string) string {
 	}
 	return lib.ID
 }
-//
-//	@Summary	Import file from triage as video
-//	@Tags		upload
-//	@Accept		json
-//	@Param		body	body	object	true	"JSON with path, import_as"
-//	@Success	201	{object}	map[string]interface{}
-//	@Failure	400	{object}	map[string]interface{}
-//	@Router		/upload/import [post]
+
+// @Summary	Import file from triage as video
+// @Tags		upload
+// @Accept		json
+// @Param		body	body	object	true	"JSON with path, import_as"
+// @Success	201	{object}	map[string]interface{}
+// @Failure	400	{object}	map[string]interface{}
+// @Router		/upload/import [post]
 func (c *Controller) UploadImport(g *gin.Context) {
 	var body struct {
 		Path      string `json:"path"`
@@ -411,8 +414,8 @@ func (c *Controller) UploadDeleteFile(g *gin.Context) {
 func (c *Controller) UploadMassDelete(g *gin.Context) {
 	// get file list from request
 	type fileDeleteForm struct {
-		Files      []string `json:"files" binding:"required"`
-		LibraryID  string   `json:"library_id"`
+		Files     []string `json:"files" binding:"required"`
+		LibraryID string   `json:"library_id"`
 	}
 
 	form := fileDeleteForm{}

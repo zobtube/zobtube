@@ -78,9 +78,9 @@ func TestVideo_IsOrganizedWith(t *testing.T) {
 	activeID := active.ID
 
 	cases := []struct {
-		name   string
-		video  Video
-		want   bool
+		name  string
+		video Video
+		want  bool
 	}{
 		{"not imported", Video{Imported: false, OrganizationID: &activeID, Path: &path}, false},
 		{"no organization", Video{Imported: true, OrganizationID: nil, Path: &path}, false},

@@ -88,7 +88,7 @@ func stageScanFixtures(t *testing.T, root string) {
 	if err := os.MkdirAll(filepath.Join(root, "triage", "sub"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	writeSizedFile(t, filepath.Join(root, "triage", "a.mp4"), 512*1024)       // 0 MB -> clip @ 1MB threshold
+	writeSizedFile(t, filepath.Join(root, "triage", "a.mp4"), 512*1024)             // 0 MB -> clip @ 1MB threshold
 	writeSizedFile(t, filepath.Join(root, "triage", "sub", "b.mp4"), 3*1024*1024/2) // 1 MB -> video
 	writeSizedFile(t, filepath.Join(root, "triage", "sub", "c.mp4"), 3*1024*1024)   // 3 MB -> movie
 	if err := os.WriteFile(filepath.Join(root, "triage", "sub", "notes.txt"), []byte("x"), 0o644); err != nil {
@@ -124,10 +124,10 @@ func postScan(t *testing.T, ctrl *Controller, libID string, body string) *httpte
 
 func scanBody(libID string, recursive bool, enC, enV, enM bool, clipMB, videoMB int64) string {
 	b, _ := json.Marshal(map[string]any{
-		"path":      "",
-		"recursive": recursive,
+		"path":       "",
+		"recursive":  recursive,
 		"library_id": libID,
-		"enabled": map[string]bool{"c": enC, "v": enV, "m": enM},
+		"enabled":    map[string]bool{"c": enC, "v": enV, "m": enM},
 		"thresholds": map[string]int64{
 			"clip_video_mb":  clipMB,
 			"video_movie_mb": videoMB,
