@@ -65,7 +65,7 @@ func (c *Controller) AdmVideoList(g *gin.Context) {
 //	@Router		/adm/actor [get]
 func (c *Controller) AdmActorList(g *gin.Context) {
 	var actors []model.Actor
-	c.datastore.Find(&actors)
+	c.datastore.Order("LOWER(name), name").Find(&actors)
 	g.JSON(http.StatusOK, gin.H{"items": actors, "total": len(actors)})
 }
 
