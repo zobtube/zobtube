@@ -17,7 +17,7 @@ ZtAdmTokenList.prototype.connectedCallback = function() {
     .then(function(r) { return r.json(); })
     .then(function(d) {
       var tokens = d.tokens || [];
-      var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="tokens"></zt-adm-tabs></div><div class="col-md-9 col-lg-9"><div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-key"></i></span><h3>API tokens</h3><hr /></div>';
+      var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="tokens"></zt-adm-tabs></div><div class="col-md-9 col-lg-9"><div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-key"></i></span><h3>API tokens <i class="fa fa-info-circle text-muted ms-1" style="font-size:0.85em;cursor:help;vertical-align:baseline" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="top" title="Users create API tokens on their own Profile → API tokens page. This view lists all tokens for administration."></i></h3><hr /></div>';
       if (tokens.length === 0) {
         html += '<p class="text-muted">No API tokens.</p>';
       } else {
@@ -33,6 +33,11 @@ ZtAdmTokenList.prototype.connectedCallback = function() {
       }
       html += '</div></div>';
       self.innerHTML = html;
+      if (window.bootstrap && window.bootstrap.Tooltip) {
+        self.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+          new window.bootstrap.Tooltip(el);
+        });
+      }
       self.querySelectorAll("button[data-token-id]").forEach(function(btn) {
         btn.onclick = function() {
           if (!confirm("Delete this API token? The token will stop working immediately.")) return;
