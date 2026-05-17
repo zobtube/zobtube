@@ -47,7 +47,7 @@ func main() {
 		Name:      "zobtube",
 		Usage:     "passion of the zob, lube for the tube!",
 		Version:   fmt.Sprintf("%s (commit %s), built at %s", version, commit, date),
-		Copyright: "(c) 2025 ZobTube",
+		Copyright: "(c) 2026 ZobTube",
 		Authors: []any{
 			mail.Address{Name: "sblablaha", Address: "sblablaha@gmail.com"},
 		},
@@ -231,12 +231,12 @@ func metadataParamsFromCmd(cmd *cli.Command) config.MetadataParams {
 
 func startServer(ctx context.Context, cmd *cli.Command) error {
 	return server.Start(&server.Parameters{
-		Ctx:     ctx,
-		Cmd:     cmd,
-		Logger:  &logger,
-		Version: version,
-		Commit:  commit,
-		Date:    date,
+		Ctx:      ctx,
+		Cmd:      cmd,
+		Logger:   &logger,
+		Version:  version,
+		Commit:   commit,
+		Date:     date,
 		WebFS:    &webFS,
 		Metadata: metadataParamsFromCmd(cmd),
 	})

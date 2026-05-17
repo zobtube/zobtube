@@ -108,4 +108,4 @@ ZobTube, on the other hand, is more around organizing and viewing.
 
 ## :page_facing_up: License
 
-ZobTube © 2025 by sblablaha is licensed under the MIT license.
+ZobTube © 2026 by sblablaha is licensed under the MIT license.
