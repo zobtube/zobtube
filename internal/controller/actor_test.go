@@ -116,6 +116,44 @@ func TestController_Actor_ActorNew_Success(t *testing.T) {
 	}
 }
 
+func TestController_ActorList_SortedByNameCaseInsensitive(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupActorController(t)
+
+	for _, name := range []string{"Zara", "alice", "Bob"} {
+		if err := ctrl.datastore.Create(&model.Actor{Name: name}).Error; err != nil {
+			t.Fatalf("create actor %q: %v", name, err)
+		}
+	}
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/api/actor", nil)
+	ctrl.ActorList(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d", w.Code)
+	}
+
+	var resp struct {
+		Items []model.Actor `json:"items"`
+	}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if len(resp.Items) != 3 {
+		t.Fatalf("expected 3 actors, got %d", len(resp.Items))
+	}
+
+	got := []string{resp.Items[0].Name, resp.Items[1].Name, resp.Items[2].Name}
+	want := []string{"alice", "Bob", "Zara"}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("order[%d]: got %q, want %q (full order: %v)", i, got[i], want[i], got)
+		}
+	}
+}
+
 func TestController_Actor_ActorProviderSearch_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	ctrl := setupActorController(t)

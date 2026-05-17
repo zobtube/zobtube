@@ -22,7 +22,7 @@ const errHumanProviderNotFound = "Unable to retrieve provider"
 //	@Router		/actor [get]
 func (c *Controller) ActorList(g *gin.Context) {
 	var actors []model.Actor
-	c.datastore.Preload("Videos").Preload("Links").Order("name").Find(&actors)
+	c.datastore.Preload("Videos").Preload("Links").Order("LOWER(name), name").Find(&actors)
 	g.JSON(http.StatusOK, gin.H{
 		"items": actors,
 		"total": len(actors),
