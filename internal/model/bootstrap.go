@@ -24,6 +24,12 @@ func EnsureDefaultLibrary(db *gorm.DB, mediaPath string) (string, error) {
 				return "", err
 			}
 		}
+		if def.Type == LibraryTypeFilesystem && def.Config.Filesystem != nil && def.Config.Filesystem.Path != mediaPath {
+			def.Config.Filesystem.Path = mediaPath
+			if err := db.Save(&def).Error; err != nil {
+				return "", err
+			}
+		}
 		return def.ID, nil
 	}
 	// Use fixed UUID so migration default (videos.library_id) points to this library without backfill.
