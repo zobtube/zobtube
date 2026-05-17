@@ -167,7 +167,9 @@ func TestController_PlaylistVideoAdd_Remove(t *testing.T) {
 		t.Fatalf("view: expected 200, got %d", w2.Code)
 	}
 	var viewResp map[string]any
-	json.Unmarshal(w2.Body.Bytes(), &viewResp)
+	if err := json.Unmarshal(w2.Body.Bytes(), &viewResp); err != nil {
+		t.Fatalf("unmarshal view: %v", err)
+	}
 	videos, _ := viewResp["videos"].([]any)
 	if len(videos) != 1 {
 		t.Fatalf("expected 1 video, got %d", len(videos))
@@ -207,7 +209,9 @@ func TestController_PlaylistList_ContainsVideo(t *testing.T) {
 		t.Fatalf("expected 200, got %d", w.Code)
 	}
 	var resp map[string]any
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal list: %v", err)
+	}
 	playlists, _ := resp["playlists"].([]any)
 	if len(playlists) != 4 {
 		t.Fatalf("expected 3 virtual + 1 user playlist, got %d", len(playlists))
@@ -365,7 +369,9 @@ func TestController_PlaylistView_UnseenVideos(t *testing.T) {
 	ctrl.PlaylistView(c)
 
 	var resp map[string]any
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal view: %v", err)
+	}
 	pl, _ := resp["playlist"].(map[string]any)
 	if pl["virtual"] != true {
 		t.Error("expected virtual playlist")

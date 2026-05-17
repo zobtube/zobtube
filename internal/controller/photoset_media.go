@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"mime"
 	"path/filepath"
 	"strings"
 
@@ -75,16 +74,4 @@ func effectiveChannel(ps *model.Photoset, photo *model.Photo) *model.Channel {
 		return photo.Channel
 	}
 	return ps.Channel
-}
-
-func detectContentType(path, fallback string) string {
-	if fallback != "" {
-		return fallback
-	}
-	if ext := strings.ToLower(filepath.Ext(path)); ext != "" {
-		if ct := mime.TypeByExtension(ext); ct != "" {
-			return ct
-		}
-	}
-	return "application/octet-stream"
 }
