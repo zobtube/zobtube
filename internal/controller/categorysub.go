@@ -18,7 +18,7 @@ import (
 //	@Accept		x-www-form-urlencoded
 //	@Param		Name	formData	string	true	"Sub-category name"
 //	@Param		Parent	formData	string	true	"Parent category ID"
-//	@Success	200
+//	@Success	200	{object}	map[string]interface{}
 //	@Failure	500	{object}	map[string]interface{}
 //	@Router		/category-sub [post]
 func (c *Controller) CategorySubAdd(g *gin.Context) {
@@ -37,7 +37,7 @@ func (c *Controller) CategorySubAdd(g *gin.Context) {
 			}
 			err = c.datastore.Create(&category).Error
 			if err == nil {
-				g.JSON(200, gin.H{})
+				g.JSON(200, gin.H{"id": category.ID})
 				return
 			}
 		}

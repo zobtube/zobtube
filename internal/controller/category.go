@@ -102,6 +102,53 @@ func (c *Controller) CategoryAdd(g *gin.Context) {
 	g.JSON(200, gin.H{})
 }
 
+// CategoryRename godoc
+//
+//	@Summary	Rename a category
+//	@Tags		category
+//	@Accept		x-www-form-urlencoded
+//	@Param		id	path	string	true	"Category ID"
+//	@Param		title	formData	string	true	"New name"
+//	@Success	200
+//	@Failure	400	{object}	map[string]interface{}
+//	@Failure	404	{object}	map[string]interface{}
+//	@Router		/category/{id}/rename [post]
+func (c *Controller) CategoryRename(g *gin.Context) {
+	id := g.Param("id")
+
+	var form struct {
+		Title string `form:"title"`
+	}
+	err := g.ShouldBind(&form)
+	if err != nil {
+		g.JSON(406, gin.H{})
+		return
+	}
+	if form.Title == "" {
+		g.JSON(400, gin.H{
+			"error": "category name cannot be empty",
+		})
+		return
+	}
+
+	category := &model.Category{ID: id}
+	result := c.datastore.First(category)
+	if result.RowsAffected < 1 {
+		g.JSON(404, gin.H{})
+		return
+	}
+
+	category.Name = form.Title
+	if err := c.datastore.Save(category).Error; err != nil {
+		g.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	g.JSON(200, gin.H{})
+}
+
 // CategoryDelete godoc
 //
 //	@Summary	Delete a category

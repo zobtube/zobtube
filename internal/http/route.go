@@ -69,6 +69,7 @@ func (s *Server) setupRoutes(c controller.AbstractController) {
 	authGroup.GET("/api/category/:id", c.CategorySubGet)
 	authGroup.GET("/api/category-sub/:id/thumb", c.CategorySubThumb)
 	admGroup.POST("/api/category", c.CategoryAdd)
+	admGroup.POST("/api/category/:id/rename", c.CategoryRename)
 	admGroup.DELETE("/api/category/:id", c.CategoryDelete)
 	admGroup.POST("/api/category-sub/:id/thumb", c.CategorySubThumbSet)
 	admGroup.DELETE("/api/category-sub/:id/thumb", c.CategorySubThumbRemove)

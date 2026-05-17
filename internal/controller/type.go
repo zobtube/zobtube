@@ -92,6 +92,7 @@ type AbstractController interface {
 
 	// Categories
 	CategoryAdd(*gin.Context)
+	CategoryRename(*gin.Context)
 	CategoryDelete(*gin.Context)
 	CategoryList(*gin.Context)
 	CategorySubGet(*gin.Context)

@@ -142,6 +142,32 @@ func TestController_CategorySubGet_NotFound(t *testing.T) {
 	}
 }
 
+func TestController_CategoryRename_Success(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupCategoryController(t)
+	cat := &model.Category{Name: "Original"}
+	ctrl.datastore.Create(cat)
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Params = gin.Params{{Key: "id", Value: cat.ID}}
+	c.Request = httptest.NewRequest("POST", "/api/category/"+cat.ID+"/rename", strings.NewReader("title=Renamed"))
+	c.Request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	ctrl.CategoryRename(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var updated model.Category
+	if ctrl.datastore.First(&updated, "id = ?", cat.ID).RowsAffected < 1 {
+		t.Fatal("category not found")
+	}
+	if updated.Name != "Renamed" {
+		t.Errorf("expected name Renamed, got %q", updated.Name)
+	}
+}
+
 func TestController_CategoryDelete_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	ctrl := setupCategoryController(t)

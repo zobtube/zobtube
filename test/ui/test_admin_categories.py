@@ -103,15 +103,83 @@ def test_admin_delete_empty_category_via_api(page: Page):
 
 
 def test_admin_category_modal_add(page: Page):
-    """Admin can add category via modal - uses API as modal may not trigger in SPA fragment."""
+    """Admin can add category via modal."""
     login_admin(page)
     page.goto(BASE_URL + "/adm/categories")
     page.wait_for_load_state("networkidle")
-    # Modal can be flaky in SPA - verify Add category button exists and use API for add
-    expect(page.get_by_role("button", name="Add category")).to_be_visible()
-    r = page.request.post(BASE_URL + "/api/category", data={"Name": "E2E Modal Category"})
+    page.get_by_role("button", name="Add category").click()
+    page.wait_for_selector("#zt-add-category-modal.show", timeout=5000)
+    page.locator("#zt-add-category-name").fill("E2E Modal Category")
+    page.locator("#zt-add-category-modal").get_by_role("button", name="Create").click()
+    page.wait_for_selector("#zt-add-category-modal", state="hidden", timeout=5000)
+    expect(page.get_by_role("heading", name="E2E Modal Category", level=4)).to_be_visible()
+
+
+def test_admin_add_sub_category_via_modal(page: Page):
+    """Admin can add a category item (sub-category) via modal."""
+    login_admin(page)
+    r = page.request.post(
+        BASE_URL + "/api/category",
+        data={"Name": "E2E Category For Sub Modal"},
+    )
     assert r.status == 200
-    # Use goto (not reload) so SPA fetches fresh fragment with new category
     page.goto(BASE_URL + "/adm/categories")
     page.wait_for_load_state("networkidle")
-    expect(page.get_by_text("E2E Modal Category")).to_be_visible()
+    page.locator("section").filter(
+        has=page.get_by_role("heading", name="E2E Category For Sub Modal", level=4)
+    ).locator("a.category-new").click()
+    page.wait_for_selector("#zt-add-sub-modal.show", timeout=5000)
+    page.locator("#zt-add-sub-name").fill("E2E Modal Sub Item")
+    page.locator("#zt-add-sub-modal").get_by_role("button", name="Create").click()
+    page.wait_for_selector("#zt-add-sub-modal", state="hidden", timeout=5000)
+    expect(page.get_by_text("E2E Modal Sub Item")).to_be_visible()
+
+
+def test_admin_edit_category_via_modal(page: Page):
+    """Admin can edit a parent category name via modal."""
+    login_admin(page)
+    r = page.request.post(
+        BASE_URL + "/api/category",
+        data={"Name": "E2E Edit Category Original"},
+    )
+    assert r.status == 200
+    page.goto(BASE_URL + "/adm/categories")
+    page.wait_for_load_state("networkidle")
+    page.locator("section").filter(
+        has=page.get_by_role("heading", name="E2E Edit Category Original", level=4)
+    ).locator(".zt-edit-category-btn").click()
+    page.wait_for_selector("#zt-edit-category-modal.show", timeout=5000)
+    page.locator("#zt-edit-category-name").fill("E2E Edit Category Renamed")
+    page.locator("#zt-edit-category-modal").get_by_role("button", name="Save").click()
+    page.wait_for_selector("#zt-edit-category-modal", state="hidden", timeout=5000)
+    expect(page.get_by_role("heading", name="E2E Edit Category Renamed", level=4)).to_be_visible()
+
+
+def test_admin_edit_sub_category_via_modal(page: Page):
+    """Admin can edit a category item name via modal."""
+    login_admin(page)
+    r = page.request.post(
+        BASE_URL + "/api/category",
+        data={"Name": "E2E Edit Sub Parent"},
+    )
+    assert r.status == 200
+    r = page.request.get(BASE_URL + "/api/category")
+    categories = r.json()["items"]
+    parent_id = next(
+        (c.get("ID") or c.get("id"))
+        for c in categories
+        if (c.get("name") or c.get("Name")) == "E2E Edit Sub Parent"
+    )
+    r = page.request.post(
+        BASE_URL + "/api/category-sub",
+        data={"Name": "E2E Sub Original", "Parent": parent_id},
+    )
+    assert r.status == 200
+    page.goto(BASE_URL + "/adm/categories")
+    page.wait_for_load_state("networkidle")
+    page.get_by_role("link", name="E2E Sub Original").click()
+    page.wait_for_selector("#zt-edit-sub-modal.show", timeout=5000)
+    page.locator("#zt-edit-sub-name").fill("E2E Sub Renamed")
+    page.locator("#zt-edit-sub-modal").get_by_role("button", name="Save").click()
+    page.wait_for_selector("#zt-edit-sub-modal", state="hidden", timeout=5000)
+    expect(page.get_by_text("E2E Sub Renamed")).to_be_visible()
