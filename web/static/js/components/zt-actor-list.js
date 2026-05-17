@@ -12,7 +12,9 @@ ZtActorList.prototype.connectedCallback = function() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var items = data.items || [];
-      var html = '<style>.card-text{display:flex;align-content:center;justify-content:space-between;color:#606060}</style>' +
+      var html = '<style>.card-text{display:flex;align-content:center;justify-content:space-between;color:#606060}' +
+        '.zt-actor-card-thumb{aspect-ratio:1/1;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;width:100%}' +
+        '.zt-actor-card-thumb img{width:100%;height:100%;object-fit:contain;display:block}</style>' +
         '<div class="themeix-section-h"><span class="heading-icon"><i class="far fa-user"></i></span><h3>Actors' +
         (admin ? ' <a href="/actor/new"><i class="fas fa-plus-circle"></i></a>' : '') + '</h3><hr /></div>' +
         '<div class="row"><div class="col-md-12"><div class="form-floating mb-3"><input id="actor-filter" class="form-control"><label for="actor-filter">Looking for someone?</label></div></div></div>' +
@@ -24,7 +26,7 @@ ZtActorList.prototype.connectedCallback = function() {
         var vlen = (a.Videos || a.videos || []).length;
         var llen = (a.Links || a.links || []).length;
         var name = (a.Name || a.name || "").replace(/&/g,"&amp;").replace(/</g,"&lt;");
-        html += '<div class="col"><div class="card"><img data-src="' + urlThumb + '" class="card-img-top lazy"><div class="card-body"><h5 class="card-title">' +
+        html += '<div class="col"><div class="card"><div class="zt-actor-card-thumb card-img-top"><img data-src="' + urlThumb + '" class="lazy" alt=""></div><div class="card-body"><h5 class="card-title">' +
           '<a class="stretched-link" href="' + urlView + '">' + name + '</a><span style="position:absolute;right:15px;"><i class="fa ' + sexIcon + '"></i></span></h5>' +
           '<div class="card-text"><a><i class="fas fa-film"></i> ' + vlen + '</a><a><i class="fas fa-link"></i> ' + llen + '</a></div></div></div></div>';
       });
