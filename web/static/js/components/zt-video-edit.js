@@ -291,12 +291,20 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       var titleEl = self.querySelector("#video-title");
       var titleBtn = self.querySelector("#video-title-edit");
       var inEditMode = false;
+      function submitTitleRename() {
+        if (!inEditMode) return;
+        var fd = new FormData(); fd.set("name", titleEl.value);
+        fetch("/api/video/"+id+"/rename", { method: "POST", credentials: "same-origin", body: fd })
+          .then(function(r){ if(r.ok){ titleEl.disabled=true; titleBtn.textContent="Edit"; inEditMode=false; } });
+      }
       titleBtn.addEventListener("click", function(){
         if(!inEditMode){ titleEl.disabled=false; titleBtn.textContent="Send"; inEditMode=true; }
-        else {
-          var fd = new FormData(); fd.set("name", titleEl.value);
-          fetch("/api/video/"+id+"/rename", { method: "POST", credentials: "same-origin", body: fd })
-            .then(function(r){ if(r.ok){ titleEl.disabled=true; titleBtn.textContent="Edit"; inEditMode=false; } });
+        else submitTitleRename();
+      });
+      titleEl.addEventListener("keydown", function(e){
+        if (e.key === "Enter" && inEditMode) {
+          e.preventDefault();
+          submitTitleRename();
         }
       });
 
