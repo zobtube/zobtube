@@ -93,7 +93,8 @@ def test_profile_playlists_play_navigates_with_query(page: Page):
         re.compile(rf"/video/{video_id}\?playlist={playlist_id}.*autoplay"),
         timeout=10000,
     )
-    expect(page.locator("text=Playing from")).to_be_visible(timeout=5000)
+    expect(page.get_by_role("heading", name="Up next")).to_be_visible(timeout=5000)
+    expect(page.get_by_role("link", name="E2E Play Queue")).to_be_visible(timeout=5000)
 
 
 def test_profile_playlists_delete(page: Page):
