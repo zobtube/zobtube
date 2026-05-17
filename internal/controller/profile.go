@@ -17,6 +17,14 @@ type profileActorViewResult struct {
 	Count int         `json:"count"`
 }
 
+type profileStatsResult struct {
+	VideosUnique    int   `json:"videos_unique"`
+	VideosTotal     int   `json:"videos_total"`
+	ActorsUnique    int   `json:"actors_unique"`
+	ActorsTotal     int   `json:"actors_total"`
+	TotalViewTimeNs int64 `json:"total_view_time_ns"`
+}
+
 // migrateVideoViewsFromDeletedVideos moves view counts from soft-deleted videos onto
 // a still-active video with the same filename in the same library (e.g. after
 // re-importing triage content as a different type).
@@ -74,6 +82,21 @@ func profileVideoPreload(db *gorm.DB) *gorm.DB {
 	return db.Unscoped()
 }
 
+// resolveProfileVideo returns the video to attribute views to, or nil if the view row is orphaned.
+func (c *Controller) resolveProfileVideo(vv *model.VideoView, userID string) *model.Video {
+	if vv.Video.ID == "" {
+		c.datastore.Delete(&model.VideoView{}, "video_id = ? AND user_id = ?", vv.VideoID, userID)
+		return nil
+	}
+	video := vv.Video
+	if video.DeletedAt.Valid {
+		if replacement := c.findReplacementVideo(&video); replacement != nil {
+			return replacement
+		}
+	}
+	return &video
+}
+
 // ProfileView godoc
 //
 //	@Summary	Get user profile with top video views and actor stats
@@ -87,39 +110,56 @@ func (c *Controller) ProfileView(g *gin.Context) {
 
 	c.migrateVideoViewsFromDeletedVideos(user.ID)
 
-	// get user views
-	var videoViewsTop []model.VideoView
-	c.datastore.Where("user_id = ?", user.ID).Order("count desc").Limit(8).
-		Preload("Video", profileVideoPreload).Find(&videoViewsTop)
-	filteredViews := make([]model.VideoView, 0, len(videoViewsTop))
-	for _, vv := range videoViewsTop {
-		if vv.Video.ID == "" {
-			c.datastore.Delete(&model.VideoView{}, "video_id = ? AND user_id = ?", vv.VideoID, user.ID)
-			continue
-		}
-		if vv.Video.DeletedAt.Valid {
-			if replacement := c.findReplacementVideo(&vv.Video); replacement != nil {
-				vv.Video = *replacement
-			}
-		}
-		filteredViews = append(filteredViews, vv)
-	}
-	videoViewsTop = filteredViews
-
-	// count actors
-	countPerActor := make(map[string]int)
 	var videoViewsAll []model.VideoView
-	c.datastore.Where("user_id = ?", user.ID).Find(&videoViewsAll)
+	c.datastore.Where("user_id = ?", user.ID).
+		Preload("Video", profileVideoPreload).Find(&videoViewsAll)
 
-	type ActorResult struct { // create temporary type to hold actor ids
+	type actorIDResult struct {
 		ActorID string
 	}
-	for _, videoView := range videoViewsAll {
-		var actors []ActorResult
-		c.datastore.Table("video_actors").Select("actor_id").Where("video_id = ?", videoView.VideoID).Scan(&actors)
-		for _, actor := range actors {
-			countPerActor[actor.ActorID] += videoView.Count
+	countPerActor := make(map[string]int)
+	actorsSeen := make(map[string]struct{})
+	var stats profileStatsResult
+	validTop := make([]model.VideoView, 0, len(videoViewsAll))
+
+	for _, vv := range videoViewsAll {
+		if vv.Count <= 0 {
+			continue
 		}
+		video := c.resolveProfileVideo(&vv, user.ID)
+		if video == nil {
+			continue
+		}
+		stats.VideosUnique++
+		stats.VideosTotal += vv.Count
+		stats.TotalViewTimeNs += int64(vv.Count) * int64(video.Duration)
+
+		display := vv
+		display.Video = *video
+		validTop = append(validTop, display)
+
+		var actors []actorIDResult
+		c.datastore.Table("video_actors").Select("actor_id").Where("video_id = ?", vv.VideoID).Scan(&actors)
+		for _, actor := range actors {
+			if actor.ActorID == "" {
+				continue
+			}
+			countPerActor[actor.ActorID] += vv.Count
+			actorsSeen[actor.ActorID] = struct{}{}
+		}
+	}
+
+	stats.ActorsUnique = len(actorsSeen)
+	for _, n := range countPerActor {
+		stats.ActorsTotal += n
+	}
+
+	sort.Slice(validTop, func(i, j int) bool {
+		return validTop[i].Count > validTop[j].Count
+	})
+	videoViewsTop := validTop
+	if len(videoViewsTop) > 8 {
+		videoViewsTop = videoViewsTop[:8]
 	}
 
 	// sort actors
@@ -146,6 +186,7 @@ func (c *Controller) ProfileView(g *gin.Context) {
 	g.JSON(http.StatusOK, gin.H{
 		"video_views": videoViewsTop,
 		"actor_views": actorViews,
+		"stats":       stats,
 	})
 }
 

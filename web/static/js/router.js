@@ -19,6 +19,7 @@ var routes = [
   { pattern: /^\/video\/([^\/]+)\/edit\/?$/, component: "zt-video-edit", param: "id" },
   { pattern: /^\/video\/([^\/]+)\/?$/, component: "zt-video-view", param: "id" },
   { pattern: /^\/clip\/([^\/]+)\/?$/, component: "zt-clip-view", param: "id" },
+  { pattern: /^\/profile\/stats\/?$/, component: "zt-profile-stats" },
   { pattern: /^\/profile\/tokens\/?$/, component: "zt-profile-tokens" },
   { pattern: /^\/profile\/settings\/?$/, component: "zt-profile-settings" },
   { pattern: /^\/profile\/most-viewed\/videos\/?$/, component: "zt-profile-most-viewed-videos" },
@@ -132,7 +133,7 @@ function loadPage(path) {
   if (path === "") path = "/";
   var normalized = path.replace(/\/$/, "") || "/";
   if (normalized === "/profile") {
-    navigate("/profile/most-viewed/videos");
+    navigate("/profile/stats");
     return;
   }
 

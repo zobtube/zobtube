@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
@@ -26,7 +27,7 @@ func setupProfileController(t *testing.T) *Controller {
 	if err != nil {
 		t.Fatalf("failed to open in-memory db: %v", err)
 	}
-	if err := db.AutoMigrate(&model.User{}, &model.Video{}, &model.VideoView{}); err != nil {
+	if err := db.AutoMigrate(&model.User{}, &model.Video{}, &model.VideoView{}, &model.Actor{}); err != nil {
 		t.Fatalf("failed to migrate: %v", err)
 	}
 
@@ -202,6 +203,77 @@ func TestController_ProfileView_OmitsOrphanVideoViews(t *testing.T) {
 	if remain != 0 {
 		t.Errorf("expected orphan video_view removed, count=%d", remain)
 	}
+	stats := profileStatsFromResponse(t, resp)
+	if stats["videos_unique"] != float64(1) {
+		t.Errorf("stats videos_unique: got %v want 1", stats["videos_unique"])
+	}
+	if stats["videos_total"] != float64(1) {
+		t.Errorf("stats videos_total: got %v want 1", stats["videos_total"])
+	}
+}
+
+func profileStatsFromResponse(t *testing.T, resp map[string]any) map[string]any {
+	t.Helper()
+	stats, ok := resp["stats"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected stats object, got %T", resp["stats"])
+	}
+	return stats
+}
+
+func TestController_ProfileView_Stats(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	ctrl := setupProfileController(t)
+	user := &model.User{Username: "u", Password: "x"}
+	ctrl.datastore.Create(user)
+
+	d1 := 10 * time.Minute
+	d2 := 5 * time.Minute
+	v1 := &model.Video{Name: "v1", Filename: "v1.mp4", Type: "v", Duration: d1}
+	v2 := &model.Video{Name: "v2", Filename: "v2.mp4", Type: "v", Duration: d2}
+	actor := &model.Actor{Name: "Star"}
+	ctrl.datastore.Create(v1)
+	ctrl.datastore.Create(v2)
+	ctrl.datastore.Create(actor)
+	if err := ctrl.datastore.Model(v1).Association("Actors").Append(actor); err != nil {
+		t.Fatalf("link actor v1: %v", err)
+	}
+	if err := ctrl.datastore.Model(v2).Association("Actors").Append(actor); err != nil {
+		t.Fatalf("link actor v2: %v", err)
+	}
+	ctrl.datastore.Create(&model.VideoView{VideoID: v1.ID, UserID: user.ID, Count: 2})
+	ctrl.datastore.Create(&model.VideoView{VideoID: v2.ID, UserID: user.ID, Count: 3})
+
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = httptest.NewRequest("GET", "/api/profile", nil)
+	c.Set("user", user)
+	ctrl.ProfileView(c)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var resp map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	stats := profileStatsFromResponse(t, resp)
+	if stats["videos_unique"] != float64(2) {
+		t.Errorf("videos_unique: got %v want 2", stats["videos_unique"])
+	}
+	if stats["videos_total"] != float64(5) {
+		t.Errorf("videos_total: got %v want 5", stats["videos_total"])
+	}
+	if stats["actors_unique"] != float64(1) {
+		t.Errorf("actors_unique: got %v want 1", stats["actors_unique"])
+	}
+	if stats["actors_total"] != float64(5) {
+		t.Errorf("actors_total: got %v want 5", stats["actors_total"])
+	}
+	wantTime := int64(2)*int64(d1) + int64(3)*int64(d2)
+	if got, ok := stats["total_view_time_ns"].(float64); !ok || int64(got) != wantTime {
+		t.Errorf("total_view_time_ns: got %v want %d", stats["total_view_time_ns"], wantTime)
+	}
 }
 
 func TestController_ProfileView_MigratesViewsFromDeletedVideo(t *testing.T) {
@@ -239,5 +311,16 @@ func TestController_ProfileView_MigratesViewsFromDeletedVideo(t *testing.T) {
 	ctrl.datastore.Model(&model.VideoView{}).Where("video_id = ?", deleted.ID).Count(&oldRemain)
 	if oldRemain != 0 {
 		t.Errorf("expected old video_view removed, count=%d", oldRemain)
+	}
+	var resp map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	stats := profileStatsFromResponse(t, resp)
+	if stats["videos_unique"] != float64(1) {
+		t.Errorf("stats videos_unique: got %v want 1", stats["videos_unique"])
+	}
+	if stats["videos_total"] != float64(4) {
+		t.Errorf("stats videos_total: got %v want 4", stats["videos_total"])
 	}
 }
