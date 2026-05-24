@@ -1,0 +1,30 @@
+---
+
+site_name: ZobTube
+theme:
+  name: material
+  favicon: img/favicon.ico
+  icon:
+    repo: fontawesome/brands/github
+repo_url: https://github.com/zobtube/zobtube
+repo_name: ZobTube
+markdown_extensions:
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+plugins:
+  - search
+nav:
+  - Home: index.md
+  - Screenshots: screenshots.md
+  - User guide:
+    - Concepts: concepts.md
+    - Configuration: configuration.md
+    - Docker: docker.md
+    - Password reset: password-reset.md
+  - About:
+    - Credits: credits.md
+    - License: license.md
+    - Changelog: changelog.md
+site_url: https://zobtube.com

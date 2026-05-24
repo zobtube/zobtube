@@ -18,11 +18,14 @@ services:
       - ZT_SERVER_BIND=0.0.0.0:8069
       - ZT_DB_DRIVER=sqlite
       - ZT_DB_CONNSTRING=/etc/zobtube/db.sqlite
-      - ZT_MEDIA_PATH=/var/lib/zobtube
+      - ZT_MEDIA_PATH=/var/lib/zobtube/media
+      - ZT_METADATA_TYPE=filesystem
+      - ZT_METADATA_PATH=/var/lib/zobtube/metadata
     volumes:
       - /etc/localtime:/etc/localtime:ro
       # Location used to store the sqlite database
       # Can be removed with PostgreSQL
       - ./config:/etc/zobtube
       ## Point this at your collection.
-      - ./data:/var/lib/zobtube
+      - ./data:/var/lib/zobtube/media
+      - ./metadata:/var/lib/zobtube/metadata
