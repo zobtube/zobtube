@@ -73,7 +73,19 @@ ZtVideoView.prototype.connectedCallback = function() {
       }
       var videoEl = self.querySelector("#zt-main-video") || self.querySelector("video");
       if (videoEl) {
-        videoEl.addEventListener("play", function(){ fetch("/api/video/"+id+"/count-view", {method:"POST",credentials:"same-origin"}).then(function(){ var s=self.querySelector("#video-view-count span"); if(s){ var n=viewCount+1; s.textContent=n>1?n+" views":n+" view"; }}); });
+        var viewCounted = false;
+        videoEl.addEventListener("play", function() {
+          if (viewCounted) return;
+          viewCounted = true;
+          fetch("/api/video/"+id+"/count-view", {method:"POST",credentials:"same-origin"}).then(function() {
+            var s = self.querySelector("#video-view-count span");
+            if (s) {
+              var n = viewCount + 1;
+              viewCount = n;
+              s.textContent = n > 1 ? n + " views" : n + " view";
+            }
+          });
+        });
         if (playlistCtx && window.ztPlaylistBindAutoAdvance) {
           window.ztPlaylistBindAutoAdvance(videoEl, playlistCtx, playlistId);
         }
