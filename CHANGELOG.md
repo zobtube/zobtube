@@ -1,5 +1,30 @@
 # Changelog
 
+## Version 0.6.1
+
+Hi everyone,
+
+This new version brings a new documentation website and a fix on video view count.
+
+The new documentation is available in the usual domain [zobtube.com](https://zobtube.com).
+
+If you encounter any bug, feel free to drop an issue on the [Github issue page](https://github.com/zobtube/zobtube/issues).
+
+As usual, it is available on the [Github release page](https://github.com/zobtube/zobtube/releases/tag/0.6.1).
+
+
+### Features
+* [acea832](https://github.com/zobtube/zobtube/commit/acea832cc2a49f85ec56bd2550ef1795a07a5942) feat(tool): add release tool
+### Chores
+* [b2f6e35](https://github.com/zobtube/zobtube/commit/b2f6e352f343612370f288cacc1adafb2b1d0ede) chore(deps): update dependency pytest-playwright to v0.8.0
+* [f2da14e](https://github.com/zobtube/zobtube/commit/f2da14eb539576c22b12cf001daa54963388a3b3) chore(deps): update dependency playwright to v1.60.0
+### Fixes
+* [5d93d63](https://github.com/zobtube/zobtube/commit/5d93d63f48f009f6b8a73964c8f94b488ba85e8f) fix(deps): update module golang.org/x/image to v0.41.0
+* [c920803](https://github.com/zobtube/zobtube/commit/c9208039704e6bfcc11b50e892052482804d832f) fix(video_view): avoid duplicating view count
+* [e9e66d2](https://github.com/zobtube/zobtube/commit/e9e66d22a0977821f4f535a36a5d932949ea4fce) fix(deps): update aws-sdk-go-v2 monorepo
+### Documentation
+* [89f7fa8](https://github.com/zobtube/zobtube/commit/89f7fa80a8cea18b5f76b35ea2317855f1103596) doc: add new documentation
+
 ## Version 0.6.0
 
 Hi everyone,
