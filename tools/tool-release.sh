@@ -17,12 +17,52 @@ read
 echo " - checkout branch $BRANCH_NAME"
 git checkout -b chore-release-$NEW_VERSION
 
+RELEASE_MSG_FILE=$(mktemp)
+ANNOUNCE_DIR=$(mktemp -d)
+trap 'rm -f "$RELEASE_MSG_FILE"; rm -rf "$ANNOUNCE_DIR"' EXIT
+
+echo " - preserve previous release announcements"
+# release-generate.sh rebuilds CHANGELOG.md from scratch, which would drop the
+# hand-written announcement prose of previous versions. Save each version's
+# announcement (everything between its '## Version' header and the first '###'
+# section) so it can be restored after regeneration.
+if [ -f CHANGELOG.md ]
+then
+	awk -v dir="$ANNOUNCE_DIR" '
+		/^## Version / { version = $3; capture = 1; next }
+		/^### / { capture = 0 }
+		capture { print > (dir "/" version) }
+	' CHANGELOG.md
+fi
+
 echo " - generate release for version $NEW_VERSION"
 ./tools/release-generate.sh $NEW_VERSION
 
+echo " - restore previous release announcements"
+awk -v dir="$ANNOUNCE_DIR" '
+	/^## Version / {
+		print
+		file = dir "/" $3
+		n = 0
+		while ((getline line < file) > 0) buf[++n] = line
+		close(file)
+		start = 1
+		while (start <= n && buf[start] ~ /^[ \t]*$/) start++
+		end = n
+		while (end >= start && buf[end] ~ /^[ \t]*$/) end--
+		if (end >= start) {
+			print ""
+			for (i = start; i <= end; i++) print buf[i]
+			print ""
+		}
+		delete buf
+		next
+	}
+	{ print }
+' CHANGELOG.md > CHANGELOG.md.tmp
+mv CHANGELOG.md.tmp CHANGELOG.md
+
 echo " - open editor to write release announcement"
-RELEASE_MSG_FILE=$(mktemp)
-trap 'rm -f "$RELEASE_MSG_FILE"' EXIT
 
 cat > "$RELEASE_MSG_FILE" <<EOF
 Hi everyone,
