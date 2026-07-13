@@ -1,7 +1,51 @@
 # Changelog
 
-## Version 0.6.1
+## Version 0.6.2
 
+Hi everyone,
+
+This release mostly contains packages updates and security fixes.
+With this new version, 15 vulnerabilities found inside dependencies were fixed.
+The exact list is available on the [upgrade commit](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed).
+Although some of them are marked as critical, none really impact the security of zobtube instances (even if running the previous version).
+The worst case scenario would be denial of service under some low probable attacks.
+
+Nevertheless, it is still recommanded to upgrade to this new version to avoid any potential issue.
+
+If you encounter any bug, feel free to drop an issue on the [Github issue page](https://github.com/zobtube/zobtube/issues).
+
+As usual, it is available on the [Github release page](https://github.com/zobtube/zobtube/releases/tag/0.6.2).
+
+
+### Chores
+* [43e2a8a](https://github.com/zobtube/zobtube/commit/43e2a8a2ed89d0d824245756a443f3cdd551519e) chore(deps): update dependency playwright to v1.61.0
+* [7814f26](https://github.com/zobtube/zobtube/commit/7814f265adb4526300ae98305eda874cc603f64e) chore(deps): update alpine docker tag to v3.24.1
+* [795b42e](https://github.com/zobtube/zobtube/commit/795b42e87f406bc5943954323abf1babff5e12fe) chore(go): tidy deps after upgrades
+* [971bb38](https://github.com/zobtube/zobtube/commit/971bb38fa55734307fe5e5ae6b9c871c6000ce95) chore(deps): update actions/checkout action to v7
+### Fixes
+* [093e185](https://github.com/zobtube/zobtube/commit/093e185e973e18e07f8ef49ca09ea8070a6b0620) fix(deps): update module golang.org/x/image to v0.44.0
+* [4a6873a](https://github.com/zobtube/zobtube/commit/4a6873afb3aff206e86aa0929b0a744eea4cc8b0) fix(deps): update module github.com/urfave/cli/v3 to v3.10.1
+* [9b12697](https://github.com/zobtube/zobtube/commit/9b1269773e9675ad367b4049175b6b8a77eebf0e) fix(deps): update aws-sdk-go-v2 monorepo
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-25680
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-39827
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-39828
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-39829
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-39830
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-39831
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-39832
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-39833
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-39834
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-39835
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-40898
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-42508
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-46595
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-46597
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): fix CVE-2026-46598
+* [b28b98c](https://github.com/zobtube/zobtube/commit/b28b98c7dcb5740c120a6ecf151eae6ec814f5ed) fix(go): upgrade to fix several security issues
+* [c4b3013](https://github.com/zobtube/zobtube/commit/c4b3013bde0b7f1620fca890dc05ffc60e150a23) fix(deps): update module gorm.io/gorm to v1.31.2
+* [cab6f1b](https://github.com/zobtube/zobtube/commit/cab6f1bdc4bd0fe8addb9908c4e67288b1e72739) fix(deps): update module golang.org/x/image to v0.44.0
+
+## Version 0.6.1
 Hi everyone,
 
 This new version brings a new documentation website and a fix on video view count.
