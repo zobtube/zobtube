@@ -20,7 +20,7 @@ require (
 	golang.org/x/image v0.41.0
 	golang.org/x/text v0.40.0
 	gorm.io/driver/postgres v1.6.0
-	gorm.io/gorm v1.31.1
+	gorm.io/gorm v1.31.2
 )
 
 require (
