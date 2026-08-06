@@ -256,6 +256,7 @@ func Start(params *Parameters) error {
 	runner.RegisterTask(video.NewVideoDeleting())
 	runner.RegisterTask(video.NewVideoMoveLibrary())
 	runner.RegisterTask(video.NewVideoGenerateThumbnail())
+	runner.RegisterTask(video.NewVideoMiniThumb())
 	runner.RegisterTask(video.NewVideoReorganize())
 	runner.RegisterTask(photoset.NewPhotosetFinalize())
 	runner.RegisterTask(photoset.NewPhotosetUnzip())

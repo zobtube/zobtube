@@ -12,6 +12,19 @@ import (
 	"golang.org/x/image/draw"
 )
 
+// NewVideoMiniThumb returns the task that (re)generates only the small/mini
+// thumbnail from the video's existing large thumbnail. It is used when a
+// custom thumbnail image has just been uploaded, so the large thumbnail must
+// not be re-derived from a video frame via ffmpeg.
+func NewVideoMiniThumb() *common.Task {
+	return &common.Task{
+		Name: "video/mini-thumb",
+		Steps: []common.Step{
+			{Name: "generate-thumbnail-mini", NiceName: "Generate mini thumbnail", Func: generateThumbnailMini},
+		},
+	}
+}
+
 func generateHorizontalMiniThumnail(readStore, writeStore storage.Storage, video *model.Video) (string, error) {
 	thumbPath := video.ThumbnailRelativePath()
 	thumbXSPath := video.ThumbnailXSRelativePath()
