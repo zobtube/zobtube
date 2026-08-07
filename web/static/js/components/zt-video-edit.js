@@ -102,6 +102,33 @@ ZtVideoEdit.prototype.connectedCallback = function() {
         return true;
       };
       var actorSel = window.zt.actorSelection;
+      var ACTOR_MODAL_LIMIT = 15;
+      function filterActorModal() {
+        var filterInput = self.querySelector("#actorSelectionModalInput");
+        var q = filterInput ? filterInput.value.trim().toLowerCase() : "";
+        var shown = 0;
+        self.querySelectorAll("#actorSelectionModal .add-actor-list").forEach(function(chip) {
+          var aid = chip.getAttribute("actor-id");
+          var addBtn = chip.querySelector(".btn-success");
+          var delBtn = chip.querySelector(".btn-danger");
+          if (aid in actorSel.actorSelected) {
+            if (addBtn) addBtn.style.display = "none";
+            if (delBtn) delBtn.style.display = "";
+            chip.style.display = "none";
+            return;
+          }
+          if (addBtn) addBtn.style.display = "";
+          if (delBtn) delBtn.style.display = "none";
+          var aname = ((actorSelectable[aid] && actorSelectable[aid].name) || "").toLowerCase();
+          var match = !q || aname.indexOf(q) >= 0;
+          if (match && shown < ACTOR_MODAL_LIMIT) {
+            chip.style.display = "";
+            shown++;
+          } else {
+            chip.style.display = "none";
+          }
+        });
+      }
       actorSel._updateSelectedActors = function(){
         var chips = Array.prototype.slice.call(document.getElementsByClassName("video-actor-list"));
         for(var i=0;i<chips.length;i++){
@@ -109,14 +136,7 @@ ZtVideoEdit.prototype.connectedCallback = function() {
           if (!(aid in actorSel.actorSelected)) chips[i].remove();
           else chips[i].style.display = "";
         }
-        var addChips = document.getElementsByClassName("add-actor-list");
-        for(i=0;i<addChips.length;i++){
-          aid = addChips[i].getAttribute("actor-id");
-          var addBtn = addChips[i].querySelector(".btn-success");
-          var delBtn = addChips[i].querySelector(".btn-danger");
-          if(aid in actorSel.actorSelected){ if(addBtn)addBtn.style.display="none"; if(delBtn)delBtn.style.display=""; addChips[i].style.display="none"; }
-          else { if(addBtn)addBtn.style.display=""; if(delBtn)delBtn.style.display="none"; addChips[i].style.display=""; }
-        }
+        filterActorModal();
       };
       actorSel.actorSelect = function(aid){ actorSel.actorSelected[aid]=undefined; actorSel._updateSelectedActors(); };
       actorSel.actorDeselect = function(aid){
@@ -193,7 +213,7 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       var actorModalChips = actors.map(function(a){
         var aid = a.ID||a.id;
         var sel = actorSelectedIds.indexOf(aid)>=0;
-        return '<div class="chip add-actor-list" actor-id="'+aid+'" style="'+(sel?'display:none;':'')+'"><img src="/api/actor/'+encodeURIComponent(aid)+'/thumb" width="50" height="50">'+esc(a.Name||a.name)+'<button class="btn btn-success add-actor-add"><i class="fa fa-plus-circle"></i></button><button class="btn btn-danger add-actor-remove" style="'+(sel?'':'display:none')+'"><i class="fa fa-trash-alt"></i></button></div>';
+        return '<div class="chip add-actor-list" actor-id="'+aid+'" style="display:none"><img src="/api/actor/'+encodeURIComponent(aid)+'/thumb" width="50" height="50">'+esc(a.Name||a.name)+'<button class="btn btn-success add-actor-add"><i class="fa fa-plus-circle"></i></button><button class="btn btn-danger add-actor-remove" style="'+(sel?'':'display:none')+'"><i class="fa fa-trash-alt"></i></button></div>';
       }).join("");
 
       var categoryModalHtml = "";
@@ -404,6 +424,11 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       self.querySelectorAll(".add-actor-list .add-actor-remove").forEach(function(btn){
         btn.addEventListener("click", function(){ var aid = this.closest(".add-actor-list").getAttribute("actor-id"); window.zt.actorSelection.actorDeselect(aid); });
       });
+      var actorFilterInput = self.querySelector("#actorSelectionModalInput");
+      if (actorFilterInput) {
+        actorFilterInput.addEventListener("input", filterActorModal);
+      }
+      filterActorModal();
       self.querySelectorAll(".add-category-list .add-category-add").forEach(function(btn){
         btn.addEventListener("click", function(){
           var cid = this.closest(".add-category-list").getAttribute("category-id");
