@@ -9,5 +9,17 @@
   "minimumReleaseAge": "7 days",
   "labels": [
     "dependency"
+  ],
+  "automerge": false,
+  "automergeType": "pr",
+  "automergeStrategy": "rebase",
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true
+    }
   ]
 }
