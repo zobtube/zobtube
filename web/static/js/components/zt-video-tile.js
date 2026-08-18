@@ -30,11 +30,12 @@ ZtVideoTile.prototype.connectedCallback = function() {
   var urlThumb = videoUrlThumbXS(v);
   var d = v.Duration || v.duration;
   var dur = d ? niceDuration(d) : "";
-  var name = (v.Name || v.name || v.Filename || v.filename || "Untitled").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+  var esc = window.ztEscHtml;
+  var name = esc(v.Name || v.name || v.Filename || v.filename || "Untitled");
   this.innerHTML = '<div class="single-video"><div class="video-img">' +
-    '<a href="' + urlView + '"><img class="lazy" data-src="' + urlThumb + '"></a>' +
-    (dur ? '<span class="video-duration">' + dur + '</span>' : '') +
-    '</div><div class="video-mini-title"><h4><a href="' + urlView + '" class="video-title">' + name + '</a></h4></div></div>';
+    '<a href="' + esc(urlView) + '"><img class="lazy" data-src="' + esc(urlThumb) + '"></a>' +
+    (dur ? '<span class="video-duration">' + esc(dur) + '</span>' : '') +
+    '</div><div class="video-mini-title"><h4><a href="' + esc(urlView) + '" class="video-title">' + name + '</a></h4></div></div>';
 };
 customElements.define("zt-video-tile", ZtVideoTile);
 window.ztVideoUrlView = videoUrlView;

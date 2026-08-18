@@ -1,7 +1,7 @@
 (function() {
 "use strict";
-function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;").replace(/>/g,"&gt;"); }
-function escAttr(s) { return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+var esc = window.ztEscHtml;
+var escAttr = window.ztEscHtml;
 
 function ZtPhotosetEdit() {
   return Reflect.construct(HTMLElement, [], ZtPhotosetEdit);
@@ -136,7 +136,7 @@ ZtPhotosetEdit.prototype.connectedCallback = function() {
           var sid = s.ID || s.id;
           var show = categorySelectedIds.indexOf(sid) >= 0 ? "" : "display:none";
           var thumb = '<img src="/api/category-sub/' + encodeURIComponent(sid) + '/thumb" width="50" height="50">';
-          categoryChips.push('<div class="chip photoset-category-list" category-id="' + sid + '" style="' + show + '">' + thumb + esc(s.Name || s.name) +
+          categoryChips.push('<div class="chip photoset-category-list" category-id="' + esc(sid) + '" style="' + show + '">' + thumb + esc(s.Name || s.name) +
             '<button type="button" class="btn btn-danger" onclick="window.zt.categorySelection.categoryDeselect(\'' + sid + '\');"><i class="fa fa-trash-alt"></i></button></div>');
         });
       });
@@ -157,7 +157,7 @@ ZtPhotosetEdit.prototype.connectedCallback = function() {
           var sid = s.ID || s.id;
           var sel = categorySelectedIds.indexOf(sid) >= 0;
           var thumb = '<img src="/api/category-sub/' + encodeURIComponent(sid) + '/thumb" width="50" height="50">';
-          categoryModalHtml += '<div class="chip add-category-list" category-id="' + sid + '" style="' + (sel ? "display:none;" : "") + '">' + thumb + esc(s.Name || s.name) +
+          categoryModalHtml += '<div class="chip add-category-list" category-id="' + esc(sid) + '" style="' + (sel ? "display:none;" : "") + '">' + thumb + esc(s.Name || s.name) +
             '<button type="button" class="btn btn-success add-category-add"><i class="fa fa-plus-circle"></i></button><button type="button" class="btn btn-danger add-category-remove" style="' + (sel ? "" : "display:none") + '"><i class="fa fa-trash-alt"></i></button></div>';
         });
         categoryModalHtml += "</div>";
@@ -165,7 +165,7 @@ ZtPhotosetEdit.prototype.connectedCallback = function() {
 
       var html = '<div class="themeix-section-h"><h3>Edit photoset</h3><hr /></div>';
       html += '<form id="zt-ps-rename" class="mb-3"><div class="input-group"><input class="form-control" name="name" value="' + name + '"><button class="btn btn-primary" type="submit">Rename</button></div></form>';
-      html += '<p><a href="/photoset/' + id + '">Back to photoset</a></p>';
+      html += '<p><a href="/photoset/' + esc(id) + '">Back to photoset</a></p>';
 
       html += '<div class="row mb-4"><div class="col-12">';
       html += '<div class="mb-3"><div class="form-floating input-group"><input type="text" disabled class="form-control" id="ps-channel" value="' + esc(channelName) + '"><label for="ps-channel">Channel</label><button class="btn btn-outline-warning" type="button" id="ps-channel-edit">Change</button></div></div>';
@@ -179,8 +179,8 @@ ZtPhotosetEdit.prototype.connectedCallback = function() {
       photos.forEach(function(p) {
         var pid = p.ID || p.id;
         var thumb = "/api/photo/" + pid + "/thumb_mini";
-        html += '<div class="col-4 col-md-2 text-center"><img class="img-fluid rounded lazy" data-src="' + thumb + '" style="aspect-ratio:1;object-fit:cover" alt="">';
-        html += '<div class="mt-1"><button type="button" class="btn btn-sm btn-outline-primary zt-set-cover" data-id="' + pid + '">Set cover</button></div></div>';
+        html += '<div class="col-4 col-md-2 text-center"><img class="img-fluid rounded lazy" data-src="' + esc(thumb) + '" style="aspect-ratio:1;object-fit:cover" alt="">';
+        html += '<div class="mt-1"><button type="button" class="btn btn-sm btn-outline-primary zt-set-cover" data-id="' + esc(pid) + '">Set cover</button></div></div>';
       });
       html += "</div>";
       html += '<div class="mt-3"><button type="button" class="btn btn-danger" id="zt-ps-delete">Delete photoset</button></div>';

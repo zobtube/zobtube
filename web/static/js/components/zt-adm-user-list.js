@@ -16,7 +16,7 @@ ZtAdmUserList.prototype.connectedCallback = function() {
       var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="users"></zt-adm-tabs></div><div class="col-md-9 col-lg-9"><div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-user-circle"></i></span><h3>User list'+addLink+'</h3><hr /></div><table class="table table-striped table-hover"><thead><tr><th>Username</th><th>Has admin rights</th><th></th></tr></thead><tbody>';
       items.forEach(function(u) {
         var id = u.ID || u.id;
-        var un = (u.Username||u.username||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+        var un = window.ztEscHtml((u.Username||u.username||""));
         var adminIcon = (u.Admin || u.admin) ? 'far fa-check-circle' : 'fas fa-ban';
         var deleteUrl = '/api/adm/user/' + id;
         html += '<tr><td>'+un+'</td><td><i class="'+adminIcon+'"></i></td><td style="text-align:end"><button type="button" class="btn btn-sm btn-danger" data-user-id="'+id+'">Delete</button></td></tr>';

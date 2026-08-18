@@ -5,7 +5,7 @@ var categoryStyles = ":root{--separator-width:4px}#zt-adm-categories-container s
 function subName(s) {
   var n = s.Name || s.name || s.Title || s.title || "";
   if (typeof n !== "string" || !n.trim()) return "Uncategorized";
-  return n.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+  return window.ztEscHtml(n);
 }
 
 function toastError(msg) {
@@ -31,15 +31,15 @@ ZtAdmCategory.prototype.connectedCallback = function() {
       items.forEach(function(c) {
         var subs = c.Sub || c.sub || [];
         var catId = c.ID || c.id;
-        var catName = (c.Name || c.name || "Other").replace(/&/g,"&amp;").replace(/</g,"&lt;");
-        html += '<section data-cat-id="' + catId + '"><div class="d-flex align-items-center gap-2 mb-2"><h4 class="mb-0">' + catName + '</h4><button type="button" class="btn btn-link p-0 border-0 zt-edit-category-btn text-secondary" data-cat-id="' + catId + '" data-cat-name="' + catName.replace(/"/g,"&quot;") + '" title="Edit category" aria-label="Edit category"><i class="fas fa-pen"></i></button></div><div class="category-values mb-3">';
+        var catName = window.ztEscHtml((c.Name || c.name || "Other"));
+        html += '<section data-cat-id="' + window.ztEscHtml(catId) + '"><div class="d-flex align-items-center gap-2 mb-2"><h4 class="mb-0">' + catName + '</h4><button type="button" class="btn btn-link p-0 border-0 zt-edit-category-btn text-secondary" data-cat-id="' + window.ztEscHtml(catId) + '" data-cat-name="' + catName + '" title="Edit category" aria-label="Edit category"><i class="fas fa-pen"></i></button></div><div class="category-values mb-3">';
         subs.forEach(function(s) {
           var sid = s.ID || s.id;
           var name = subName(s);
           var thumbUrl = "/api/category-sub/" + encodeURIComponent(sid) + "/thumb";
-          html += '<a href="#" class="category-item" data-sub-id="' + sid + '" data-sub-name="' + name.replace(/"/g,"&quot;") + '"><img src="' + thumbUrl + '" alt=""><div class="category-value-header"><h5>' + name + '</h5></div></a>';
+          html += '<a href="#" class="category-item" data-sub-id="' + window.ztEscHtml(sid) + '" data-sub-name="' + name + '"><img src="' + window.ztEscHtml(thumbUrl) + '" alt=""><div class="category-value-header"><h5>' + name + '</h5></div></a>';
         });
-        html += '<a class="category-new" data-parent-id="' + catId + '" style="cursor:pointer"><img src="/static/images/category-add.svg" alt=""><div class="category-value-header"><h5>New</h5></div></a>';
+        html += '<a class="category-new" data-parent-id="' + window.ztEscHtml(catId) + '" style="cursor:pointer"><img src="/static/images/category-add.svg" alt=""><div class="category-value-header"><h5>New</h5></div></a>';
         html += '</div></section>';
       });
       html += "</div></div></div></div>";

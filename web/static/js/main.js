@@ -54,7 +54,11 @@ function ajax(url, method, data) {
 }
 
 // common toast function
-function sendToast(title, subtitle, title_color, message) {
+//
+// message is treated as plain text, because most callers pass a server error
+// string or a user-supplied name. The few callers that genuinely need markup
+// (an "edit this" link) pass allowHtml explicitly.
+function sendToast(title, subtitle, title_color, message, allowHtml) {
    // get const
    toastContainer = document.getElementById('zt-toast-container');
    toastTemplate = document.getElementById('toastTemplate');
@@ -76,7 +80,11 @@ function sendToast(title, subtitle, title_color, message) {
 
    // set content
    n_content = newtoast.getElementsByClassName('zt-toast-body');
-   n_content[0].innerHTML = message;
+   if (allowHtml) {
+      n_content[0].innerHTML = message;
+   } else {
+      n_content[0].textContent = message == null ? "" : String(message);
+   }
 
    toastContainer.appendChild(newtoast);
    toast = new bootstrap.Toast(newtoast);
