@@ -1,8 +1,6 @@
 (function() {
 "use strict";
-function escapeAttr(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
+var escapeAttr = window.ztEscHtml;
 function ZtHome() {
   var el = Reflect.construct(HTMLElement, [], ZtHome);
   return el;

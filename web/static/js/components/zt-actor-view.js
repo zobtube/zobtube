@@ -1,8 +1,6 @@
 (function() {
 "use strict";
-function esc(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-}
+var esc = window.ztEscHtml;
 function ZtActorView() {
   var el = Reflect.construct(HTMLElement, [], ZtActorView);
   return el;
@@ -19,9 +17,9 @@ function photosetCardsHtml(items) {
     var name = esc(ps.Name || ps.name || "Untitled");
     var status = ps.Status || ps.status || "";
     var cover = "/api/photoset/" + pid + "/cover";
-    html += '<div class="col-md-3 col-sm-6 mb-4"><a href="/photoset/' + pid + '" class="text-decoration-none text-dark">';
+    html += '<div class="col-md-3 col-sm-6 mb-4"><a href="/photoset/' + esc(pid) + '" class="text-decoration-none text-dark">';
     html += '<div class="card h-100"><div class="ratio ratio-4x3 bg-light">';
-    html += '<img class="lazy" data-src="' + cover + '" alt="' + name + '" style="object-fit:cover;width:100%;height:100%">';
+    html += '<img class="lazy" data-src="' + esc(cover) + '" alt="' + name + '" style="object-fit:cover;width:100%;height:100%">';
     html += '</div></div><div class="card-body p-2"><h6 class="card-title mb-0">' + name + '</h6>';
     if (status && status !== "ready") html += '<small class="text-muted">' + esc(status) + "</small>";
     html += "</div></div></a></div>";
@@ -68,7 +66,7 @@ ZtActorView.prototype.connectedCallback = function() {
       var name = esc(a.Name || a.name || "");
       var desc = esc(a.Description || a.description || "").replace(/\n/g, "<br>");
       var linksHtml = links.map(function(l) {
-        return '<a href="' + (l.URL || l.url) + '" target="_blank" rel="noopener noreferrer"><img class="img-rounded" src="/static/images/provider-' + (l.Provider || l.provider) + '.png" style="height:80px;width:80px;margin-top:5px"></a>';
+        return '<a href="' + esc(window.ztSafeUrl(l.URL || l.url)) + '" target="_blank" rel="noopener noreferrer"><img class="img-rounded" src="/static/images/provider-' + esc(l.Provider || l.provider) + '.png" style="height:80px;width:80px;margin-top:5px"></a>';
       }).join("");
       var initialTab = "videos";
       try {
@@ -84,10 +82,10 @@ ZtActorView.prototype.connectedCallback = function() {
       html += ".zt-actor-tab.active::after{content:'';position:absolute;left:0;right:0;bottom:0;height:4px;background:#f44336}";
       html += ".zt-actor-tab-badge{background:#ff9800;color:#fff;font-size:.75rem;font-weight:600;padding:.15rem .45rem;border-radius:4px;min-width:1.5rem;text-align:center}";
       html += "</style>";
-      html += '<div style="display:flex"><div style="width:250px;margin-right:25px"><img class="img-rounded" src="/api/actor/' + id + '/thumb" style="height:250px;width:250px"></div>';
+      html += '<div style="display:flex"><div style="width:250px;margin-right:25px"><img class="img-rounded" src="/api/actor/' + esc(id) + '/thumb" style="height:250px;width:250px"></div>';
       html += '<div id="bio" style="flex-grow:1;margin:0"><h2 class="card-title actor_name">' + name + "</h2>";
       if (aliases) html += "<h4>aka " + esc(aliases) + "</h4>";
-      if (admin) html += ' <a href="/actor/' + id + '/edit"><i>Edit profile</i></a>';
+      if (admin) html += ' <a href="/actor/' + esc(id) + '/edit"><i>Edit profile</i></a>';
       html += '<div class="categories mb-4" style="padding-top:25px">' + catsHtml + "</div><div>" + desc + "</div></div>";
       html += '<div style="display:flex"><div style="width:170px"><div style="margin-top:20px;float:right">' + linksHtml + "</div></div></div></div>";
       html += "<hr /><br />";

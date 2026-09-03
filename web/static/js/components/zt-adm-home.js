@@ -1,7 +1,7 @@
 (function() {
 "use strict";
 var admHomeStyles = "h4:not(.first-h4){margin-top:30px}.s16{width:30px;height:16px}.card-adm{display:flex;justify-content:space-between}.card-adm-btn{display:inline;align-self:center}dt{float:left;clear:left;margin-right:30px;width:160px;text-align:right}dd{margin-left:0}";
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+var esc = window.ztEscHtml;
 function ZtAdmHome() {
   var el = Reflect.construct(HTMLElement, [], ZtAdmHome);
   return el;

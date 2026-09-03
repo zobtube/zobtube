@@ -1,6 +1,6 @@
 (function() {
 "use strict";
-function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
+var esc = window.ztEscHtml;
 function formatDate(createdAt) {
   if (!createdAt) return "—";
   var d = new Date(createdAt);

@@ -4,7 +4,7 @@ var categoryListStyles = ":root{--separator-width:4px}#zt-categories-container s
 function subName(s) {
   var n = s.Name || s.name || s.Title || s.title || "";
   if (typeof n !== "string" || !n.trim()) return "Uncategorized";
-  return n.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+  return window.ztEscHtml(n);
 }
 function ZtCategoryList() {
   var el = Reflect.construct(HTMLElement, [], ZtCategoryList);
@@ -25,7 +25,7 @@ ZtCategoryList.prototype.connectedCallback = function() {
       items.forEach(function(c) {
         var subs = c.Sub || c.sub || [];
         if (subs.length === 0) return;
-        var catName = (c.Name || c.name || "Other").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+        var catName = window.ztEscHtml((c.Name || c.name || "Other"));
         html += '<section><h4>' + catName + '</h4><div class="category-values mb-3">';
         subs.forEach(function(s) {
           var sid = s.ID || s.id;

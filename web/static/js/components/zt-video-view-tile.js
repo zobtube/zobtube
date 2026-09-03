@@ -17,12 +17,13 @@ ZtVideoViewTile.prototype.connectedCallback = function() {
   var urlView = t === "c" ? "/clip/" + id : "/video/" + id;
   var urlThumb = "/api/video/" + id + "/thumb_xs";
   var dur = (v.Duration || v.duration) ? (window.ztNiceDuration || function(ns){var s=Math.floor(ns/1e9),m=Math.floor(s/60);s%=60;var h=Math.floor(m/60);m%=60;return h>0?String(h).padStart(2,0)+":"+String(m).padStart(2,0)+":"+String(s).padStart(2,0):String(m).padStart(2,0)+":"+String(s).padStart(2,0)})(v.Duration||v.duration) : "";
-  var name = (v.Name||v.name||v.Filename||v.filename||"Untitled").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+  var esc = window.ztEscHtml;
+  var name = esc(v.Name||v.name||v.Filename||v.filename||"Untitled");
   this.innerHTML = '<div class="single-video"><div class="video-img">' +
-    '<a href="' + urlView + '"><img class="lazy" data-src="' + urlThumb + '"></a>' +
-    (dur ? '<span class="video-duration">' + dur + '</span>' : '') +
-    '</div><div class="video-mini-title"><h4><a href="' + urlView + '" class="video-title">' + name + '</a></h4>' +
-    '<div class="video-counter"><div class="video-viewers"><span class="fa fa-eye view-icon"></span><span>' + count + '</span></div></div></div>';
+    '<a href="' + esc(urlView) + '"><img class="lazy" data-src="' + esc(urlThumb) + '"></a>' +
+    (dur ? '<span class="video-duration">' + esc(dur) + '</span>' : '') +
+    '</div><div class="video-mini-title"><h4><a href="' + esc(urlView) + '" class="video-title">' + name + '</a></h4>' +
+    '<div class="video-counter"><div class="video-viewers"><span class="fa fa-eye view-icon"></span><span>' + esc(count) + '</span></div></div></div>';
 };
 customElements.define("zt-video-view-tile", ZtVideoViewTile);
 })();

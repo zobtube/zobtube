@@ -25,7 +25,7 @@ ZtActorList.prototype.connectedCallback = function() {
         var sexIcon = (a.Sex || a.sex) === "f" ? "fa-venus" : (a.Sex || a.sex) === "m" ? "fa-mars" : (a.Sex || a.sex) === "s" ? "fa-mars-and-venus" : "fa-person-circle-question";
         var vlen = (a.Videos || a.videos || []).length;
         var llen = (a.Links || a.links || []).length;
-        var name = (a.Name || a.name || "").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+        var name = window.ztEscHtml((a.Name || a.name || ""));
         html += '<div class="col"><div class="card"><div class="zt-actor-card-thumb card-img-top"><img data-src="' + urlThumb + '" class="lazy" alt=""></div><div class="card-body"><h5 class="card-title">' +
           '<a class="stretched-link" href="' + urlView + '">' + name + '</a><span style="position:absolute;right:15px;"><i class="fa ' + sexIcon + '"></i></span></h5>' +
           '<div class="card-text"><a><i class="fas fa-film"></i> ' + vlen + '</a><a><i class="fas fa-link"></i> ' + llen + '</a></div></div></div></div>';
