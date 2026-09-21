@@ -19,7 +19,7 @@ require (
 	github.com/urfave/cli/v3 v3.11.0
 	golang.org/x/image v0.46.0
 	golang.org/x/text v0.42.0
-	gorm.io/driver/postgres v1.6.2
+	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2
 )
 
