@@ -30,16 +30,17 @@ ZtClipView.prototype.connectedCallback = function() {
       var v = data.video || data;
       var clipIds = data.clip_ids || [id];
       var playlistCtx = data.playlist_video_ids ? data : null;
-      var streamUrl = data.stream_url || "/api/video/"+id+"/stream";
-      var thumbUrl = "/api/video/"+id+"/thumb";
-      var name = (v.Name||v.name||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+      var streamUrl = data.stream_url || "/api/video/"+encodeURIComponent(id)+"/stream";
+      var thumbUrl = "/api/video/"+encodeURIComponent(id)+"/thumb";
+      var esc = window.ztEscHtml;
+      var name = esc(v.Name||v.name||"");
       var actors = v.Actors || v.actors || [];
       var categories = v.Categories || v.categories || [];
       var descParts = [];
-      actors.forEach(function(a){ descParts.push("<b>@"+(a.Name||a.name||"")+"</b>"); });
+      actors.forEach(function(a){ descParts.push("<b>@"+esc(a.Name||a.name||"")+"</b>"); });
       var seenCats = {};
-      actors.forEach(function(a){ (a.Categories||a.categories||[]).forEach(function(c){ if (!seenCats[c.ID||c.id]) { seenCats[c.ID||c.id]=1; descParts.push("<b>#"+(c.Name||c.name||"")+"</b>"); } }); });
-      categories.forEach(function(c){ if (!seenCats[c.ID||c.id]) { seenCats[c.ID||c.id]=1; descParts.push("<b>#"+(c.Name||c.name||"")+"</b>"); } });
+      actors.forEach(function(a){ (a.Categories||a.categories||[]).forEach(function(c){ if (!seenCats[c.ID||c.id]) { seenCats[c.ID||c.id]=1; descParts.push("<b>#"+esc(c.Name||c.name||"")+"</b>"); } }); });
+      categories.forEach(function(c){ if (!seenCats[c.ID||c.id]) { seenCats[c.ID||c.id]=1; descParts.push("<b>#"+esc(c.Name||c.name||"")+"</b>"); } });
       var descHtml = descParts.join(" ");
       var admin = (window.__USER__ && window.__USER__.admin);
       var editBtn = admin ? '<div style="width:40px;display:block;margin-top:25px;margin-left:auto;text-align:center"><i class="fas fa-pen clip-change" id="zt-clip-edit" style="font-size:24px;cursor:pointer"></i></div>' : '';
@@ -67,7 +68,7 @@ ZtClipView.prototype.connectedCallback = function() {
       var html = '<style>'+css+'</style>';
       html += '<div id="zt-clip-main">';
       html += '<div id="zt-clip-video-wrap">';
-      html += '<video id="zt-clip-video" clip-id="'+id+'" src="'+streamUrl+'" preload="metadata" poster="'+thumbUrl+'" style="width:100%;height:100%;object-fit:contain"></video>';
+      html += '<video id="zt-clip-video" clip-id="'+esc(id)+'" src="'+esc(window.ztSafeUrl(streamUrl))+'" preload="metadata" poster="'+esc(thumbUrl)+'" style="width:100%;height:100%;object-fit:contain"></video>';
       html += '<div id="play-button" class="zt-clip-play"><div class="play-inner">'+playSvg+'</div></div>';
       html += '</div>';
       html += '<div id="zt-clip-nav"><div id="zt-clip-nav-inner">';
@@ -75,7 +76,7 @@ ZtClipView.prototype.connectedCallback = function() {
       html += '<svg id="clip-change-previous" class="clip-change-disabled" style="width:40px;display:block;margin-top:25px;margin-left:auto;transform:rotate(180deg)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">'+arrowSvg+'</svg>';
       html += '<svg id="clip-change-next" class="clip-change" style="width:40px;display:block;margin-top:25px;margin-left:auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">'+arrowSvg+'</svg>';
       html += editBtn;
-      html += '<div style="width:40px;display:block;margin-top:25px;margin-left:auto"><zt-playlist-picker data-video-id="'+id+'"></zt-playlist-picker></div>';
+      html += '<div style="width:40px;display:block;margin-top:25px;margin-left:auto"><zt-playlist-picker data-video-id="'+esc(id)+'"></zt-playlist-picker></div>';
       html += '</div></div>';
       html += '<div id="zt-clip-details"><div id="zt-clip-details-inner">';
       html += '<div id="clip-title">'+name+'</div>';
@@ -117,7 +118,7 @@ ZtClipView.prototype.connectedCallback = function() {
             if (window.ztPlaylistNavigateToId) {
               window.ztPlaylistNavigateToId(newId, playlistCtx, playlistId, { autoplay: !!shouldPlay });
             } else {
-              var url = "/video/" + newId + "?playlist=" + encodeURIComponent(playlistId);
+              var url = "/video/" + encodeURIComponent(newId) + "?playlist=" + encodeURIComponent(playlistId);
               if (shouldPlay) url += "&autoplay=1";
               if (window.navigate) window.navigate(url); else window.location.href = url;
             }
@@ -132,13 +133,13 @@ ZtClipView.prototype.connectedCallback = function() {
         curIdx = newIdx;
         viewCounted = false;
         playBtn.classList.remove("playing");
-        video.poster = "/api/video/"+newId+"/thumb";
-        video.src = "/api/video/"+newId+"/stream";
+        video.poster = "/api/video/"+encodeURIComponent(newId)+"/thumb";
+        video.src = "/api/video/"+encodeURIComponent(newId)+"/stream";
         video.setAttribute("clip-id", newId);
         video.load();
         if (seekFill) seekFill.style.width = "0%";
         updateNavButtons();
-        var clipPath = "/clip/" + newId;
+        var clipPath = "/clip/" + encodeURIComponent(newId);
         if (playlistId) clipPath += "?playlist=" + encodeURIComponent(playlistId) + (shouldPlay ? "&autoplay=1" : "");
         if (window.history && window.history.replaceState) history.replaceState({path: clipPath}, "", clipPath);
         var refetchUrl = "/api/clip/" + encodeURIComponent(newId);
@@ -148,22 +149,22 @@ ZtClipView.prototype.connectedCallback = function() {
           .then(function(data){
             var v = data.video || data;
             if (data.stream_url) {
-              video.src = data.stream_url;
+              video.src = window.ztSafeUrl(data.stream_url);
               video.load();
             }
-            var name = (v.Name||v.name||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+            var name = v.Name || v.name || "";
             var actors = v.Actors || v.actors || [];
             var categories = v.Categories || v.categories || [];
             var descParts = [];
-            actors.forEach(function(a){ descParts.push("<b>@"+(a.Name||a.name||"")+"</b>"); });
+            actors.forEach(function(a){ descParts.push("<b>@"+esc(a.Name||a.name||"")+"</b>"); });
             var seenCats = {};
-            actors.forEach(function(a){ (a.Categories||a.categories||[]).forEach(function(c){ if (!seenCats[c.ID||c.id]) { seenCats[c.ID||c.id]=1; descParts.push("<b>#"+(c.Name||c.name||"")+"</b>"); } }); });
-            categories.forEach(function(c){ if (!seenCats[c.ID||c.id]) { seenCats[c.ID||c.id]=1; descParts.push("<b>#"+(c.Name||c.name||"")+"</b>"); } });
+            actors.forEach(function(a){ (a.Categories||a.categories||[]).forEach(function(c){ if (!seenCats[c.ID||c.id]) { seenCats[c.ID||c.id]=1; descParts.push("<b>#"+esc(c.Name||c.name||"")+"</b>"); } }); });
+            categories.forEach(function(c){ if (!seenCats[c.ID||c.id]) { seenCats[c.ID||c.id]=1; descParts.push("<b>#"+esc(c.Name||c.name||"")+"</b>"); } });
             var titleEl = self.querySelector("#clip-title");
             var descEl = self.querySelector("#clip-description");
-            if (titleEl) titleEl.textContent = name || "";
+            if (titleEl) titleEl.textContent = name;
             if (descEl) descEl.innerHTML = descParts.join(" ");
-            if (editIcon) editIcon.onclick = function(){ window.navigate("/video/"+newId+"/edit"); };
+            if (editIcon) editIcon.onclick = function(){ window.navigate("/video/"+encodeURIComponent(newId)+"/edit"); };
             var picker = self.querySelector("zt-playlist-picker");
             if (picker) picker.setAttribute("data-video-id", newId);
             if (shouldPlay) video.play();
@@ -174,7 +175,7 @@ ZtClipView.prototype.connectedCallback = function() {
         video.addEventListener("play", function(){
           var cid = video.getAttribute("clip-id");
           playBtn.classList.add("playing");
-          if (!viewCounted) { viewCounted = true; fetch("/api/video/"+cid+"/count-view", {method:"POST",credentials:"same-origin"}); }
+          if (!viewCounted) { viewCounted = true; fetch("/api/video/"+encodeURIComponent(cid)+"/count-view", {method:"POST",credentials:"same-origin"}); }
         });
         video.addEventListener("pause", function(){ playBtn.classList.remove("playing"); });
         video.addEventListener("ended", function(){

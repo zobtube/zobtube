@@ -1,6 +1,6 @@
 (function() {
 "use strict";
-function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+var esc = window.ztEscHtml;
 function ZtAdmConfigProvider() {
   var el = Reflect.construct(HTMLElement, [], ZtAdmConfigProvider);
   return el;

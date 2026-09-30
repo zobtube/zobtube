@@ -15,8 +15,10 @@ ZtChannelView.prototype.connectedCallback = function() {
       var ch = data.channel || data;
       var videos = data.videos || [];
       var admin = (window.__USER__ && window.__USER__.admin);
-      var name = (ch.Name||ch.name||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
-      var html = '<div style="display:flex"><div style="width:250px;margin-right:25px"><img class="img-rounded" src="/api/channel/'+id+'/thumb" style="height:250px;width:250px"></div><div><h2 class="card-title actor_name">'+name+'</h2>'+(admin?' <a href="/channel/'+id+'/edit"><i>Edit channel</i></a>':'')+'</div></div><hr /><br /><div class="row row-cols-1 row-cols-md-6 g-4">';
+      var esc = window.ztEscHtml;
+      var name = esc(ch.Name||ch.name||"");
+      var idAttr = esc(id);
+      var html = '<div style="display:flex"><div style="width:250px;margin-right:25px"><img class="img-rounded" src="/api/channel/'+idAttr+'/thumb" style="height:250px;width:250px"></div><div><h2 class="card-title actor_name">'+name+'</h2>'+(admin?' <a href="/channel/'+idAttr+'/edit"><i>Edit channel</i></a>':'')+'</div></div><hr /><br /><div class="row row-cols-1 row-cols-md-6 g-4">';
       videos.forEach(function(v){ html += (window.ztThumbPreviewHtml||function(){return"";})(v); });
       html += "</div>";
       self.innerHTML = html;

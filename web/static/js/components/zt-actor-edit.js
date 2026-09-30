@@ -1,6 +1,6 @@
 (function() {
 "use strict";
-function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+var esc = window.ztEscHtml;
 function ZtActorEdit() {
   var el = Reflect.construct(HTMLElement, [], ZtActorEdit);
   return el;
@@ -24,8 +24,8 @@ ZtActorEdit.prototype.connectedCallback = function() {
     var catsData = results[1];
     var providerData = results[2];
     var categories = catsData.items || catsData.categories || [];
-    var urlView = "/actor/" + id;
-    var urlThumb = "/api/actor/" + id + "/thumb";
+    var urlView = "/actor/" + encodeURIComponent(id);
+    var urlThumb = "/api/actor/" + encodeURIComponent(id) + "/thumb";
     var name = esc(a.Name || a.name || "");
     var sex = a.Sex || a.sex || "m";
     var desc = esc(a.Description || a.description || "");
@@ -80,8 +80,8 @@ ZtActorEdit.prototype.connectedCallback = function() {
     }).join("");
 
     var html = '<h2>Edit actor information</h2><hr/><br/><div class="row">';
-    html += '<div class="col-3"><img class="rounded" src="' + urlThumb + '" style="width:100%">';
-    html += '<div style="margin-top:15px"><a class="btn btn-success" style="width:100%" href="' + urlView + '">View profile</a>';
+    html += '<div class="col-3"><img class="rounded" src="' + esc(urlThumb) + '" style="width:100%">';
+    html += '<div style="margin-top:15px"><a class="btn btn-success" style="width:100%" href="' + esc(urlView) + '">View profile</a>';
     html += '<button type="button" class="btn btn-danger" style="margin-top:15px;width:100%" id="zt-actor-delete">Delete actor profile</button>';
     html += '<button type="button" class="btn btn-info" style="margin-top:15px;width:100%" id="zt-view-link-pictures">View link pictures</button></div></div>';
     html += '<div class="col-9"><h3>Profile details</h3><br/>';

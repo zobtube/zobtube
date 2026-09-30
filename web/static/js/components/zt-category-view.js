@@ -13,7 +13,7 @@ ZtCategoryView.prototype.connectedCallback = function() {
     .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function(data) {
       var sub = data;
-      var name = (sub.Name||sub.name||"").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+      var name = window.ztEscHtml((sub.Name||sub.name||""));
       var videos = sub.Videos || sub.videos || [];
       var actors = sub.Actors || sub.actors || [];
       var byId = {};

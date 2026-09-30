@@ -15,11 +15,12 @@ ZtAdmObjectList.prototype.connectedCallback = function() {
     .then(function(d) {
       var items = d.items || [];
       var base = obj === "Video" ? "/video" : obj === "Actor" ? "/actor" : obj === "Channel" ? "/channel" : "/adm/user";
-      var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="'+tab+'"></zt-adm-tabs></div><div class="col-md-9 col-lg-9"><div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-' + (obj === "Video" ? "video" : obj === "Actor" ? "user" : "podcast") + '"></i></span><h3>'+obj+'s</h3><hr /></div><ul class="list-group">';
+      var html = '<div class="row"><div class="col-md-3 col-lg-3"><zt-adm-tabs data-active="'+window.ztEscHtml(tab)+'"></zt-adm-tabs></div><div class="col-md-9 col-lg-9"><div class="themeix-section-h"><span class="heading-icon"><i class="fa fa-' + (obj === "Video" ? "video" : obj === "Actor" ? "user" : "podcast") + '"></i></span><h3>'+window.ztEscHtml(obj)+'s</h3><hr /></div><ul class="list-group">';
+      var esc = window.ztEscHtml;
       items.forEach(function(it) {
         var id = it.ID || it.id;
-        var name = (it.Name || it.name || it.Username || it.username || "").replace(/&/g,"&amp;");
-        html += '<li class="list-group-item"><a href="'+base+'/'+id+(obj==="Video"?'/edit':'')+'">'+name+'</a></li>';
+        var name = esc(it.Name || it.name || it.Username || it.username || "");
+        html += '<li class="list-group-item"><a href="'+base+'/'+esc(id)+(obj==="Video"?'/edit':'')+'">'+name+'</a></li>';
       });
       html += '</ul></div></div>';
       self.innerHTML = html;

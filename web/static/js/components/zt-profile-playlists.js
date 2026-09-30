@@ -1,8 +1,6 @@
 (function() {
 "use strict";
-function escapeHtml(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
+var escapeHtml = window.ztEscHtml;
 function ZtProfilePlaylists() {
   var el = Reflect.construct(HTMLElement, [], ZtProfilePlaylists);
   return el;

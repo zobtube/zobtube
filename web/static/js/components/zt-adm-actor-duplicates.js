@@ -1,8 +1,6 @@
 (function() {
 "use strict";
-function esc(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
-}
+var esc = window.ztEscHtml;
 function toast(title, body, cls) {
   if (typeof sendToast === "function") sendToast(title, "", cls || "bg-success", body);
 }

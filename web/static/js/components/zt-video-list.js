@@ -19,7 +19,7 @@ ZtVideoList.prototype.connectedCallback = function() {
         html += '<div class="col-md-12"><div class="alert alert-warning">No ' + title.toLowerCase() + ' yet.</div></div>';
       } else {
         items.forEach(function(v) {
-          html += '<div class="col-md-3"><zt-video-tile data-video="' + String(JSON.stringify(v)).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;") + '"></zt-video-tile></div>';
+          html += '<div class="col-md-3"><zt-video-tile data-video="' + window.ztEscHtml(JSON.stringify(v)) + '"></zt-video-tile></div>';
         });
       }
       html += "</div>";

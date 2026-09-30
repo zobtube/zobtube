@@ -13,7 +13,7 @@ ZtChannelEdit.prototype.connectedCallback = function() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var ch = data.channel || data;
-      var name = (ch.Name||ch.name||"").replace(/&/g,"&amp;");
+      var name = window.ztEscHtml((ch.Name||ch.name||""));
       self.innerHTML = '<div class="themeix-section-h"><h3>Edit channel</h3><hr /></div><form><div class="mb-3"><label class="form-label">Name</label><input name="name" class="form-control" value="'+name+'" required></div><button type="submit" class="btn btn-primary">Save</button></form>';
       self.querySelector("form").onsubmit = function(e) {
         e.preventDefault();
