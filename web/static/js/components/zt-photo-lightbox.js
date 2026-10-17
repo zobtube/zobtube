@@ -1,7 +1,7 @@
 (function() {
 "use strict";
-function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;").replace(/>/g,"&gt;"); }
-function escAttr(s) { return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+var esc = window.ztEscHtml;
+var escAttr = window.ztEscHtml;
 
 function photoId(p) { return p.ID || p.id; }
 
@@ -411,7 +411,7 @@ ZtPhotoLightbox.prototype.render = function() {
   var self = this;
   var p = self.current();
   var id = photoId(p);
-  var stream = "/api/photo/" + id + "/stream";
+  var stream = "/api/photo/" + encodeURIComponent(id) + "/stream";
   var name = esc(p.Filename || p.filename || "");
   var actors = p.effective_actors || p.EffectiveActors || [];
   var cats = p.effective_categories || p.EffectiveCategories || [];
@@ -421,14 +421,14 @@ ZtPhotoLightbox.prototype.render = function() {
     var aname = esc(a.Name || a.name || "");
     var tags = (a.Categories || a.categories || []).map(function(c) {
       var cid = photoId(c);
-      return '<a class="btn btn-sm btn-secondary me-1" href="/category/' + cid + '">#' + esc(c.Name || c.name || "") + '</a>';
+      return '<a class="btn btn-sm btn-secondary me-1" href="/category/' + esc(cid) + '">#' + esc(c.Name || c.name || "") + '</a>';
     }).join("");
-    return '<span class="me-2 d-inline-flex flex-wrap align-items-center gap-1"><a class="btn btn-sm btn-danger" href="/actor/' + aid + '">@' + aname + '</a>' + tags + '</span>';
+    return '<span class="me-2 d-inline-flex flex-wrap align-items-center gap-1"><a class="btn btn-sm btn-danger" href="/actor/' + esc(aid) + '">@' + aname + '</a>' + tags + '</span>';
   }).join("");
   var catsHtml = cats.map(function(c) {
-    return '<a class="btn btn-sm btn-secondary me-1" href="/category/' + photoId(c) + '">#' + esc(c.Name || c.name || "") + '</a>';
+    return '<a class="btn btn-sm btn-secondary me-1" href="/category/' + esc(photoId(c)) + '">#' + esc(c.Name || c.name || "") + '</a>';
   }).join("");
-  var chHtml = channel ? '<a class="btn btn-sm btn-dark me-1" href="/channel/' + photoId(channel) + '">' + esc(channel.Name || channel.name || "") + '</a>' : "";
+  var chHtml = channel ? '<a class="btn btn-sm btn-dark me-1" href="/channel/' + esc(photoId(channel)) + '">' + esc(channel.Name || channel.name || "") + '</a>' : "";
 
   var editorDisplay = self._editorOpen ? "block" : "none";
   var editorBody = "";
@@ -455,7 +455,7 @@ ZtPhotoLightbox.prototype.render = function() {
   if (this._admin) html += '<button type="button" class="btn btn-sm btn-warning me-2" id="zt-lb-edit">' + (this._editorOpen ? "Hide editor" : "Edit photo") + '</button>';
   html += '<button type="button" class="btn btn-sm btn-light" id="zt-lb-close">&times;</button></div></div>';
   html += '<div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 3rem">';
-  html += '<img src="' + stream + '" alt="' + name + '" style="max-width:100%;max-height:calc(100vh - 140px);object-fit:contain">';
+  html += '<img src="' + escAttr(stream) + '" alt="' + name + '" style="max-width:100%;max-height:calc(100vh - 140px);object-fit:contain">';
   html += '</div>';
   html += '<div style="padding:0.5rem 1rem;color:#fff">' + chHtml + actorsHtml + catsHtml + '</div>';
   if (this._admin) {

@@ -11,7 +11,7 @@ ZtAdmTaskList.prototype.connectedCallback = function() {
     .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function(d) {
       var items = d.items || [];
-      function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+      var esc = window.ztEscHtml;
       function badgeClass(s) {
         var v = (s||"").toLowerCase();
         if (v === "todo") return "secondary";
