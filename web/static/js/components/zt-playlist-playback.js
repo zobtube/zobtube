@@ -9,9 +9,7 @@ var sidebarStyles =
   ".zt-playlist-up-next-item img{width:120px;height:68px;object-fit:cover;border-radius:4px;flex-shrink:0}" +
   ".zt-playlist-up-next-item .zt-up-next-title{font-size:0.9rem;line-height:1.3}";
 
-function escapeHtml(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
+var escapeHtml = window.ztEscHtml;
 
 function videoPlayPath(v) {
   if (!v) return "#";
@@ -80,8 +78,8 @@ window.ztPlaylistRenderUpNext = function(container, ctx, playlistId, currentVide
       var url = window.ztPlaylistPlayUrl(v, playlistId, {});
       var title = escapeHtml(v.Name || v.name || v.Filename || v.filename || "Untitled");
       var active = currentVideoId && vid === currentVideoId ? " active" : "";
-      html += '<a class="zt-playlist-up-next-item' + active + '" href="' + url + '">';
-      html += '<img class="lazy" data-src="' + thumbUrl(v) + '" alt="">';
+      html += '<a class="zt-playlist-up-next-item' + active + '" href="' + escapeHtml(window.ztSafeUrl(url)) + '">';
+      html += '<img class="lazy" data-src="' + escapeHtml(thumbUrl(v)) + '" alt="">';
       html += '<span class="zt-up-next-title">' + title + "</span></a>";
     });
   }

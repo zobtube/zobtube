@@ -1,8 +1,6 @@
 (function() {
 "use strict";
-function escapeHtml(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
+var escapeHtml = window.ztEscHtml;
 function ZtPlaylistView() {
   var el = Reflect.construct(HTMLElement, [], ZtPlaylistView);
   return el;
@@ -54,7 +52,7 @@ ZtPlaylistView.prototype.connectedCallback = function() {
         videos.forEach(function(v) {
           var vid = v.ID || v.id;
           html += '<div class="col-md-3 mb-4" data-video-id="' + escapeHtml(vid) + '">';
-          html += '<zt-video-tile data-video="' + String(JSON.stringify(v)).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;") + '"></zt-video-tile>';
+          html += '<zt-video-tile data-video="' + window.ztEscHtml(JSON.stringify(v)) + '"></zt-video-tile>';
           if (!isVirtual) {
             html += '<button type="button" class="btn btn-sm btn-outline-danger w-100 mt-1 zt-playlist-remove-video" data-video-id="' + escapeHtml(vid) + '">Remove</button>';
           }

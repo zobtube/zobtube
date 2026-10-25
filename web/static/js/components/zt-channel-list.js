@@ -17,7 +17,7 @@ ZtChannelList.prototype.connectedCallback = function() {
         '<div class="row row-cols-1 row-cols-md-4 g-4">';
       items.forEach(function(ch) {
         var id = ch.ID || ch.id;
-        var name = (ch.Name || ch.name || "").replace(/&/g,"&amp;").replace(/</g,"&lt;");
+        var name = window.ztEscHtml((ch.Name || ch.name || ""));
         var thumbUrl = "/api/channel/" + encodeURIComponent(id) + "/thumb";
         html += '<div class="col"><div class="card"><a href="/channel/' + id + '"><img data-src="' + thumbUrl + '" class="card-img-top lazy" alt=""></a><div class="card-body"><h5 class="card-title"><a class="stretched-link" href="/channel/' + id + '">' + name + '</a></h5></div></div></div>';
       });

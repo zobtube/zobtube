@@ -1,7 +1,7 @@
 (function() {
 "use strict";
-function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;").replace(/>/g,"&gt;"); }
-function escAttr(s) { return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+var esc = window.ztEscHtml;
+var escAttr = window.ztEscHtml;
 function niceDur(ns) {
   if (!ns) return "Unknown";
   var s = Math.floor(ns/1e9), m = Math.floor(s/60); s %= 60;
@@ -41,7 +41,7 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       if (!v) { self.innerHTML = '<div class="alert alert-danger">Video not found</div>'; if (window.zt && window.zt.pageReady) window.zt.pageReady(self); return; }
 
       var urlView = (v.Type||v.type)==="c" ? "/clip/"+id : "/video/"+id;
-      var streamUrl = data.stream_url || "/api/video/"+id+"/stream";
+      var streamUrl = data.stream_url || "/api/video/"+encodeURIComponent(id)+"/stream";
       var name = esc(v.Name||v.name||"");
       var filename = esc(v.Filename||v.filename||"");
       var imported = v.Imported||v.imported;
@@ -231,7 +231,7 @@ ZtVideoEdit.prototype.connectedCallback = function() {
       });
 
       var html = '<h2>Video editing</h2><a href="'+urlView+'">← Back to video viewer</a><br/><div class="row">';
-      html += '<div class="col-md-9"><video id="zt-video-edit-player" style="width:100%;height:35vw" src="'+streamUrl+'" controls></video></div>';
+      html += '<div class="col-md-9"><video id="zt-video-edit-player" style="width:100%;height:35vw" src="'+escAttr(window.ztSafeUrl(streamUrl))+'" controls></video></div>';
       var orgStatusHtml = '<h5>Organization</h5><p>';
       if (!imported) {
         orgStatusHtml += '<span class="badge bg-warning">In triage</span>';
@@ -386,7 +386,7 @@ ZtVideoEdit.prototype.connectedCallback = function() {
           if (wrap) wrap.style.display = "";
           sel.innerHTML = otherLibs.map(function(l){
             var lid = l.id || l.ID;
-            var lname = (l.Name || l.name || lid).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+            var lname = window.ztEscHtml((l.Name || l.name || lid));
             return '<option value="'+escAttr(lid)+'">'+lname+'</option>';
           }).join("");
           sel.value = otherLibs[0].id || otherLibs[0].ID;

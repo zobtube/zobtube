@@ -125,7 +125,7 @@ if (window.zt) {
     for (var i = 0; i < els.length; i++) {
       var img = els[i];
       var src = img.getAttribute("data-src");
-      if (src && img.tagName === "IMG") { img.src = src; img.classList.remove("lazy"); img.classList.add("loaded"); }
+      if (src && img.tagName === "IMG") { img.src = window.ztSafeUrl(src); img.classList.remove("lazy"); img.classList.add("loaded"); }
     }
   };
 }
